@@ -223,8 +223,8 @@ CXXSRC += UltiLCD2_menu_utils.cpp UltiLCD2_menu_prefs.cpp tinkergnome.cpp \
 CXXSRC += WMath.cpp WString.cpp Print.cpp Marlin_main.cpp	\
 	MarlinSerial.cpp motion_control.cpp planner.cpp \
 	stepper.cpp temperature.cpp ConfigurationStore.cpp \
-	watchdog.cpp electronics_test.cpp
-#CXXSRC += LiquidCrystal.cpp ultralcd.cpp SPI.cpp Servo.cpp Tone.cpp
+	watchdog.cpp
+#CXXSRC += electronics_test.cpp LiquidCrystal.cpp ultralcd.cpp SPI.cpp Servo.cpp Tone.cpp
 
 #Check for Arduino 1.0.0 or higher and use the correct sourcefiles for that version
 ifeq ($(shell [ $(ARDUINO_VERSION) -ge 100 ] && echo true), true)

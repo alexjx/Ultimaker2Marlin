@@ -6,7 +6,18 @@
 
 void lcd_lib_init();
 void lcd_lib_update_screen();   /* Start sending out the display buffer to the screen. Wait till lcd_lib_update_ready before issuing any draw functions */
-bool lcd_lib_update_ready();
+
+//The TWI interrupt routine conflicts with an interrupt already defined by Arduino, if you are using the Arduino IDE.
+// Not running the screen update from interrupts causes a 25ms delay each screen refresh. Which will cause issues during printing.
+// I recommend against using the Arduino IDE and setup a proper development environment.
+#define USE_TWI_INTERRUPT 1
+
+#if USE_TWI_INTERRUPT
+    FORCE_INLINE bool lcd_lib_update_ready() { return !(TWCR & _BV(TWIE)); }
+#else
+    #define lcd_lib_update_ready() 0x01
+#endif
+
 void led_update();
 
 void lcd_lib_draw_string(uint8_t x, uint8_t y, const char* str);
@@ -36,8 +47,8 @@ void lcd_lib_tick();
 void lcd_lib_keyclick();
 void lcd_lib_buttons_update();
 void lcd_lib_buttons_update_interrupt();
-void lcd_lib_led_color(uint8_t r, uint8_t g, uint8_t b);
-void lcd_lib_contrast(uint8_t data);
+void lcd_lib_led_color(const uint8_t r, const uint8_t g, const uint8_t b);
+void lcd_lib_contrast(const uint8_t data);
 
 extern int16_t lcd_lib_encoder_pos;
 extern bool lcd_lib_button_pressed;

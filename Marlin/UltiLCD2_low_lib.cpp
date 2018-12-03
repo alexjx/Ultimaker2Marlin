@@ -15,11 +15,6 @@
 
 #define I2C_FREQ 400000
 
-//The TWI interrupt routine conflicts with an interrupt already defined by Arduino, if you are using the Arduino IDE.
-// Not running the screen update from interrupts causes a 25ms delay each screen refresh. Which will cause issues during printing.
-// I recommend against using the Arduino IDE and setup a proper development environment.
-#define USE_TWI_INTERRUPT 1
-
 #define I2C_WRITE   0x00
 #define I2C_READ    0x01
 
@@ -55,29 +50,32 @@ uint8_t led_glow_dir;
  */
 static inline void i2c_start()
 {
-    TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
+#ifdef __AVR
+    while (TWCR & _BV(TWIE)) {}
+#endif
+    TWCR = _BV(TWEN) | _BV(TWEA) | _BV(TWINT) | _BV(TWSTA);
 }
 
-static inline void i2c_restart()
+static void i2c_restart()
 {
-    while (!(TWCR & (1<<TWINT))) {}
+    while (!(TWCR & _BV(TWINT))) {}
     i2c_start();
 }
 
-static inline void i2c_send_raw(uint8_t data)
+static void i2c_send_raw(const uint8_t data)
 {
-    while (!(TWCR & (1<<TWINT))) {}
+    while (!(TWCR & _BV(TWINT))) {}
     TWDR = data;
-    TWCR = (1<<TWINT) | (1<<TWEN);
+    TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWEA);
 }
 
-static inline void i2c_end()
+static void i2c_end()
 {
-    while (!(TWCR & (1<<TWINT))) {}
-    TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWSTO);
+    while (!(TWCR & _BV(TWINT))) {}
+    TWCR = _BV(TWEN) | _BV(TWEA) | _BV(TWINT) | _BV(TWSTO);
 }
 
-static void i2c_led_write(uint8_t addr, uint8_t data)
+static void i2c_led_write(const uint8_t addr, const uint8_t data)
 {
     i2c_start();
     i2c_send_raw(I2C_LED_ADDRESS << 1 | I2C_WRITE);
@@ -87,7 +85,7 @@ static void i2c_led_write(uint8_t addr, uint8_t data)
 }
 
 // set LCD contrast
-void lcd_lib_contrast(uint8_t data)
+void lcd_lib_contrast(const uint8_t data)
 {
     i2c_start();
     i2c_send_raw(I2C_LCD_ADDRESS << 1 | I2C_WRITE);
@@ -184,7 +182,7 @@ void lcd_lib_init()
     i2c_send_raw(0xD9);//Pre charge period
     i2c_send_raw(0x82);
 
-    i2c_send_raw(0xDB);//VCOMH Deslect level
+    i2c_send_raw(0xDB);//VCOMH Deselect level
     i2c_send_raw(0x34);
 
     i2c_send_raw(LCD_COMMAND_SET_ADDRESSING_MODE);
@@ -201,18 +199,20 @@ void lcd_lib_init()
 }
 
 #if USE_TWI_INTERRUPT
-volatile uint16_t lcd_update_pos = 0;
+static uint16_t lcd_update_pos = 0;
 ISR(TWI_vect)
 {
-    if (lcd_update_pos >= LCD_GFX_WIDTH*LCD_GFX_HEIGHT/8u)
-    {
-        lcd_update_pos = 0;
-        i2c_end();
-    }
-    else
+    if (lcd_update_pos < LCD_BUFFER_SIZE)
     {
         i2c_send_raw(lcd_buffer[lcd_update_pos++]);
         TWCR |= _BV(TWIE);
+    }
+    else
+    {
+        // i2c_end();
+        // screen refresh is done, disable i2c interrupts
+        lcd_update_pos = 0;
+        TWCR = _BV(TWEN) | _BV(TWEA) | _BV(TWINT) | _BV(TWSTO);
     }
 }
 #endif
@@ -295,11 +295,6 @@ void lcd_lib_update_screen()
     if (!(sleep_state & SLEEP_LCD_DIMMED) || lcd_sleep_contrast)
     {
         // update screen content
-    #if USE_TWI_INTERRUPT
-        CRITICAL_SECTION_START
-        lcd_update_pos = 0;
-        CRITICAL_SECTION_END
-    #endif
         i2c_start();
         i2c_send_raw(I2C_LCD_ADDRESS << 1 | I2C_WRITE);
         //Set the drawing position to 0,0
@@ -313,9 +308,10 @@ void lcd_lib_update_screen()
         i2c_send_raw(I2C_LCD_SEND_DATA);
     #if USE_TWI_INTERRUPT
         // enable TWI interrupts
+        lcd_update_pos = 0;
         TWCR |= _BV(TWIE);
     #else
-        for(uint16_t n=0;n<LCD_GFX_WIDTH*LCD_GFX_HEIGHT/8;n++)
+        for(uint16_t n=0;n<LCD_GFX_WIDTH*LCD_GFX_HEIGHT/8u;n++)
         {
             i2c_send_raw(lcd_buffer[n]);
         }
@@ -324,16 +320,7 @@ void lcd_lib_update_screen()
     }
 }
 
-bool lcd_lib_update_ready()
-{
-#if USE_TWI_INTERRUPT
-    return !(TWCR & _BV(TWIE));
-#else
-    return true;
-#endif
-}
-
-void lcd_lib_led_color(uint8_t r, uint8_t g, uint8_t b)
+void lcd_lib_led_color(const uint8_t r, const uint8_t g, const uint8_t b)
 {
     led_r = r;
     led_g = g;

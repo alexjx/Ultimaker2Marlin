@@ -12,7 +12,7 @@
 // build by the user have been successfully uploaded into firmware.
 #define STRING_VERSION_CONFIG_H __DATE__ " " __TIME__ // build date and time
 #ifndef STRING_CONFIG_H_AUTHOR
-#define STRING_CONFIG_H_AUTHOR "Tinker_DXU_18.10" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "Tinker_DXU-18.12" // Who made the changes.
 #endif
 
 // we are extended

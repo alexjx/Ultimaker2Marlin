@@ -40,7 +40,6 @@
 #include "ConfigurationStore.h"
 #include "ConfigurationDual.h"
 #include "lifetime_stats.h"
-#include "electronics_test.h"
 #include "language.h"
 #include "pins_arduino.h"
 #include "tinkergnome.h"
@@ -51,6 +50,10 @@
 #include "UltiLCD2_menu_print.h"
 #include "commandbuffer.h"
 #include "powerbudget.h"
+
+#ifdef ELECTRONICS_TEST
+  #include "electronics_test.h"
+#endif
 
 #if NUM_SERVOS > 0
 #include "Servo.h"
@@ -3045,10 +3048,12 @@ void process_command(const char *strCmd, bool sendAck)
       }
     }
   }
+#ifdef ELECTRONICS_TEST
   else if (strcmp_P(strCmd, PSTR("Electronics_test")) == 0)
   {
     run_electronics_test();
   }
+#endif
   else
   {
     SERIAL_ECHO_START;
