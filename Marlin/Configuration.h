@@ -185,7 +185,7 @@
 #ifndef HEATER_2_MAXTEMP
     #define HEATER_2_MAXTEMP 305
 #endif
-#define BED_MAXTEMP 200
+#define BED_MAXTEMP 145
 
 //Check if the heater heats up MAX_HEATING_TEMPERATURE_INCREASE within MAX_HEATING_CHECK_MILLIS while the PID was at the maximum.
 // If not, raise an error because most likely the heater is not heating up the temperature sensor. Indicating an issue in the system.
@@ -222,15 +222,15 @@
     //#define  DEFAULT_Kd 114
 
 #ifdef UM2PLUS
-// Ultimaker2 JarJar
-    #define  DEFAULT_Kp 10.03
-    #define  DEFAULT_Ki 1.50
-    #define  DEFAULT_Kd 70.0
-#else
-    // Ultimaker2
+    // Ultimaker2 JarJar
     #define DEFAULT_Kp 8.90
     #define DEFAULT_Ki 0.99
     #define DEFAULT_Kd 87.0
+#else
+    // Ultimaker2
+    #define DEFAULT_Kp 10.00
+    #define DEFAULT_Ki 2.50
+    #define DEFAULT_Kd 100.0
 #endif // UM2PLUS
 
 // Makergear
