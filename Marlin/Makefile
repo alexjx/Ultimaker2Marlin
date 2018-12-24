@@ -40,8 +40,8 @@
 HARDWARE_MOTHERBOARD ?= 72
 
 # Arduino source install directory, and version number
-ARDUINO_INSTALL_DIR  ?= /usr/share/arduino
-ARDUINO_VERSION      ?= 105
+ARDUINO_INSTALL_DIR  ?= /opt/arduino-1.8.5
+ARDUINO_VERSION      ?= 185
 
 # You can optionally set a path to the avr-gcc tools. Requires a trailing slash. (ex: /usr/local/avr-gcc/bin)
 AVR_TOOLS_PATH ?= $(ARDUINO_INSTALL_DIR)/hardware/tools/avr/bin/
@@ -183,6 +183,7 @@ HARDWARE_DIR = ../ArduinoAddons/Arduino_0.xx
 endif
 endif
 HARDWARE_SRC = $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/avr/cores/arduino
+# HARDWARE_SRC = $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/cores/arduino
 
 TARGET = $(notdir $(CURDIR))
 

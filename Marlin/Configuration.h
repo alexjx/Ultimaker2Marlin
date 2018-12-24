@@ -15,6 +15,9 @@
 #define STRING_CONFIG_H_AUTHOR "Tinker_18.11-DEV" // Who made the changes.
 #endif
 
+// we are extended
+#define UM2PLUS
+
 // SERIAL_PORT selects which serial port should be used for communication with the host.
 // This allows the connection of wireless adapters (for instance) to non-default port pins.
 // Serial port 0 is still used by the Arduino bootloader regardless of this setting.
@@ -174,13 +177,13 @@
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
 #ifndef HEATER_0_MAXTEMP
-    #define HEATER_0_MAXTEMP 275
+    #define HEATER_0_MAXTEMP 305
 #endif
 #ifndef HEATER_1_MAXTEMP
-    #define HEATER_1_MAXTEMP 275
+    #define HEATER_1_MAXTEMP 305
 #endif
 #ifndef HEATER_2_MAXTEMP
-    #define HEATER_2_MAXTEMP 275
+    #define HEATER_2_MAXTEMP 305
 #endif
 #define BED_MAXTEMP 200
 
@@ -224,10 +227,10 @@
     #define  DEFAULT_Ki 1.50
     #define  DEFAULT_Kd 70.0
 #else
-// Ultimaker2
-    #define  DEFAULT_Kp 10.0
-    #define  DEFAULT_Ki 2.5
-    #define  DEFAULT_Kd 100.0
+    // Ultimaker2
+    #define DEFAULT_Kp 8.90
+    #define DEFAULT_Ki 0.99
+    #define DEFAULT_Kd 87.0
 #endif // UM2PLUS
 
 // Makergear
@@ -396,7 +399,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
   #ifdef UM2GO
     #define Y_MAX_POS 124
   #else
-    #define Y_MAX_POS 225
+    #define Y_MAX_POS 222
   #endif // UM2GO
 #endif // Y_MAX_POS
 
@@ -408,7 +411,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
   #ifdef UM2GO
     #define Z_MAX_POS 130
   #else
-    #define Z_MAX_POS 230
+    #define Z_MAX_POS 325
   #endif // UM2GO
 #endif // Z_MAX_POS
 
@@ -440,7 +443,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define DEFAULT_MAX_FEEDRATE          {300, 300, 40, 45}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 
-#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
+#define DEFAULT_ACCELERATION          1700   // X, Y, Z and E max acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
@@ -450,7 +453,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 // #define EXTRUDER_OFFSET_Y {0.0, 5.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
 
 // The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
-#define DEFAULT_XYJERK                20.0    // (mm/sec)
+#define DEFAULT_XYJERK                10.0    // (mm/sec)
 #define DEFAULT_ZJERK                 0.4     // (mm/sec)
 #define DEFAULT_EJERK                 5.0    // (mm/sec)
 
@@ -479,7 +482,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define EEPROM_CHITCHAT
 
 // Preheat Constants
-#define PLA_PREHEAT_HOTEND_TEMP 180
+#define PLA_PREHEAT_HOTEND_TEMP 200
 #define PLA_PREHEAT_HPB_TEMP 70
 #define PLA_PREHEAT_FAN_SPEED 0     // Insert Value between 0 and 255
 
