@@ -183,6 +183,7 @@ HARDWARE_DIR = ../ArduinoAddons/Arduino_0.xx
 endif
 endif
 HARDWARE_SRC = $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/avr/cores/arduino
+# HARDWARE_SRC = $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/cores/arduino
 
 TARGET = $(notdir $(CURDIR))
 
