@@ -17,6 +17,8 @@
 #include "UltiLCD2_menu_print.h"
 #include "UltiLCD2_menu_utils.h"
 
+#define CALIBRATE_OFFSET 20
+
 static void lcd_menu_first_run_init_2();
 static void lcd_menu_first_run_init_3();
 
@@ -86,6 +88,7 @@ static void homeAndRaiseBed()
     enquecommand(buffer);
 }
 
+// second page
 static void lcd_menu_first_run_init_2()
 {
     SELECT_MAIN_MENU_ITEM(0);
@@ -103,7 +106,10 @@ static void homeAndParkHeadForCenterAdjustment()
     cmd_synchronize();
     CommandBuffer::homeHead();
     char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[0]),
+              int(AXIS_CENTER_POS(X_AXIS)),
+              int(max_pos[Y_AXIS]) - CALIBRATE_OFFSET);
+    sprintf_P(buffer, PSTR("G1 F%i Z%i"), int(homing_feedrate[0]), 35);
     enquecommand(buffer);
 }
 
@@ -123,23 +129,37 @@ static void parkHeadForLeftAdjustment()
 {
     add_homing[Z_AXIS] -= current_position[Z_AXIS];
     current_position[Z_AXIS] = 0;
-    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
+    plan_set_position(
+        current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
 
-    char buffer[32] = {0};
+    char buffer[32] = { 0 };
     sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
 #if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), max(int(min_pos[X_AXIS]), 0)+15, max(int(min_pos[Y_AXIS]), 0)+20);
-    }
+    if
+        IS_DUAL_ENABLED
+        {
+            sprintf_P(buffer,
+                      PSTR("G1 F%i X%i Y%i"),
+                      int(homing_feedrate[X_AXIS]),
+                      max(int(min_pos[X_AXIS]), 0) + CALIBRATE_OFFSET,
+                      max(int(min_pos[Y_AXIS]), 0) + CALIBRATE_OFFSET);
+        }
     else
     {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), max(int(min_pos[X_AXIS]), 0)+10, max(int(min_pos[Y_AXIS]), 0)+15);
+        sprintf_P(buffer,
+                  PSTR("G1 F%i X%i Y%i"),
+                  int(homing_feedrate[X_AXIS]),
+                  max(int(min_pos[X_AXIS]), 0) + CALIBRATE_OFFSET,
+                  max(int(min_pos[Y_AXIS]), 0) + CALIBRATE_OFFSET);
     }
     enquecommand(buffer);
 #else
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), max(int(min_pos[X_AXIS]), 0)+10, max(int(min_pos[Y_AXIS]), 0)+15);
+    sprintf_P(buffer,
+              PSTR("G1 F%i X%i Y%i"),
+              int(homing_feedrate[X_AXIS]),
+              max(int(min_pos[X_AXIS]), 0) + CALIBRATE_OFFSET,
+              max(int(min_pos[Y_AXIS]), 0) + CALIBRATE_OFFSET);
     enquecommand(buffer);
 #endif
     sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
@@ -174,24 +194,36 @@ static void lcd_menu_first_run_bed_level_center_adjust()
 
 static void parkHeadForRightAdjustment()
 {
-    char buffer[32] = {0};
+    char buffer[32] = { 0 };
     sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
 #if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(max_pos[X_AXIS])-15, max(int(min_pos[Y_AXIS]), 0)+20);
-    }
+    if
+        IS_DUAL_ENABLED
+        {
+            sprintf_P(buffer,
+                      PSTR("G1 F%i X%i Y%i"),
+                      int(homing_feedrate[X_AXIS]),
+                      int(max_pos[X_AXIS]) - CALIBRATE_OFFSET,
+                      max(int(min_pos[Y_AXIS]), 0) + CALIBRATE_OFFSET);
+        }
     else
     {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(max_pos[X_AXIS])-10, max(int(min_pos[Y_AXIS]), 0)+15);
+        sprintf_P(buffer,
+                  PSTR("G1 F%i X%i Y%i"),
+                  int(homing_feedrate[X_AXIS]),
+                  int(max_pos[X_AXIS]) - CALIBRATE_OFFSET,
+                  max(int(min_pos[Y_AXIS]), 0) + CALIBRATE_OFFSET);
     }
     enquecommand(buffer);
 #else
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(max_pos[X_AXIS])-10, max(int(min_pos[Y_AXIS]), 0)+15);
+    sprintf_P(buffer,
+              PSTR("G1 F%i X%i Y%i"),
+              int(homing_feedrate[X_AXIS]),
+              int(max_pos[X_AXIS]) - CALIBRATE_OFFSET,
+              max(int(min_pos[Y_AXIS]), 0) + CALIBRATE_OFFSET);
     enquecommand(buffer);
 #endif
-
 
     sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
@@ -231,7 +263,9 @@ static void parkHeadForCenterAdjustment()
     char buffer[32] = {0};
     sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]),
+              int(AXIS_CENTER_POS(X_AXIS)),
+              int(max_pos[Y_AXIS]) - CALIBRATE_OFFSET);
     enquecommand(buffer);
     sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
@@ -342,7 +376,7 @@ static void parkHeadForHeating()
     cmd_synchronize();
     lcd_material_reset_defaults();
     CommandBuffer::move2front();
-    finishAndDisableSteppers();//Disable motor power.
+    finishAndDisableSteppers(); //Disable motor power.
 }
 
 static void lcd_menu_first_run_material_load()
@@ -361,7 +395,7 @@ static void lcd_menu_first_run_material_select_1()
 {
     if (eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET()) == 1)
     {
-        digipot_current(2, motor_current_setting[2]);//Set E motor power to default.
+        digipot_current(2, motor_current_setting[2]); //Set E motor power to default.
 
         for(uint8_t e=0; e<EXTRUDERS; e++)
             lcd_material_set_material(0, e);
@@ -371,6 +405,7 @@ static void lcd_menu_first_run_material_select_1()
 
         return;
     }
+
     SELECT_MAIN_MENU_ITEM(0);
     lcd_info_screen(lcd_menu_first_run_material_select_material, doCooldown, PSTR("READY"));
     DRAW_PROGRESS_NR(12);
@@ -447,7 +482,7 @@ static void lcd_menu_first_run_material_load_heatup()
     if (temp < 0) temp = 0;
     if (temp > target)
     {
-        for(uint8_t e=0; e<EXTRUDERS; ++e)
+        for(uint8_t e = 0; e < EXTRUDERS; ++e)
             volume_to_filament_length[e] = 1.0;//Set the extrusion to 1mm per given value, so we can move the filament a set distance.
 
         menu.replace_menu(menu_t(lcd_menu_first_run_material_load_insert, MAIN_MENU_ITEM_POS(0)));
@@ -522,12 +557,12 @@ static void lcd_menu_first_run_material_load_forward()
     {
         lcd_lib_keyclick();
         // led_glow_dir = led_glow = 0;
-        digipot_current(2, motor_current_setting[2]*2/3);//Set E motor power lower so the motor will skip instead of grind.
+        digipot_current(2, motor_current_setting[2] * 2 / 3); // Set E motor power lower so the motor will skip instead of grind.
         menu.replace_menu(menu_t(lcd_menu_first_run_material_load_wait, MAIN_MENU_ITEM_POS(0)));
     }
 
     long pos = st_get_position(E_AXIS);
-    long targetPos = lround(FILAMENT_FORWARD_LENGTH*e_steps_per_unit(active_extruder));
+    long targetPos = lround(FILAMENT_FORWARD_LENGTH * e_steps_per_unit(active_extruder));
     uint8_t progress = (pos * 125 / targetPos);
     lcd_progressbar(progress);
 
