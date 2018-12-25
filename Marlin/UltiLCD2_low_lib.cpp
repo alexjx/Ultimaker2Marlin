@@ -936,7 +936,8 @@ void lcd_lib_buttons_update()
     lcd_lib_button_pressed = (buttonState && !lcd_lib_button_down);
     lcd_lib_button_down = buttonState;
 
-	if (lcd_lib_button_down || lcd_lib_encoder_pos_interrupt!=0 ) last_user_interaction=millis();
+	if (lcd_lib_button_down || lcd_lib_encoder_pos_interrupt!=0 )
+        last_user_interaction = millis();
 
     lcd_lib_encoder_pos_interrupt = 0;
 }

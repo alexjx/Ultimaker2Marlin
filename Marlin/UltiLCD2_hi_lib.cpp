@@ -120,14 +120,17 @@ void lcd_info_screen(menuFunc_t cancelMenu, menuFunc_t callbackOnCancel, const c
     if (lcd_lib_encoder_pos != ENCODER_NO_SELECTION)
     {
         if (lcd_lib_encoder_pos < 0)
-            lcd_lib_encoder_pos += 2*ENCODER_TICKS_PER_MAIN_MENU_ITEM;
-        if (lcd_lib_encoder_pos >= 2*ENCODER_TICKS_PER_MAIN_MENU_ITEM)
-            lcd_lib_encoder_pos -= 2*ENCODER_TICKS_PER_MAIN_MENU_ITEM;
+            lcd_lib_encoder_pos += 2 * ENCODER_TICKS_PER_MAIN_MENU_ITEM;
+        if (lcd_lib_encoder_pos >= 2 * ENCODER_TICKS_PER_MAIN_MENU_ITEM)
+            lcd_lib_encoder_pos -= 2 * ENCODER_TICKS_PER_MAIN_MENU_ITEM;
     }
     if (lcd_lib_button_pressed && IS_SELECTED_MAIN(0))
     {
-        if (callbackOnCancel) callbackOnCancel();
-        if (cancelMenu) menu.replace_menu(menu_t(cancelMenu));
+        if (callbackOnCancel)
+            callbackOnCancel();
+
+        if (cancelMenu)
+            menu.replace_menu(menu_t(cancelMenu));
     }
 
     lcd_basic_screen();
@@ -138,8 +141,8 @@ void lcd_info_screen(menuFunc_t cancelMenu, menuFunc_t callbackOnCancel, const c
     }
     if (IS_SELECTED_MAIN(0))
     {
-        lcd_lib_draw_box(3+2, BOTTOM_MENU_YPOS-1, 124-2, BOTTOM_MENU_YPOS+7);
-        lcd_lib_set(3+3, BOTTOM_MENU_YPOS, 124-3, BOTTOM_MENU_YPOS+6);
+        lcd_lib_draw_box(3 + 2, BOTTOM_MENU_YPOS-1, 124 - 2, BOTTOM_MENU_YPOS + 7);
+        lcd_lib_set(3 + 3, BOTTOM_MENU_YPOS, 124 - 3, BOTTOM_MENU_YPOS + 6);
         lcd_lib_clear_stringP(65 - strlen_P(cancelButtonText) * 3, BOTTOM_MENU_YPOS, cancelButtonText);
     }
     else
@@ -153,20 +156,24 @@ void lcd_question_screen(menuFunc_t optionAMenu, menuFunc_t callbackOnA, const c
     if (lcd_lib_encoder_pos != ENCODER_NO_SELECTION)
     {
         if (lcd_lib_encoder_pos < 0)
-            lcd_lib_encoder_pos += 2*ENCODER_TICKS_PER_MAIN_MENU_ITEM;
-        if (lcd_lib_encoder_pos >= 2*ENCODER_TICKS_PER_MAIN_MENU_ITEM)
-            lcd_lib_encoder_pos -= 2*ENCODER_TICKS_PER_MAIN_MENU_ITEM;
+            lcd_lib_encoder_pos += 2 * ENCODER_TICKS_PER_MAIN_MENU_ITEM;
+        if (lcd_lib_encoder_pos >= 2 * ENCODER_TICKS_PER_MAIN_MENU_ITEM)
+            lcd_lib_encoder_pos -= 2 * ENCODER_TICKS_PER_MAIN_MENU_ITEM;
     }
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_MAIN(0))
         {
-            if (callbackOnA) callbackOnA();
-            if (optionAMenu) menu.add_menu(menu_t(optionAMenu));
+            if (callbackOnA)
+                callbackOnA();
+            if (optionAMenu)
+                menu.add_menu(menu_t(optionAMenu));
         }else if (IS_SELECTED_MAIN(1))
         {
-            if (callbackOnB) callbackOnB();
-            if (optionBMenu) menu.add_menu(menu_t(optionBMenu));
+            if (callbackOnB)
+                callbackOnB();
+            if (optionBMenu)
+                menu.add_menu(menu_t(optionBMenu));
         }
     }
 

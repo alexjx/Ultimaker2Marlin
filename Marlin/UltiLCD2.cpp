@@ -18,7 +18,7 @@
 
 // coefficient for the exponential moving average
 // K1 defined in Configuration.h in the PID settings
-#define K2 (1.0-K1)
+#define K2 (1.0 - K1)
 
 #define LCD_CHARS_PER_LINE 20
 
@@ -26,7 +26,7 @@ uint8_t led_brightness_level = 100;
 uint8_t led_mode = LED_MODE_ALWAYS_ON;
 float dsp_temperature[EXTRUDERS] = { 20.0 };
 float dsp_temperature_bed = 20.0;
-char lcd_status_message[LCD_CHARS_PER_LINE+1] = {0};
+char lcd_status_message[LCD_CHARS_PER_LINE+1] = { 0 };
 
 //#define SPECIAL_STARTUP
 #define MILLIS_GLOW  (1000L / 40L)
@@ -46,7 +46,7 @@ void lcd_init()
     if (!lcd_material_verify_material_settings())
     {
         lcd_material_reset_defaults();
-        for(uint8_t e=0; e<EXTRUDERS; ++e)
+        for(uint8_t e = 0; e < EXTRUDERS; ++e)
             lcd_material_set_material(0, e);
     }
     lcd_material_read_current_material();
@@ -75,17 +75,20 @@ void lcd_update()
         glow_millis += MILLIS_GLOW;
         if (led_glow_dir)
         {
-            led_glow-=2;
-            if (led_glow == 0) led_glow_dir = 0;
+            led_glow -= 2;
+            if (led_glow == 0)
+                led_glow_dir = 0;
         }
         else
         {
-            led_glow+=2;
-            if (led_glow >= 126) led_glow_dir = 1;
+            led_glow += 2;
+            if (led_glow >= 126)
+                led_glow_dir = 1;
         }
     }
 
-    if (!lcd_lib_update_ready()) return;
+    if (!lcd_lib_update_ready())
+        return;
     lcd_lib_buttons_update();
     card.updateSDInserted();
 
@@ -167,7 +170,7 @@ void lcd_update()
     }
 
     // refresh the displayed temperatures
-    for(uint8_t e=0; e<EXTRUDERS; ++e)
+    for(uint8_t e = 0; e < EXTRUDERS; ++e)
     {
         dsp_temperature[e] = (K2 * current_temperature[e]) + (K1 * dsp_temperature[e]);
     }
@@ -252,7 +255,7 @@ static void lcd_menu_special_startup()
 
 void doCooldown()
 {
-    for(uint8_t n=0; n<EXTRUDERS; ++n)
+    for(uint8_t n = 0; n < EXTRUDERS; ++n)
         cooldownHotend(n);
 #if TEMP_SENSOR_BED != 0
     setTargetBed(0);

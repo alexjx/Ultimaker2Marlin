@@ -203,7 +203,8 @@ void tinkergnome_init()
         lcd_contrast = GET_LCD_CONTRAST();
         if (lcd_contrast == 0)
             lcd_contrast = 0xDF;
-    } else
+    }
+    else
     {
         ui_mode = UI_MODE_EXPERT;
         led_sleep_brightness = 0;
