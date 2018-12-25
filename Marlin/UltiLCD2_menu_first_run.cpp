@@ -87,7 +87,7 @@ static void homeAndRaiseBed()
 static void lcd_menu_first_run_init_2()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_init_3, homeAndRaiseBed, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_init_3, NULL, PSTR("CONTINUE"));
     DRAW_PROGRESS_NR_IF_NOT_DONE(2);
     lcd_lib_draw_string_centerP(10, PSTR("Because this is the"));
     lcd_lib_draw_string_centerP(20, PSTR("first startup I will"));
