@@ -295,38 +295,34 @@ void LCDMenu::drawMenuString_P(uint8_t left, uint8_t top, uint8_t width, uint8_t
     drawMenuString(left, top, width, height, buffer, textAlign, flags);
 }
 
+// implement for sub-menus
 void LCDMenu::process_submenu(menuItemCallback_t getMenuItem, uint8_t len)
 {
-    if ((lcd_lib_encoder_pos != lastEncoderPos) || lcd_lib_button_pressed)
-    {
+    // on input event
+    if ((lcd_lib_encoder_pos != lastEncoderPos) || lcd_lib_button_pressed) {
         lastEncoderPos = lcd_lib_encoder_pos;
 
-        if (!activeSubmenu.processMenuFunc && (lcd_lib_encoder_pos != ENCODER_NO_SELECTION))
-        {
+        if (!activeSubmenu.processMenuFunc && (lcd_lib_encoder_pos != ENCODER_NO_SELECTION)) {
             // adjust encoder position
             if (lcd_lib_encoder_pos < 0)
-                lcd_lib_encoder_pos += len*ENCODER_TICKS_PER_MAIN_MENU_ITEM;
-            if (lcd_lib_encoder_pos >= len*ENCODER_TICKS_PER_MAIN_MENU_ITEM)
-                lcd_lib_encoder_pos -= len*ENCODER_TICKS_PER_MAIN_MENU_ITEM;
+                lcd_lib_encoder_pos += len * ENCODER_TICKS_PER_MAIN_MENU_ITEM;
+            if (lcd_lib_encoder_pos >= len * ENCODER_TICKS_PER_MAIN_MENU_ITEM)
+                lcd_lib_encoder_pos -= len * ENCODER_TICKS_PER_MAIN_MENU_ITEM;
 
             // determine new selection
             int16_t index = (lcd_lib_encoder_pos / ENCODER_TICKS_PER_MAIN_MENU_ITEM);
 
-            if ((index >= 0) && (index < len))
-            {
+            if ((index >= 0) && (index < len)) {
                 currentMenu().encoderPos = lcd_lib_encoder_pos;
 
-                if (lcd_lib_button_pressed)
-                {
+                if (lcd_lib_button_pressed) {
                     lcd_lib_button_pressed = false;
                     menu_t menuItem;
                     getMenuItem(index, menuItem);
-                    if (menuItem.initMenuFunc)
-                    {
+                    if (menuItem.initMenuFunc) {
                         menuItem.initMenuFunc();
                     }
-                    if (menuItem.flags & MENU_INPLACE_EDIT)
-                    {
+                    if (menuItem.flags & MENU_INPLACE_EDIT) {
                         // "instant tuning"
                         lcd_lib_encoder_pos = 0;
                         LED_INPUT
@@ -334,43 +330,35 @@ void LCDMenu::process_submenu(menuItemCallback_t getMenuItem, uint8_t len)
 
                         selectedSubmenu = index;
                         activeSubmenu = menuItem;
-                    }
-                    else
-                    {
+                    } else {
                         // process standard menu item
-                        if ((selectedSubmenu == index) && menuItem.processMenuFunc)
-                        {
+                        if ((selectedSubmenu == index) &&
+                            menuItem.processMenuFunc) {
                             menuItem.processMenuFunc();
                         }
                         activeSubmenu = menu_t();
                         if (menuItem.flags & MENU_NORMAL)
                             selectedSubmenu = -1;
                     }
-                }else {
+                } else {
                     selectedSubmenu = index;
                 }
-            }
-            else
-            {
+            } else {
                 selectedSubmenu = -1;
             }
         }
-    }
-    else if (isSubmenuSelected() && millis() - last_user_interaction > LCD_TIMEOUT_TO_STATUS)
-    {
+
+    } else if (isSubmenuSelected() && millis() - last_user_interaction > LCD_TIMEOUT_TO_STATUS) {
         // timeout occurred - reset selection
         reset_submenu();
     }
+
     // process active item
-    if (isSubmenuSelected() && activeSubmenu.processMenuFunc)
-    {
-        if (lcd_lib_button_pressed)
-        {
+    if (isSubmenuSelected() && activeSubmenu.processMenuFunc) {
+        if (lcd_lib_button_pressed) {
             lcd_lib_keyclick();
             reset_submenu();
-        }
-        else
-        {
+        } else {
             activeSubmenu.processMenuFunc();
             lastEncoderPos = lcd_lib_encoder_pos;
         }

@@ -1267,7 +1267,9 @@ void lcd_print_pause()
         // move z up according to the current height - but minimum to z=70mm (above the gantry height)
         uint16_t zdiff = 0;
         if (current_position[Z_AXIS] < 70)
+        {
             zdiff = max(70 - floor(current_position[Z_AXIS]), 20);
+        }
         else if (current_position[Z_AXIS] < max_pos[Z_AXIS] - 60)
         {
             zdiff = 20;
@@ -1277,17 +1279,16 @@ void lcd_print_pause()
             zdiff = 2;
         }
 
-        char buffer[32] = {0};
-        #if (EXTRUDERS > 1)
-            uint16_t x = max(5, int(min_pos[X_AXIS]) + 5 + extruder_offset[X_AXIS][active_extruder]);
-        #else
-            uint8_t x = max(int(min_pos[X_AXIS]), 0) + 5;
-        #endif
+        char buffer[32] = { 0 };
+#if (EXTRUDERS > 1)
+        uint16_t x = max(5, int(min_pos[X_AXIS]) + 5 + extruder_offset[X_AXIS][active_extruder]);
+#else
+        uint8_t x = max(int(min_pos[X_AXIS]), 0) + 5;
+#endif
         uint8_t y = max(int(min_pos[Y_AXIS]), 0) + 5;
 
         sprintf_P(buffer, PSTR("M601 X%u Y%u Z%u L%u"), x, y, zdiff, uint8_t(end_of_print_retraction));
         process_command(buffer, false);
-
     }
 }
 
