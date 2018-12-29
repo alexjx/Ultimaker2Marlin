@@ -14,6 +14,7 @@ Following are the changes so far:
   * Adjust all material diameter to 1.75.
 * Remove raising platform when first run. It's kind scaring since I'd expect the head move before platform.
 * Ported the retraction after insert material from the original firmware.
+* Tick stats for extruder temperature also. (for tracking PTFE tube life)
 
 # Readme from TinkerGonome Fork
 * Download the latest version from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>

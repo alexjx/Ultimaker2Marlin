@@ -2,6 +2,7 @@
 #include "Marlin.h"
 #include "planner.h"
 #include "lifetime_stats.h"
+#include "temperature.h"
 
 //Random number to verify if the lifetime has actually been written to the EEPROM already
 #define LIFETIME_MAGIC 0x2624BA15
@@ -57,8 +58,7 @@ void lifetime_stats_tick()
 
         lifetime_minutes++;
         triptime_minutes++;
-        if (is_printing)
-        {
+        if (is_printing || current_temperature[active_extruder] > EXTRUDE_MINTEMP) {
             lifetime_print_minutes++;
             triptime_print_minutes++;
 
