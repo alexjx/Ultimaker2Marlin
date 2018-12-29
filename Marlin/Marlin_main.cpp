@@ -2537,9 +2537,9 @@ void process_command(const char *strCmd, bool sendAck)
     case 601: //M601 Pause in UltiLCD2, X[pos] Y[pos] Z[relative lift] L[later retract distance]
     {
         if (printing_state == PRINT_STATE_RECOVER)
-          break;
+            break;
 
-//        serial_action_P(PSTR("pause"));
+        //        serial_action_P(PSTR("pause"));
         card.pauseSDPrint();
 
         st_synchronize();
@@ -2550,92 +2550,113 @@ void process_command(const char *strCmd, bool sendAck)
         memcpy(target, current_position, sizeof(target));
         recover_height = lastpos[Z_AXIS];
 
-        //retract
-        //Set the recover length to whatever distance we retracted so we recover properly.
-        retract_recover_length = retract_length/volume_to_filament_length[active_extruder];
+        // retract
+        // Set the recover length to whatever distance we retracted so we recover properly.
+        retract_recover_length = retract_length / volume_to_filament_length[active_extruder];
         target[E_AXIS] -= retract_recover_length;
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
-        retracted=true;
+        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate / 60, active_extruder);
+        retracted = true;
 
-        //lift Z
-        if(code_seen(strCmd, 'Z'))
+        // lift Z
+        if (code_seen(strCmd, 'Z'))
         {
-          target[Z_AXIS]+= code_value();
+            target[Z_AXIS] += code_value();
         }
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
+        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS] / 60, active_extruder);
 
-        //move xy
-        if(code_seen(strCmd, 'X'))
+        // move xy
+        if (code_seen(strCmd, 'X'))
         {
-          target[X_AXIS] = code_value();
+            target[X_AXIS] = code_value();
         }
-        if(code_seen(strCmd, 'Y'))
+        if (code_seen(strCmd, 'Y'))
         {
-          target[Y_AXIS] = code_value();
+            target[Y_AXIS] = code_value();
         }
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
+        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS] / 60, active_extruder);
 
         // additional retract
         float addRetractLength = 0.0f;
         bool bAddRetract = code_seen(strCmd, 'L');
-        if(bAddRetract)
+        if (bAddRetract)
         {
-          addRetractLength = code_value()/volume_to_filament_length[active_extruder];
-          retract_recover_length += addRetractLength;
-          target[E_AXIS] -= addRetractLength;
+            addRetractLength = code_value() / volume_to_filament_length[active_extruder];
+            retract_recover_length += addRetractLength;
+            target[E_AXIS] -= addRetractLength;
         }
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
+        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate / 60, active_extruder);
 
         memcpy(current_position, target, sizeof(current_position));
         memcpy(destination, current_position, sizeof(destination));
 
-        //finish moves
+        // finish moves
         st_synchronize();
-        //disable extruder steppers so filament can be removed
+        // disable extruder steppers so filament can be removed
         disable_e0();
         disable_e1();
         disable_e2();
-    #if EXTRUDERS > 1
+#if EXTRUDERS > 1
         last_extruder = 0xFF;
-    #endif
+#endif
         // serial_action_P(PSTR("pause"));
         card.pauseSDPrint();
-        while(card.pause()){
-          idle();
-          if (printing_state == PRINT_STATE_ABORT)
-          {
-            break;
-          }
+        while (card.pause())
+        {
+            idle();
+            if (printing_state == PRINT_STATE_ABORT)
+            {
+                break;
+            }
         }
 
         plan_set_e_position(target[E_AXIS], active_extruder, true);
 
         if ((printing_state != PRINT_STATE_ABORT) && (card.sdprinting() || HAS_SERIAL_CMD))
         {
-            //return to normal
-            if(bAddRetract)
+            // return to normal
+            if (bAddRetract)
             {
                 // revert the additional retract
                 target[E_AXIS] += addRetractLength;
-                plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder); //Move back the L feed.
+                plan_buffer_line(target[X_AXIS],
+                                 target[Y_AXIS],
+                                 target[Z_AXIS],
+                                 target[E_AXIS],
+                                 retract_feedrate / 60,
+                                 active_extruder);  // Move back the L feed.
             }
 
             memcpy(current_position, lastpos, sizeof(current_position));
             memcpy(destination, current_position, sizeof(destination));
 
-            //move xy back
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
-            //move z back
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
+            // move xy back
+            plan_buffer_line(current_position[X_AXIS],
+                             current_position[Y_AXIS],
+                             target[Z_AXIS],
+                             target[E_AXIS],
+                             homing_feedrate[X_AXIS] / 60,
+                             active_extruder);
+            // move z back
+            plan_buffer_line(current_position[X_AXIS],
+                             current_position[Y_AXIS],
+                             current_position[Z_AXIS],
+                             target[E_AXIS],
+                             homing_feedrate[Z_AXIS] / 60,
+                             active_extruder);
 
-            //final unretract
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_feedrate/60, active_extruder);
+            // final unretract
+            plan_buffer_line(current_position[X_AXIS],
+                             current_position[Y_AXIS],
+                             current_position[Z_AXIS],
+                             current_position[E_AXIS],
+                             retract_feedrate / 60,
+                             active_extruder);
             retracted = false;
         }
         else
         {
-          memcpy(current_position, target, sizeof(current_position));
-          memcpy(destination, current_position, sizeof(destination));
+            memcpy(current_position, target, sizeof(current_position));
+            memcpy(destination, current_position, sizeof(destination));
         }
         serial_action_P(PSTR("resume"));
     }

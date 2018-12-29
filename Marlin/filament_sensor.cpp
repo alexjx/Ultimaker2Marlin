@@ -11,9 +11,9 @@
 void filament_sensor_init()
 {
 #if defined(FILAMENT_SENSOR_PIN) && (FILAMENT_SENSOR_PIN > -1)
-  SET_INPUT(FILAMENT_SENSOR_PIN);
-  // enable pullup resistor
-  WRITE(FILAMENT_SENSOR_PIN, HIGH);
+    SET_INPUT(FILAMENT_SENSOR_PIN);
+    // enable pullup resistor
+    WRITE(FILAMENT_SENSOR_PIN, HIGH);
 #endif
 }
 
@@ -24,7 +24,7 @@ bool checkFilamentSensor()
     bool bResult = READ(FILAMENT_SENSOR_PIN);
 
     // filament sensor pin is pulled down to LOW when a problem is detected
-    if(!bResult)
+    if (!bResult)
     {
         // pause print only if:
         //    - printer is printing
@@ -47,7 +47,7 @@ bool checkFilamentSensor()
 
     return bResult;
 #else
-  return true;
+    return true;
 #endif
 }
 
