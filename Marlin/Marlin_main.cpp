@@ -1176,7 +1176,7 @@ void process_command(const char *strCmd, bool sendAck)
       if (printing_state == PRINT_STATE_RECOVER)
         break;
 
-      serial_action_P(PSTR("pause"));
+      serial_action_P(PSTR("paused"));
       LCD_MESSAGEPGM(MSG_DWELL);
       codenum = 0;
       if(code_seen(strCmd, 'P')) codenum = code_value(); // milliseconds to wait
@@ -1190,7 +1190,7 @@ void process_command(const char *strCmd, bool sendAck)
       {
           idle();
       }
-      serial_action_P(PSTR("resume"));
+      serial_action_P(PSTR("resumed"));
 
       break;
       #ifdef FWRETRACT
@@ -1464,20 +1464,20 @@ void process_command(const char *strCmd, bool sendAck)
     break;
 #endif
 #ifdef ENABLE_ULTILCD2
-    case 0: // M0 - Unconditional stop - Wait for user button press on LCD
-    case 1: // M1 - Conditional stop - Wait for user button press on LCD
+    case 0:  // M0 - Unconditional stop - Wait for user button press on LCD
+    case 1:  // M1 - Conditional stop - Wait for user button press on LCD
     {
         if (printing_state == PRINT_STATE_RECOVER)
-          break;
+            break;
 
-//        serial_action_P(PSTR("pause"));
+        serial_action_P(PSTR("paused"));
         card.pauseSDPrint();
-        while(card.pause())
+        while (card.pause())
         {
-          idle();
+            idle();
         }
         plan_set_e_position(current_position[E_AXIS], active_extruder, true);
-//        serial_action_P(PSTR("resume"));
+        serial_action_P(PSTR("resumed"));
     }
     break;
 #endif
@@ -2539,7 +2539,7 @@ void process_command(const char *strCmd, bool sendAck)
         if (printing_state == PRINT_STATE_RECOVER)
             break;
 
-        //        serial_action_P(PSTR("pause"));
+        serial_action_P(PSTR("paused"));
         card.pauseSDPrint();
 
         st_synchronize();
@@ -2548,7 +2548,7 @@ void process_command(const char *strCmd, bool sendAck)
         // preserve current position
         memcpy(lastpos, current_position, sizeof(lastpos));
         memcpy(target, current_position, sizeof(target));
-        recover_height = lastpos[Z_AXIS];
+        // recover_height = lastpos[Z_AXIS];
 
         // retract
         // Set the recover length to whatever distance we retracted so we recover properly.
@@ -2598,8 +2598,9 @@ void process_command(const char *strCmd, bool sendAck)
 #if EXTRUDERS > 1
         last_extruder = 0xFF;
 #endif
-        // serial_action_P(PSTR("pause"));
-        card.pauseSDPrint();
+        // serial_action_P(PSTR("paused"));
+        // card.pauseSDPrint();
+
         while (card.pause())
         {
             idle();
@@ -2658,7 +2659,7 @@ void process_command(const char *strCmd, bool sendAck)
             memcpy(current_position, target, sizeof(current_position));
             memcpy(destination, current_position, sizeof(destination));
         }
-        serial_action_P(PSTR("resume"));
+        serial_action_P(PSTR("resumed"));
     }
     break;
 
