@@ -15,7 +15,7 @@
 #include "UltiLCD2_menu_print.h"
 #include "UltiLCD2_menu_utils.h"
 
-#define CALIBRATE_OFFSET 15
+#define CALIBRATE_OFFSET 20
 
 static void lcd_menu_first_run_init_2();
 static void lcd_menu_first_run_init_3();
