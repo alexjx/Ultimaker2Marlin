@@ -45,7 +45,11 @@ static void lcd_menu_first_run_print_card_detect();
 #define DRAW_PROGRESS_NR(nr) do { lcd_lib_draw_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/21")); } while(0)
 #define CLEAR_PROGRESS_NR(nr) do { lcd_lib_clear_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/21")); } while(0)
 
-//Run the first time you start-up the machine or after a factory reset.
+/////////////////////////////////////////////////////
+// first run only logic
+/////////////////////////////////////////////////////
+
+// Run the first time you start-up the machine or after a factory reset.
 void lcd_menu_first_run_init()
 {
     SELECT_MAIN_MENU_ITEM(0);
@@ -58,30 +62,10 @@ void lcd_menu_first_run_init()
     lcd_lib_update_screen();
 }
 
-static void homeAndParkHeadForCenterAdjustment2()
-{
-    add_homing[Z_AXIS] = 0;
-    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
-    enquecommand(buffer);
-    menu.return_to_previous(false);
-}
-//Started bed leveling from the calibration menu
-void lcd_menu_first_run_start_bed_leveling()
-{
-    lcd_question_screen(lcd_menu_first_run_bed_level_center_adjust, homeAndParkHeadForCenterAdjustment2, PSTR("CONTINUE"), NULL, lcd_change_to_previous_menu, PSTR("CANCEL"));
-    lcd_lib_draw_string_centerP(10, PSTR("I will guide you"));
-    lcd_lib_draw_string_centerP(20, PSTR("through the process"));
-    lcd_lib_draw_string_centerP(30, PSTR("of adjusting your"));
-    lcd_lib_draw_string_centerP(40, PSTR("buildplate."));
-    lcd_lib_update_screen();
-}
-
 static void homeAndRaiseBed()
 {
     homeBed();
-    char buffer[32] = {0};
+    char buffer[32] = { 0 };
     sprintf_P(buffer, PSTR("G1 F%i Z%i"), int(homing_feedrate[0]), 35);
     enquecommand(buffer);
 }
@@ -102,10 +86,9 @@ static void lcd_menu_first_run_init_2()
 static void homeAndParkHeadForCenterAdjustment()
 {
     homeHead();
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[0]),
-              int(AXIS_CENTER_POS(X_AXIS)),
-              int(max_pos[Y_AXIS]) - CALIBRATE_OFFSET);
+    char buffer[32] = { 0 };
+    sprintf_P(
+        buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[0]), int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS]) - CALIBRATE_OFFSET);
     sprintf_P(buffer, PSTR("G1 F%i Z%i"), int(homing_feedrate[0]), 35);
     enquecommand(buffer);
 }
@@ -122,6 +105,44 @@ static void lcd_menu_first_run_init_3()
     lcd_lib_update_screen();
 }
 
+/////////////////////////////////////////////////////
+// re-leveling only logic
+/////////////////////////////////////////////////////
+
+static void homeAndParkHeadForCenterAdjustment2()
+{
+    add_homing[Z_AXIS] = 0;
+    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
+    char buffer[32] = { 0 };
+    sprintf_P(buffer,
+              PSTR("G1 F%i Z%i X%i Y%i"),
+              int(homing_feedrate[0]),
+              35,
+              int(AXIS_CENTER_POS(X_AXIS)),
+              int(max_pos[Y_AXIS]) - CALIBRATE_OFFSET);
+    enquecommand(buffer);
+    menu.return_to_previous(false);
+}
+
+// Started bed leveling from the calibration menu
+void lcd_menu_first_run_start_bed_leveling()
+{
+    lcd_question_screen(lcd_menu_first_run_bed_level_center_adjust,
+                        homeAndParkHeadForCenterAdjustment2,
+                        PSTR("CONTINUE"),
+                        NULL,
+                        lcd_change_to_previous_menu,
+                        PSTR("CANCEL"));
+    lcd_lib_draw_string_centerP(10, PSTR("I will guide you"));
+    lcd_lib_draw_string_centerP(20, PSTR("through the process"));
+    lcd_lib_draw_string_centerP(30, PSTR("of adjusting your"));
+    lcd_lib_draw_string_centerP(40, PSTR("buildplate."));
+    lcd_lib_update_screen();
+}
+
+/////////////////////////////////////////////////////
+// common bed leveling logic for both re-leveling or first run
+/////////////////////////////////////////////////////
 static void parkHeadForLeftAdjustment()
 {
     add_homing[Z_AXIS] -= current_position[Z_AXIS];

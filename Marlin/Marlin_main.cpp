@@ -353,34 +353,34 @@ void clear_command_queue()
 
 static void next_command()
 {
-  #ifdef SDSUPPORT
-    if(card.saving())
+#ifdef SDSUPPORT
+    if (card.saving())
     {
-        if(strstr_P(cmdbuffer[bufindr], PSTR("M29")) == NULL)
+        if (strstr_P(cmdbuffer[bufindr], PSTR("M29")) == NULL)
         {
-          card.write_command(cmdbuffer[bufindr]);
-          if(card.logging())
-          {
-            process_command(cmdbuffer[bufindr], serialCmd & (1 << bufindr));
-          }
-          else
-          {
-            SERIAL_PROTOCOLLNPGM(MSG_OK);
-          }
+            card.write_command(cmdbuffer[bufindr]);
+            if (card.logging())
+            {
+                process_command(cmdbuffer[bufindr], serialCmd & (1 << bufindr));
+            }
+            else
+            {
+                SERIAL_PROTOCOLLNPGM(MSG_OK);
+            }
         }
         else
         {
-          card.closefile();
-          SERIAL_PROTOCOLLNPGM(MSG_FILE_SAVED);
+            card.closefile();
+            SERIAL_PROTOCOLLNPGM(MSG_FILE_SAVED);
         }
     }
     else
     {
-    process_command(cmdbuffer[bufindr], serialCmd & (1 << bufindr));
+        process_command(cmdbuffer[bufindr], serialCmd & (1 << bufindr));
     }
-  #else
+#else
     process_command(cmdbuffer[bufindr], serialCmd & (1 << bufindr));
-  #endif //SDSUPPORT
+#endif  // SDSUPPORT
 
     if (buflen)
     {
@@ -509,82 +509,87 @@ void servo_init()
 
 void setup()
 {
-  setup_killpin();
-  setup_powerhold();
-  MYSERIAL.begin(BAUDRATE);
-  SERIAL_PROTOCOLLNPGM("start");
-  SERIAL_ECHO_START;
+    setup_killpin();
+    setup_powerhold();
+    MYSERIAL.begin(BAUDRATE);
+    SERIAL_PROTOCOLLNPGM("start");
+    SERIAL_ECHO_START;
 
-  // Check startup - does nothing if bootloader sets MCUSR to 0
-  byte mcu = MCUSR;
-  if(mcu & 1) SERIAL_ECHOLNPGM(MSG_POWERUP);
-  if(mcu & 2) SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
-  if(mcu & 4) SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
-  if(mcu & 8) SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
-  if(mcu & 32) SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
-  MCUSR=0;
+    // Check startup - does nothing if bootloader sets MCUSR to 0
+    byte mcu = MCUSR;
+    if (mcu & 1)
+        SERIAL_ECHOLNPGM(MSG_POWERUP);
+    if (mcu & 2)
+        SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
+    if (mcu & 4)
+        SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
+    if (mcu & 8)
+        SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
+    if (mcu & 32)
+        SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
+    MCUSR = 0;
 
-  SERIAL_ECHOPGM(MSG_MARLIN);
-  SERIAL_ECHOLNPGM(VERSION_STRING);
-  #ifdef STRING_VERSION_CONFIG_H
-    #ifdef STRING_CONFIG_H_AUTHOR
-      SERIAL_ECHO_START;
-      SERIAL_ECHOPGM(MSG_CONFIGURATION_VER);
-      SERIAL_ECHOPGM(STRING_VERSION_CONFIG_H);
-      SERIAL_ECHOPGM(MSG_AUTHOR);
-      SERIAL_ECHOLNPGM(STRING_CONFIG_H_AUTHOR);
-      SERIAL_ECHOPGM("Compiled: ");
-      SERIAL_ECHOLNPGM(__DATE__);
-    #endif
-  #endif
-  SERIAL_ECHO_START;
-  SERIAL_ECHOPGM(MSG_FREE_MEMORY);
-  SERIAL_ECHO(freeMemory());
-  SERIAL_ECHOPGM(MSG_PLANNER_BUFFER_BYTES);
-  SERIAL_ECHOLN((int)sizeof(block_t)*BLOCK_BUFFER_SIZE);
-  serialCmd = 0;
+    SERIAL_ECHOPGM(MSG_MARLIN);
+    SERIAL_ECHOLNPGM(VERSION_STRING);
+#ifdef STRING_VERSION_CONFIG_H
+#ifdef STRING_CONFIG_H_AUTHOR
+    SERIAL_ECHO_START;
+    SERIAL_ECHOPGM(MSG_CONFIGURATION_VER);
+    SERIAL_ECHOPGM(STRING_VERSION_CONFIG_H);
+    SERIAL_ECHOPGM(MSG_AUTHOR);
+    SERIAL_ECHOLNPGM(STRING_CONFIG_H_AUTHOR);
+    SERIAL_ECHOPGM("Compiled: ");
+    SERIAL_ECHOLNPGM(__DATE__);
+#endif
+#endif
+    SERIAL_ECHO_START;
+    SERIAL_ECHOPGM(MSG_FREE_MEMORY);
+    SERIAL_ECHO(freeMemory());
+    SERIAL_ECHOPGM(MSG_PLANNER_BUFFER_BYTES);
+    SERIAL_ECHOLN((int)sizeof(block_t) * BLOCK_BUFFER_SIZE);
+    serialCmd = 0;
 
-  // loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
-  Config_RetrieveSettings();
-  PowerBudget_RetrieveSettings();
-  lifetime_stats_init();
-  tp_init();    // Initialize temperature loop
-  plan_init();  // Initialize planner;
-  filament_sensor_init(); // Initialize filament sensor
-  watchdog_init();
-  st_init();    // Initialize stepper, this enables interrupts!
-  setup_photpin();
-  servo_init();
+    // loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
+    Config_RetrieveSettings();
+    PowerBudget_RetrieveSettings();
+    lifetime_stats_init();
+    tp_init();               // Initialize temperature loop
+    plan_init();             // Initialize planner;
+    filament_sensor_init();  // Initialize filament sensor
+    watchdog_init();
+    st_init();  // Initialize stepper, this enables interrupts!
+    setup_photpin();
+    servo_init();
 
-  lcd_init();
+    lcd_init();
 
-  #if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
-    SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
-  #endif
+#if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
+    SET_OUTPUT(CONTROLLERFAN_PIN);  // Set pin used for driver cooling fan
+#endif
 }
 
 void loop()
 {
-  if (printing_state == PRINT_STATE_ABORT)
-  {
-    abortPrint(true);
-  }
-  #ifdef SDSUPPORT
-  card.checkautostart(false);
-  #endif
-  if(buflen)
-  {
-    // process next command
-    next_command();
-  }
-  if(buflen < BUFSIZE)
-  {
-    // get next command
-    get_command();
-  }
-  // manage heater and inactivity
-  checkHitEndstops();
-  idle();
+    if (printing_state == PRINT_STATE_ABORT)
+    {
+        abortPrint(true);
+    }
+#ifdef SDSUPPORT
+    card.checkautostart(false);
+#endif
+    if (buflen)
+    {
+        // process next command
+        next_command();
+    }
+    if (buflen < BUFSIZE)
+    {
+        // get next command
+        get_command();
+    }
+    // manage heater and inactivity
+    checkHitEndstops();
+    idle();
 }
 
 FORCE_INLINE float code_value()
@@ -872,10 +877,11 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir,  HOME_DIR);
 
 static void axis_is_at_home(int axis)
 {
-    float baseHomePos;
+    float baseHomePos = 0.0f;
 #ifdef BED_CENTER_AT_0_0
     float maxLength = max_pos[axis] - min_pos[axis];
 #endif
+
     if (axis == Z_AXIS)
     {
         if (home_dir(axis) == -1)
@@ -891,19 +897,19 @@ static void axis_is_at_home(int axis)
     {
         if (home_dir(axis) == -1)
         {
-            #ifdef BED_CENTER_AT_0_0
-                baseHomePos = maxLength * -0.5;
-            #else
-                baseHomePos = min_pos[axis];
-            #endif
+#ifdef BED_CENTER_AT_0_0
+            baseHomePos = maxLength * -0.5;
+#else
+            baseHomePos = min_pos[axis];
+#endif
         }
         else
         {
-            #ifdef BED_CENTER_AT_0_0
-                baseHomePos = maxLength * 0.5;
-            #else
-                baseHomePos = max_pos[axis];
-            #endif
+#ifdef BED_CENTER_AT_0_0
+            baseHomePos = maxLength * 0.5;
+#else
+            baseHomePos = max_pos[axis];
+#endif
         }
     }
 
@@ -914,6 +920,7 @@ static void axis_is_at_home(int axis)
         current_position[axis] += extruder_offset[axis][active_extruder];
     }
 #endif
+
     // min_pos[axis] =          base_min_pos(axis);// + add_homing[axis];
     // max_pos[axis] =          base_max_pos(axis);// + add_homing[axis];
 }
@@ -2914,6 +2921,13 @@ void process_command(const char *strCmd, bool sendAck)
         }
         break;
 #endif//ENABLE_ULTILCD2
+    case 10020: // M10020 - debug
+        {
+            SERIAL_ECHO_START;
+            SERIAL_ECHOPAIR("MAX_POS Z", max_pos[Z_AXIS]);
+            SERIAL_ECHOPAIR("Current Z", current_position[Z_AXIS]);
+            SERIAL_EOL;
+        }
     }
   }
 
@@ -3109,17 +3123,43 @@ static void get_arc_coordinates(const char *cmd)
 
 void clamp_to_software_endstops(float target[3])
 {
-  if (min_software_endstops) {
-    if (target[X_AXIS] < min_pos[X_AXIS]) { target[X_AXIS] = min_pos[X_AXIS]; position_error = true; }
-    if (target[Y_AXIS] < min_pos[Y_AXIS]) { target[Y_AXIS] = min_pos[Y_AXIS]; position_error = true; }
-    if (target[Z_AXIS] < min_pos[Z_AXIS]) { target[Z_AXIS] = min_pos[Z_AXIS]; position_error = true; }
-  }
+    if (min_software_endstops)
+    {
+        if (target[X_AXIS] < min_pos[X_AXIS])
+        {
+            target[X_AXIS] = min_pos[X_AXIS];
+            position_error = true;
+        }
+        if (target[Y_AXIS] < min_pos[Y_AXIS])
+        {
+            target[Y_AXIS] = min_pos[Y_AXIS];
+            position_error = true;
+        }
+        if (target[Z_AXIS] < min_pos[Z_AXIS])
+        {
+            target[Z_AXIS] = min_pos[Z_AXIS];
+            position_error = true;
+        }
+    }
 
-  if (max_software_endstops) {
-    if (target[X_AXIS] > max_pos[X_AXIS]) { target[X_AXIS] = max_pos[X_AXIS]; position_error = true; }
-    if (target[Y_AXIS] > max_pos[Y_AXIS]) { target[Y_AXIS] = max_pos[Y_AXIS]; position_error = true; }
-    if (target[Z_AXIS] > max_pos[Z_AXIS]) { target[Z_AXIS] = max_pos[Z_AXIS]; position_error = true; }
-  }
+    if (max_software_endstops)
+    {
+        if (target[X_AXIS] > max_pos[X_AXIS])
+        {
+            target[X_AXIS] = max_pos[X_AXIS];
+            position_error = true;
+        }
+        if (target[Y_AXIS] > max_pos[Y_AXIS])
+        {
+            target[Y_AXIS] = max_pos[Y_AXIS];
+            position_error = true;
+        }
+        if (target[Z_AXIS] > max_pos[Z_AXIS])
+        {
+            target[Z_AXIS] = max_pos[Z_AXIS];
+            position_error = true;
+        }
+    }
 }
 
 #ifdef DELTA
@@ -3151,64 +3191,83 @@ void calculate_delta(float cartesian[3])
 
 static void prepare_move(const char *cmd)
 {
-  clamp_to_software_endstops(destination);
+    clamp_to_software_endstops(destination);
 
-  previous_millis_cmd = millis();
+    previous_millis_cmd = millis();
 #ifdef DELTA
-  float difference[NUM_AXIS];
-  for (int8_t i=0; i < NUM_AXIS; i++) {
-    difference[i] = destination[i] - current_position[i];
-  }
-  float cartesian_mm = sqrt(sq(difference[X_AXIS]) +
-                            sq(difference[Y_AXIS]) +
-                            sq(difference[Z_AXIS]));
-  if (cartesian_mm < 0.000001) { cartesian_mm = abs(difference[E_AXIS]); }
-  if (cartesian_mm < 0.000001) { return; }
-  float seconds = 6000 * cartesian_mm / feedrate / feedmultiply;
-  int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
-  // SERIAL_ECHOPGM("mm="); SERIAL_ECHO(cartesian_mm);
-  // SERIAL_ECHOPGM(" seconds="); SERIAL_ECHO(seconds);
-  // SERIAL_ECHOPGM(" steps="); SERIAL_ECHOLN(steps);
-  for (int s = 1; s <= steps; s++) {
-    float fraction = float(s) / float(steps);
-    for(int8_t i=0; i < NUM_AXIS; i++) {
-      destination[i] = current_position[i] + difference[i] * fraction;
-    }
-    calculate_delta(destination);
-    if (card.sdprinting && (printing_state == PRINT_STATE_RECOVER) && (destination[Z_AXIS] >= recover_height-0.01f))
+    float difference[NUM_AXIS];
+    for (int8_t i = 0; i < NUM_AXIS; i++)
     {
-      recover_start_print(cmd);
+        difference[i] = destination[i] - current_position[i];
+    }
+    float cartesian_mm = sqrt(sq(difference[X_AXIS]) + sq(difference[Y_AXIS]) + sq(difference[Z_AXIS]));
+    if (cartesian_mm < 0.000001)
+    {
+        cartesian_mm = abs(difference[E_AXIS]);
+    }
+    if (cartesian_mm < 0.000001)
+    {
+        return;
+    }
+    float seconds = 6000 * cartesian_mm / feedrate / feedmultiply;
+    int steps = max(1, int(DELTA_SEGMENTS_PER_SECOND * seconds));
+    // SERIAL_ECHOPGM("mm="); SERIAL_ECHO(cartesian_mm);
+    // SERIAL_ECHOPGM(" seconds="); SERIAL_ECHO(seconds);
+    // SERIAL_ECHOPGM(" steps="); SERIAL_ECHOLN(steps);
+    for (int s = 1; s <= steps; s++)
+    {
+        float fraction = float(s) / float(steps);
+        for (int8_t i = 0; i < NUM_AXIS; i++)
+        {
+            destination[i] = current_position[i] + difference[i] * fraction;
+        }
+        calculate_delta(destination);
+        if (card.sdprinting && (printing_state == PRINT_STATE_RECOVER) && (destination[Z_AXIS] >= recover_height - 0.01f))
+        {
+            recover_start_print(cmd);
+        }
+        else if (printing_state != PRINT_STATE_RECOVER)
+        {
+            plan_buffer_line(delta[X_AXIS],
+                             delta[Y_AXIS],
+                             delta[Z_AXIS],
+                             destination[E_AXIS],
+                             feedrate * feedmultiply / 60 / 100.0,
+                             active_extruder);
+        }
+    }
+#else
+    if (card.sdprinting() && (printing_state == PRINT_STATE_RECOVER) && (destination[Z_AXIS] >= recover_height - 0.01f))
+    {
+        if (current_position[E_AXIS] != destination[E_AXIS])
+        {
+            for (uint8_t i = 0; i < NUM_AXIS; ++i)
+            {
+                recover_position[i] = current_position[i];
+            }
+            recover_start_print(cmd);
+        }
     }
     else if (printing_state != PRINT_STATE_RECOVER)
     {
-      plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS],
-                       destination[E_AXIS], feedrate*feedmultiply/60/100.0,
-                       active_extruder);
+        // Do not use feedmultiply for E or Z only moves
+        if ((current_position[X_AXIS] == destination[X_AXIS]) && (current_position[Y_AXIS] == destination[Y_AXIS]))
+        {
+            plan_buffer_line(
+                destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate / 60, active_extruder);
+        }
+        else
+        {
+            plan_buffer_line(destination[X_AXIS],
+                             destination[Y_AXIS],
+                             destination[Z_AXIS],
+                             destination[E_AXIS],
+                             feedrate * feedmultiply / 60 / 100.0,
+                             active_extruder);
+        }
     }
-  }
-#else
-  if (card.sdprinting() && (printing_state == PRINT_STATE_RECOVER) && (destination[Z_AXIS] >= recover_height-0.01f))
-  {
-    if (current_position[E_AXIS] != destination[E_AXIS])
-    {
-      for(uint8_t i=0; i < NUM_AXIS; ++i) {
-          recover_position[i] = current_position[i];
-      }
-      recover_start_print(cmd);
-    }
-  }
-  else if (printing_state != PRINT_STATE_RECOVER)
-  {
-    // Do not use feedmultiply for E or Z only moves
-    if( (current_position[X_AXIS] == destination [X_AXIS]) && (current_position[Y_AXIS] == destination [Y_AXIS])) {
-      plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder);
-    }
-    else {
-      plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate*feedmultiply/60/100.0, active_extruder);
-    }
-  }
 #endif
-  memcpy(current_position, destination, sizeof(current_position));
+    memcpy(current_position, destination, sizeof(current_position));
 }
 
 static void prepare_arc_move(char isclockwise)
