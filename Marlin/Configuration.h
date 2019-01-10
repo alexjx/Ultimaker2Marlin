@@ -223,9 +223,9 @@
 
 #ifdef UM2PLUS
     // Ultimaker2 JarJar
-    #define DEFAULT_Kp 8.90
-    #define DEFAULT_Ki 0.99
-    #define DEFAULT_Kd 87.0
+    #define DEFAULT_Kp 15.71
+    #define DEFAULT_Ki 0.79
+    #define DEFAULT_Kd 86.02
 #else
     // Ultimaker2
     #define DEFAULT_Kp 10.00
