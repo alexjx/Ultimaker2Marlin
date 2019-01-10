@@ -287,7 +287,7 @@ void start_move_material()
     target_temperature_diff[menu_extruder] = 0;
     if (ui_mode & UI_MODE_EXPERT)
     {
-        menu.add_menu(menu_t(lcd_init_extrude, lcd_menu_expert_extrude, NULL));
+        menu.add_menu(menu_t(lcd_menu_expert_extrude));
     }
     else
     {

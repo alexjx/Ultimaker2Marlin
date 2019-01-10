@@ -1254,7 +1254,7 @@
 #define encrot3                     2
 
 #ifndef FILAMENT_SENSOR_PIN
-#define FILAMENT_SENSOR_PIN         -1  // PC7 = D30; PD7 = D38
+#define FILAMENT_SENSOR_PIN         30  // PC7 = D30; PD7 = D38
 #endif
 //@NEB
 

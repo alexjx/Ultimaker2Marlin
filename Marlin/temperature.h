@@ -18,8 +18,8 @@
   along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef TEMPERATURE_H
-#define TEMPERATURE_H
+#ifndef temperature_h
+#define temperature_h
 
 #include "Marlin.h"
 #include "planner.h"
@@ -159,7 +159,7 @@ FORCE_INLINE bool isCoolingHotend(uint8_t extruder) {
 typedef bool (*autotuneFunc_t) (uint8_t state, uint8_t cycle, float kp, float ki, float kd);
 
 int getHeaterPower(int heater);
-void disable_all_heaters();
+void disable_heater();
 void setWatch();
 void updatePID();
 

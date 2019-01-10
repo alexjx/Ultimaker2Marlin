@@ -261,7 +261,7 @@ static void lcd_menu_special_startup()
 
 void doCooldown()
 {
-    disable_all_heaters();
+    disable_heater();
     fanSpeed = 0;
 }
 

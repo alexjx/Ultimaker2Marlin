@@ -136,10 +136,10 @@ void abortPrint(bool bQuickstop)
     set_extrude_min_temp(minTemp);
     doCooldown();
 
-#if EXTRUDERS > 1
+/*#if EXTRUDERS > 1
     // move to a safe y position in dual mode
     CommandBuffer::move2SafeYPos();
-#endif // EXTRUDERS
+#endif // EXTRUDERS*/
     if (current_position[Z_AXIS] > max_pos[Z_AXIS] - 30)
     {
         CommandBuffer::homeHead();
@@ -1358,7 +1358,7 @@ void lcd_menu_print_tune()
             LCD_EDIT_SETTING(led_brightness_level, "Brightness", "%", 0, 100);
 #endif
         else if ((ui_mode & UI_MODE_EXPERT) && card.sdprinting() && card.pause() && IS_SELECTED_SCROLL(index++))
-            menu.add_menu(menu_t(lcd_init_extrude, lcd_menu_expert_extrude, NULL)); // Move material
+            menu.add_menu(menu_t(lcd_menu_expert_extrude, 0)); // Move material
         else if ((ui_mode & UI_MODE_EXPERT) && IS_SELECTED_SCROLL(index++))
             menu.add_menu(menu_t(lcd_menu_sleeptimer));
     }
@@ -1418,7 +1418,6 @@ void lcd_print_pause()
     if (!card.pause())
     {
         card.pauseSDPrint();
-        serial_action_P(PSTR("pause"));
 
         // move z up according to the current height - but minimum to z=70mm (above the gantry height)
         uint16_t zdiff = 0;
@@ -1462,19 +1461,12 @@ void lcd_print_abort()
     menu.add_menu(menu_t(lcd_menu_print_abort, MAIN_MENU_ITEM_POS(1)));
 }
 
-static void doResume()
-{
-    primed |= (EXTRUDER_PRIMED << active_extruder);
-    primed |= ENDOFPRINT_RETRACT;
-    card.resumePrinting();
-    serial_action_P(PSTR("resume"));
-    menu.return_to_previous();
-}
-
 static void lcd_print_resume()
 {
     menu.return_to_previous();
-    menu.add_menu(menu_t(doResume));
+    card.resumePrinting();
+    primed |= (EXTRUDER_PRIMED << active_extruder);
+    primed |= ENDOFPRINT_RETRACT;
     for (uint8_t e=0; e<EXTRUDERS; ++e)
     {
         check_preheat(e);

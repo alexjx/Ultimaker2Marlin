@@ -2830,27 +2830,6 @@ static void lcd_extrude_return()
         target_temperature_diff[menu_extruder] = 0;
     }
 }
-static void lcd_extrude_toggle_heater()
-{
-    target_temperature_diff[menu_extruder] = 0;
-
-    // second target temperature
-    uint16_t temp2(material[menu_extruder].temperature[0]*9/20);
-    temp2 -= temp2 % 10;
-
-    if (!target_temperature[menu_extruder])
-    {
-        target_temperature[menu_extruder] = temp2;
-    }
-    else if (target_temperature[menu_extruder] > temp2)
-    {
-        target_temperature[menu_extruder] = 0;
-    }
-    else
-    {
-        target_temperature[menu_extruder] = material[menu_extruder].temperature[0];
-    }
-}
 
 static void lcd_extrude_temperature()
 {
@@ -2900,10 +2879,10 @@ static void lcd_extrude_init_pull()
     digipot_current(2, motor_current_setting[2]*2/3);
 #endif
     //increase max. feedrate and reduce acceleration
-    OLD_FEEDRATE = max_feedrate[E_AXIS];
+    //OLD_FEEDRATE = max_feedrate[E_AXIS];
     OLD_ACCEL = retract_acceleration;
     OLD_JERK = max_e_jerk;
-    max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
+    //max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
     retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(menu_extruder);
     max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 }
@@ -2956,10 +2935,6 @@ static const menu_t & get_extrude_menuoption(uint8_t nr, menu_t &opt)
     else if (nr == menu_index++)
     {
         opt.setData(MENU_NORMAL, lcd_extrude_return);
-    }
-    else if (nr == menu_index++)
-    {
-        opt.setData(MENU_NORMAL, lcd_extrude_toggle_heater);
     }
     else if (nr == menu_index++)
     {
@@ -3028,30 +3003,6 @@ static void drawExtrudeSubmenu (uint8_t nr, uint8_t &flags)
     }
     else if (nr == index++)
     {
-        // toggle heater
-        if (flags & (MENU_SELECTED | MENU_ACTIVE))
-        {
-            lcd_lib_draw_string_leftP(5, PSTR("Toggle heater"));
-            flags |= MENU_STATUSLINE;
-        }
-        LCDMenu::drawMenuBox(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-13*LCD_CHAR_SPACING-LCD_CHAR_SPACING/2
-                           , 20
-                           , 2*LCD_CHAR_SPACING
-                           , LCD_CHAR_HEIGHT+1
-                           , flags);
-
-
-        if (flags & MENU_SELECTED)
-        {
-            lcd_lib_clear_gfx(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-13*LCD_CHAR_SPACING, 20, thermometerGfx);
-        }
-        else
-        {
-            lcd_lib_draw_heater(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-13*LCD_CHAR_SPACING, 20, getHeaterPower(menu_extruder));
-        }
-    }
-    else if (nr == index++)
-    {
         // temp nozzle
         if (flags & (MENU_SELECTED | MENU_ACTIVE))
         {
@@ -3066,6 +3017,7 @@ static void drawExtrudeSubmenu (uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
 
+        lcd_lib_draw_heater(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-13*LCD_CHAR_SPACING, 20, getHeaterPower(menu_extruder));
         int_to_string(dsp_temperature[menu_extruder], buffer, PSTR(DEGREE_SLASH));
         lcd_lib_draw_string_right(LCD_GFX_WIDTH-2*LCD_CHAR_MARGIN_RIGHT-4*LCD_CHAR_SPACING, 20, buffer);
         int_to_string(int(degTargetHotend(menu_extruder)), buffer, PSTR(DEGREE_SYMBOL));
@@ -3085,6 +3037,8 @@ static void drawExtrudeSubmenu (uint8_t nr, uint8_t &flags)
             lcd_lib_draw_string_leftP(5, PSTR("Click & hold to pull"));
             flags |= MENU_STATUSLINE;
         }
+        // lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-12*LCD_CHAR_SPACING, 35, PSTR("Pos. E"));
+        // lcd_lib_draw_gfx(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-13*LCD_CHAR_SPACING-1, 35, flowGfx);
         LCDMenu::drawMenuBox(LCD_CHAR_MARGIN_LEFT+2
                            , 35
                            , 3*LCD_CHAR_SPACING
@@ -3107,6 +3061,8 @@ static void drawExtrudeSubmenu (uint8_t nr, uint8_t &flags)
             lcd_lib_draw_string_leftP(5, PSTR("Reset position"));
             flags |= MENU_STATUSLINE;
         }
+        // lcd_lib_draw_string_rightP(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-12*LCD_CHAR_SPACING, 35, PSTR("Pos. E"));
+        // lcd_lib_draw_gfx(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-13*LCD_CHAR_SPACING-1, 35, flowGfx);
         LCDMenu::drawMenuBox(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-13*LCD_CHAR_SPACING-LCD_CHAR_MARGIN_LEFT
                            , 35
                            , LCD_CHAR_SPACING+2*LCD_CHAR_MARGIN_LEFT
@@ -3140,11 +3096,6 @@ static void drawExtrudeSubmenu (uint8_t nr, uint8_t &flags)
     }
 }
 
-void lcd_init_extrude()
-{
-    menu.set_active(get_extrude_menuoption, 6);
-}
-
 void lcd_menu_expert_extrude()
 {
     // reset heater timeout until target temperature is reached
@@ -3156,7 +3107,7 @@ void lcd_menu_expert_extrude()
     lcd_basic_screen();
     lcd_lib_draw_hline(3, 124, 13);
 
-    uint8_t len = card.sdprinting() ? 6 : 7;
+    uint8_t len = card.sdprinting() ? 5 : 6;
 
     menu.process_submenu(get_extrude_menuoption, len);
 

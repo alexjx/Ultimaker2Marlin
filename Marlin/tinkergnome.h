@@ -10,7 +10,7 @@
 #define DEFAULT_FILAMENT_AREA 6.3793966
 
 // allowed tuning difference to the target temperature
-#define MAX_TEMP_DIFF  25
+#define MAX_TEMP_DIFF  99
 #define MAX_STANDBY_DIFF  50
 
 extern float recover_height;
@@ -38,7 +38,6 @@ void endofprint_retract_store();
 void lcd_prepare_buildplate_adjust();
 void lcd_menu_simple_buildplate_init();
 
-void lcd_init_extrude();
 
 FORCE_INLINE void lcd_print_tune_nozzle0_diff() { lcd_tune_value(target_temperature_diff[0], max(-MAX_TEMP_DIFF, -target_temperature[0]), min(MAX_TEMP_DIFF, get_maxtemp(0) - target_temperature[0] - 15)); }
 #if EXTRUDERS > 1

@@ -12,7 +12,7 @@
 // build by the user have been successfully uploaded into firmware.
 #define STRING_VERSION_CONFIG_H __DATE__ " " __TIME__ // build date and time
 #ifndef STRING_CONFIG_H_AUTHOR
-#define STRING_CONFIG_H_AUTHOR "Tinker_17.09-DEV" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "Tinker_DXU_17.10" // Who made the changes.
 #endif
 
 // SERIAL_PORT selects which serial port should be used for communication with the host.
@@ -66,7 +66,7 @@
 
 // This defines the number of extruders
 #ifndef EXTRUDERS
-#define EXTRUDERS 1
+#define EXTRUDERS 2
 #endif
 
 //// The following define selects which power supply you have. Please choose the one that matches your setup
@@ -74,6 +74,8 @@
 // 2 = X-Box 360 203Watts (the blue wire connected to PS_ON and the red wire to VCC)
 
 #define POWER_SUPPLY 2
+
+#define UM2PLUS
 
 
 //===========================================================================
@@ -174,13 +176,13 @@
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
 #ifndef HEATER_0_MAXTEMP
-    #define HEATER_0_MAXTEMP 275
+    #define HEATER_0_MAXTEMP 315
 #endif
 #ifndef HEATER_1_MAXTEMP
-    #define HEATER_1_MAXTEMP 275
+    #define HEATER_1_MAXTEMP 315
 #endif
 #ifndef HEATER_2_MAXTEMP
-    #define HEATER_2_MAXTEMP 275
+    #define HEATER_2_MAXTEMP 315
 #endif
 #define BED_MAXTEMP 200
 
@@ -218,10 +220,10 @@
     //#define  DEFAULT_Ki 1.08
     //#define  DEFAULT_Kd 114
 
-// Ultimaker2+
-    #define  DEFAULT_Kp 12.0
-    #define  DEFAULT_Ki 0.75
-    #define  DEFAULT_Kd 55.0
+// Ultimaker2s
+    #define  DEFAULT_Kp 13.2
+    #define  DEFAULT_Ki 1.17
+    #define  DEFAULT_Kd 37.31
 
 // Makergear
 //    #define  DEFAULT_Kp 7.0
@@ -268,9 +270,9 @@
 //    #define  DEFAULT_bedKd 1675.16
 
 //Ultimaker2
-    #define  DEFAULT_bedKp 124.50
-    #define  DEFAULT_bedKi 23.50
-    #define  DEFAULT_bedKd 165.00
+    #define  DEFAULT_bedKp 72.15
+    #define  DEFAULT_bedKi 13.85
+    #define  DEFAULT_bedKd 94.0
 
 // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #endif // PIDTEMPBED
@@ -385,10 +387,10 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define Z_MAX_LENGTH (Z_MAX_POS - Z_MIN_POS)
 
 
-#if EXTRUDERS > 1
+/*#if EXTRUDERS > 1
 // safe y-position for dual head mode
-#define DUAL_Y_MIN_POS (dock_position[Y_AXIS] + 20.0f)
-#endif // EXTRUDERS
+#define DUAL_Y_MIN_POS (dock_position[Y_AXIS] + 15.0f)
+#endif // EXTRUDERS*/
 
 // The position of the homing switches
 //#define MANUAL_HOME_POSITIONS  // If defined, MANUAL_*_HOME_POS below will be used
@@ -421,7 +423,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).
 // For the other hotends it is their distance from the extruder 0 hotend.
 #define EXTRUDER_OFFSET_X {0.0, 18.00} // (in mm) for each extruder, offset of the hotend on the X axis
-#define EXTRUDER_OFFSET_Y {0.0, -25.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
+#define EXTRUDER_OFFSET_Y {0.0, 0.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
 
 // The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
 #define DEFAULT_XYJERK                20.0    // (mm/sec)
@@ -429,7 +431,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define DEFAULT_EJERK                 5.0    // (mm/sec)
 
 //Length of the bowden tube. Used for the material load/unload procedure.
-#define FILAMENT_BOWDEN_LENGTH        705
+#define FILAMANT_BOWDEN_LENGTH        705
 
 //===========================================================================
 //=============================Additional Features===========================
