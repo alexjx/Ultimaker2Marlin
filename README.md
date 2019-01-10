@@ -7,14 +7,15 @@ Following are the changes so far:
   * Change Z range to 305
   * Change max temperature to 290
   * Change max bed temperature to 130
-  * Lower max acc to 1700.0
+  * Lower max acc to ~~1700.0~~ 1500.0
   * Lower max jerk to 10.0
   * Lower bang-bang check interval to 4s
   * Limited Y axis to 222 for metal slider block.
   * Adjust all material diameter to 1.75.
-* Remove raising platform when first run. It's kind scaring since I'd expect the head move before platform.
+* ~~Remove raising platform when first run. It's kind scaring since I'd expect the head move before platform.~~ (it makes sense now...)
 * Ported the retraction after insert material from the original firmware.
 * Tick stats for extruder temperature also. (for tracking PTFE tube life)
+* Aggressive PID value
 
 # Readme from TinkerGonome Fork
 * Download the latest version from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>
