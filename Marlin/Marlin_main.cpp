@@ -173,11 +173,11 @@
 CardReader card;
 #endif
 float homing_feedrate[] = HOMING_FEEDRATE;
-int feedmultiply=100; //100->1 200->2
-int saved_feedmultiply;
-int extrudemultiply[EXTRUDERS]=ARRAY_BY_EXTRUDERS(100, 100, 100); //100->1 200->2
+int feedmultiply = 100;  // 100->1 200->2
+int saved_feedmultiply = 100;
+int extrudemultiply[EXTRUDERS] = ARRAY_BY_EXTRUDERS(100, 100, 100);  // 100->1 200->2
 float current_position[NUM_AXIS] = { 0.0, 0.0, 0.0, 0.0 };
-float add_homing[3]={0,0,0};
+float add_homing[3] = { 0, 0, 0 };
 float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
 float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
 // Extruder offset, only in XY plane
@@ -2329,10 +2329,20 @@ void process_command(const char *strCmd, bool sendAck)
     #endif
     case 220: // M220 S<factor in percent>- set speed factor override percentage
     {
-      if(code_seen(strCmd, 'S'))
-      {
-        feedmultiply = code_value() ;
-      }
+        if (code_seen(strCmd, 'S'))
+        {
+            int c = code_value();
+            // safe guard cura's z-change plugin.. it will generate bad value
+            if (c < 0)
+            {
+                feedmultiply = saved_feedmultiply;
+            }
+            else
+            {
+                saved_feedmultiply = feedmultiply;
+                feedmultiply = c;
+            }
+        }
     }
     break;
     case 221: // M221 S<factor in percent>- set extrude factor override percentage
