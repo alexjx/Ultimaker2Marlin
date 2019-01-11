@@ -508,36 +508,14 @@ void lcd_lib_clear_string(uint8_t x, uint8_t y, const char* str)
     }
 }
 
-void line_entry_pos_update (uint16_t maxStep)
-{
-	if (lineEntryPos > maxStep) lineEntryPos = 0;
-	//
-	lineEntryWait++;
-	if (lineEntryWait >= LINE_ENTRY_WAIT_END)
-	{
-		lineEntryWait = LINE_ENTRY_WAIT_END;
-		lineEntryPos += LINE_ENTRY_STEP;
-		if (lineEntryPos > maxStep)
-		{
-			lineEntryPos  = maxStep;
-			lineEntryWait = -lineEntryWait;
-		}
-	}
-	else if (lineEntryWait == 0 && lineEntryPos > 0)
-	{
-		lineEntryPos -= LINE_ENTRY_STEP;
-		lineEntryWait--;
-	}
-}
-
 void lcd_lib_draw_string_center(uint8_t y, const char* str)
 {
-    lcd_lib_draw_string(LCD_GFX_WIDTH/2 - min(strlen(str), LINE_ENTRY_TEXT_LENGHT) * (LCD_CHAR_SPACING/2), y, str);
+    lcd_lib_draw_string(LCD_GFX_WIDTH/2 - min(strlen(str), LINE_ENTRY_TEXT_LENGTH) * (LCD_CHAR_SPACING/2), y, str);
 }
 
 void lcd_lib_clear_string_center(uint8_t y, const char* str)
 {
-    lcd_lib_clear_string(LCD_GFX_WIDTH/2 - min(strlen(str), LINE_ENTRY_TEXT_LENGHT) * (LCD_CHAR_SPACING/2), y, str);
+    lcd_lib_clear_string(LCD_GFX_WIDTH/2 - min(strlen(str), LINE_ENTRY_TEXT_LENGTH) * (LCD_CHAR_SPACING/2), y, str);
 }
 
 void lcd_lib_draw_stringP(uint8_t x, uint8_t y, const char* pstr)
@@ -1091,5 +1069,75 @@ char* float_to_string2(float f, char* temp_buffer, const char* p_postfix, const 
     *c = '\0';
     return c;
 }
+
+#ifndef HAVE_STRLCAT
+/*
+ * concatenate two strings
+ */
+size_t strlcat(char* dst, const char* src, size_t n)
+{
+  size_t    srclen;         /* Length of source string */
+  size_t    dstlen;         /* Length of destination string */
+
+ /*
+  * Figure out how much room is left...
+  */
+
+  dstlen = strlen(dst);
+  n   -= dstlen + 1;
+
+  if (!n)
+    return (dstlen);        /* No room, return immediately... */
+
+ /*
+  * Figure out how much room is needed...
+  */
+
+  srclen = strlen(src);
+
+ /*
+  * Copy the appropriate amount...
+  */
+
+  if (srclen > n)
+    srclen = n;
+
+  memcpy(dst + dstlen, src, srclen);
+  dst[dstlen + srclen] = '\0';
+
+  return (dstlen + srclen);
+}
+#endif /* !HAVE_STRLCAT */
+
+#ifndef HAVE_STRLCPY
+/*
+ * copy string
+ */
+size_t strlcpy(char* dst, const char* src, size_t n)
+{
+  size_t    srclen;         /* Length of source string */
+
+ /*
+  * Figure out how much room is needed...
+  */
+
+  n--;
+
+  srclen = strlen(src);
+
+ /*
+  * Copy the appropriate amount...
+  */
+
+  if (srclen > n)
+    srclen = n;
+
+  memcpy(dst, src, srclen);
+  dst[srclen] = '\0';
+
+  return (srclen);
+}
+#endif /* !HAVE_STRLCPY */
+
 
 #endif//ENABLE_ULTILCD2

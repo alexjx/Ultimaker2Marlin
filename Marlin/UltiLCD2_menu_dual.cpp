@@ -6,6 +6,7 @@
 #include "stepper.h"
 #include "language.h"
 #include "machinesettings.h"
+#include "cardreader.h"
 #include "commandbuffer.h"
 #include "tinkergnome.h"
 #include "UltiLCD2_hi_lib.h"
@@ -80,10 +81,10 @@ static void lcd_extruderruler_y()
 
 static void lcd_extruderoffset_z()
 {
-    float zoffset = add_homeing[Z_AXIS] - add_homeing_z2;
+    float zoffset = add_homing[Z_AXIS] - add_homing_z2;
     if (lcd_tune_value(zoffset, -10.0f, 10.0f, 0.01f))
     {
-        add_homeing_z2 = add_homeing[Z_AXIS] - zoffset;
+        add_homing_z2 = add_homing[Z_AXIS] - zoffset;
     }
 }
 
@@ -249,7 +250,7 @@ static void drawExtruderOffsetSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_string_leftP(39, PSTR("Z"));
-        float_to_string2(add_homeing[Z_AXIS] - add_homeing_z2, buffer, PSTR("mm"));
+        float_to_string2(add_homing[Z_AXIS] - add_homing_z2, buffer, PSTR("mm"));
         LCDMenu::drawMenuString(LCD_CHAR_MARGIN_LEFT+LCD_CHAR_SPACING*3
                                 , 39
                                 , LCD_CHAR_SPACING*8

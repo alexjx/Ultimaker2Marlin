@@ -21,7 +21,7 @@
 #define DUAL_TOOLCHANGE      4
 
 extern uint8_t dual_state;
-extern float add_homeing_z2;
+extern float add_homing_z2;
 extern float dock_position[2];
 extern float wipe_position[2];
 extern float toolchange_retractlen[EXTRUDERS];
@@ -42,7 +42,7 @@ FORCE_INLINE void Dual_StoreState() { eeprom_write_byte((uint8_t*)EEPROM_DUAL_ST
 FORCE_INLINE void Dual_StoreExtruderOffset() { eeprom_write_block(extruder_offset, (uint8_t*)EEPROM_EXTRUDER_OFFSET, sizeof(extruder_offset)); }
 FORCE_INLINE void Dual_StoreDockPosition() { eeprom_write_block(dock_position, (uint8_t*)EEPROM_DOCK_POSITION, sizeof(dock_position)); }
 FORCE_INLINE void Dual_StoreWipePosition() { eeprom_write_block(wipe_position, (uint8_t*)EEPROM_WIPE_POSITION, sizeof(wipe_position)); }
-FORCE_INLINE void Dual_StoreAddHomeingZ2() { eeprom_write_float((float*)EEPROM_ADDHOMEING_Z2, add_homeing_z2); }
+FORCE_INLINE void Dual_StoreAddHomeingZ2() { eeprom_write_float((float*)EEPROM_ADDHOMEING_Z2, add_homing_z2); }
 FORCE_INLINE void Dual_StoreRetract()
 {
     eeprom_write_block(toolchange_retractlen, (uint8_t*)EEPROM_DUAL_RETRACTLEN, sizeof(toolchange_retractlen));

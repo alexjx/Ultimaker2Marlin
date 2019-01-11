@@ -96,8 +96,7 @@ struct CommandBuffer::t_cmdline* CommandBuffer::readScript(const char *filename)
                     cmd = cmd->next;
                 }
                 cmd->str = new char[len+1];
-                strncpy(cmd->str, buffer, len);
-                cmd->str[len] = '\0';
+                strlcpy(cmd->str, buffer, len);
             }
         }
         card.closefile();

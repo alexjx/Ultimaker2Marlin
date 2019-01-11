@@ -117,13 +117,13 @@ void  CardReader::lsDive(SdFile &parent, SdFile** parents, uint8_t dirDepth)
       }
       else if(lsAction==LS_Count)
       {
-        nrFiles++;
+        ++nrFiles;
       }
       else if(lsAction==LS_GetFilename)
       {
         if(cnt==nrFiles)
           return;
-        cnt++;
+        ++cnt;
       }
     }
   }
@@ -241,8 +241,7 @@ void CardReader::openFile(const char* name,bool read)
       if(dirname_end>0 && dirname_end>dirname_start)
       {
         char subdirname[13];
-        strncpy(subdirname, dirname_start, dirname_end-dirname_start);
-        subdirname[dirname_end-dirname_start]=0;
+        strlcpy(subdirname, dirname_start, dirname_end-dirname_start);
         SERIAL_ECHOLN(subdirname);
         if(!myDir.open(curDir,subdirname,O_READ))
         {
@@ -332,8 +331,7 @@ void CardReader::removeFile(const char* name)
       if(dirname_end>0 && dirname_end>dirname_start)
       {
         char subdirname[13];
-        strncpy(subdirname, dirname_start, dirname_end-dirname_start);
-        subdirname[dirname_end-dirname_start]=0;
+        strlcpy(subdirname, dirname_start, dirname_end-dirname_start);
         SERIAL_ECHOLN(subdirname);
         if(!myDir.open(curDir,subdirname,O_READ))
         {
@@ -505,7 +503,7 @@ void CardReader::getfilename(const uint8_t nr)
   lsDive(*curDir, NULL, 0);
 }
 
-uint16_t CardReader::getnrfilenames()
+uint8_t CardReader::getnrfilenames()
 {
   curDir=&workDir;
   lsAction=LS_Count;
@@ -566,20 +564,23 @@ void CardReader::printingHasFinished()
     autotempShutdown();
 }
 
-void CardReader::getFilenameFromNr(char* buffer, uint8_t nr)
+void CardReader::getFilenameFromNr(uint8_t nr, char* buffer, uint8_t maxlen)
 {
 	getfilename(nr);
 	if (*longFilename)
 	{
-		strncpy(buffer, longFilename, LONG_FILENAME_LENGTH-1);
+		strlcpy(buffer, longFilename, maxlen);
 	}
 	else
     {
-		strncpy(buffer, filename, LONG_FILENAME_LENGTH-1);
+		strlcpy(buffer, filename, maxlen);
 	}
 	if (!filenameIsDir())
 	{
-		if (strrchr(buffer, '.')) strrchr(buffer, '.')[0] = '\0';
+		if (char *p = strrchr(buffer, '.'))
+        {
+            *p = '\0';
+        }
 	}
 }
 

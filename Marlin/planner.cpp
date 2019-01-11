@@ -250,7 +250,7 @@ static void planner_reverse_pass_kernel(block_t *previous, block_t *current, blo
       // for max allowable speed if block is decelerating and nominal length is false.
       if ((!current->nominal_length_flag) && (current->max_entry_speed > next->entry_speed)) {
         current->entry_speed = min( current->max_entry_speed,
-        max_allowable_speed(-current->acceleration,next->entry_speed,current->millimeters));
+                                    max_allowable_speed(-current->acceleration,next->entry_speed,current->millimeters));
       }
       else {
         current->entry_speed = current->max_entry_speed;
@@ -273,9 +273,9 @@ static void planner_reverse_pass() {
 
   if(((block_buffer_head-tail + BLOCK_BUFFER_SIZE) & (BLOCK_BUFFER_SIZE - 1)) > 3) {
     block_index = (block_buffer_head - 3) & (BLOCK_BUFFER_SIZE - 1);
-    block_t *block[3] = {
-      NULL, NULL, NULL         };
-    while(block_index != tail) {
+    block_t *block[3] = { NULL, NULL, NULL };
+    while (block_index != tail)
+    {
       block_index = prev_block_index(block_index);
       block[2]= block[1];
       block[1]= block[0];

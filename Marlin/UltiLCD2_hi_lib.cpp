@@ -43,6 +43,30 @@ void eeprom_write_float(const float* addr, float f)
     eeprom_write_dword((uint32_t*)addr, n.i);
 }
 
+static void line_entry_pos_update (uint16_t maxStep)
+{
+	if (lineEntryPos > maxStep) lineEntryPos = 0;
+	//
+	lineEntryWait++;
+	if (lineEntryWait >= LINE_ENTRY_WAIT_END)
+	{
+		lineEntryWait = LINE_ENTRY_WAIT_END;
+		lineEntryPos += LINE_ENTRY_STEP;
+		if (lineEntryPos > maxStep)
+		{
+			lineEntryPos  = maxStep;
+			lineEntryWait = -lineEntryWait;
+		}
+	}
+	else if (lineEntryWait == 0 && lineEntryPos > 0)
+	{
+		lineEntryPos -= LINE_ENTRY_STEP;
+		lineEntryWait--;
+	}
+}
+
+FORCE_INLINE void line_entry_pos_reset () { lineEntryPos = lineEntryWait = 0; }
+
 void lcd_tripple_menu(const char* left, const char* right, const char* bottom)
 {
     if (lcd_lib_encoder_pos != ENCODER_NO_SELECTION)
@@ -111,13 +135,18 @@ void lcd_info_screen(menuFunc_t cancelMenu, menuFunc_t callbackOnCancel, const c
 
     lcd_basic_screen();
 
-    if (!cancelButtonText) cancelButtonText = PSTR("CANCEL");
+    if (!cancelButtonText)
+    {
+        cancelButtonText = PSTR("CANCEL");
+    }
     if (IS_SELECTED_MAIN(0))
     {
         lcd_lib_draw_box(3+2, BOTTOM_MENU_YPOS-1, 124-2, BOTTOM_MENU_YPOS+7);
         lcd_lib_set(3+3, BOTTOM_MENU_YPOS, 124-3, BOTTOM_MENU_YPOS+6);
         lcd_lib_clear_stringP(65 - strlen_P(cancelButtonText) * 3, BOTTOM_MENU_YPOS, cancelButtonText);
-    }else{
+    }
+    else
+    {
         lcd_lib_draw_stringP(65 - strlen_P(cancelButtonText) * 3, BOTTOM_MENU_YPOS, cancelButtonText);
     }
 }
@@ -191,37 +220,37 @@ void lcd_draw_scroll_entry(uint8_t offsetY, char * buffer, uint8_t flags)
 	uint8_t backup_pos = 0;
 	if (flags & MENU_SELECTED)
 	{
-		if ((ui_mode & UI_SCROLL_ENTRY) && (buffer_len > LINE_ENTRY_TEXT_LENGHT))
+		if ((ui_mode & UI_SCROLL_ENTRY) && (buffer_len > LINE_ENTRY_TEXT_LENGTH))
 		{
-			line_entry_pos_update(LINE_ENTRY_MAX_STEP(buffer_len - LINE_ENTRY_TEXT_LENGHT));
-			buffer    += LINE_ENTRY_TEXT_BEGIN();
-			backup_pos = LINE_ENTRY_TEXT_LENGHT+LINE_ENTRY_TEXT_OFFSET();
+			line_entry_pos_update(LINE_ENTRY_MAX_STEP(buffer_len - LINE_ENTRY_TEXT_LENGTH));
+			buffer    += LINE_ENTRY_TEXT_BEGIN;
+			backup_pos = LINE_ENTRY_TEXT_LENGTH+LINE_ENTRY_TEXT_OFFSET;
 			backup     = buffer[backup_pos];
 			buffer[backup_pos] = '\0';
 		}
 		//
 		lcd_lib_set(LCD_CHAR_MARGIN_LEFT-1, offsetY-1, LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT, offsetY+7);
-		lcd_lib_clear_string(LCD_CHAR_MARGIN_LEFT+LINE_ENTRY_GFX_BEGIN(), offsetY, buffer);
+		lcd_lib_clear_string(LCD_CHAR_MARGIN_LEFT+LINE_ENTRY_GFX_BEGIN, offsetY, buffer);
 		//
 		if (backup != '\0')
 			buffer[backup_pos] = backup;
 	}
 	else
     {
-		if ((ui_mode & UI_SCROLL_ENTRY) && (buffer_len > LINE_ENTRY_TEXT_LENGHT))
+		if ((ui_mode & UI_SCROLL_ENTRY) && (buffer_len > LINE_ENTRY_TEXT_LENGTH))
 		{
-			backup = buffer[LINE_ENTRY_TEXT_LENGHT];
-			buffer[LINE_ENTRY_TEXT_LENGHT] = '\0';
+			backup = buffer[LINE_ENTRY_TEXT_LENGTH];
+			buffer[LINE_ENTRY_TEXT_LENGTH] = '\0';
 		}
 		//
 		lcd_lib_draw_string(LCD_CHAR_MARGIN_LEFT, offsetY, buffer);
 		//
 		if (backup != '\0')
-			buffer[LINE_ENTRY_TEXT_LENGHT] = backup;
+			buffer[LINE_ENTRY_TEXT_LENGTH] = backup;
 	}
 }
 
-void lcd_scroll_menu(const char* menuNameP, int8_t entryCount, scrollDrawCallback_t entryDrawCallback, entryDetailsCallback_t entryDetailsCallback)
+void lcd_scroll_menu(const char* menuNameP, uint8_t entryCount, scrollDrawCallback_t entryDrawCallback, entryDetailsCallback_t entryDetailsCallback)
 {
     if (lcd_lib_button_pressed)
 		return;//Selection possibly changed the menu, so do not update it this cycle.
@@ -295,7 +324,7 @@ void lcd_menu_edit_setting()
 
     lcd_basic_screen();
     lcd_lib_draw_string_centerP(20, lcd_setting_name);
-    char buffer[20] = {0};
+    char buffer[LINE_ENTRY_TEXT_LENGTH] = {0};
     if (lcd_setting_type == 3)
         float_to_string2(float(lcd_lib_encoder_pos) / 100.0, buffer, lcd_setting_postfix);
     else

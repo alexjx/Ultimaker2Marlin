@@ -284,8 +284,9 @@ CXXINCS = ${addprefix -I ,${VPATH}}
 CDEBUG = -g$(DEBUG)
 CWARN = -Wall -Wstrict-prototypes
 CTUNING = -funsigned-char -funsigned-bitfields -fpack-struct \
-	-fshort-enums -w -ffunction-sections -fdata-sections \
+	-fshort-enums -w -ffunction-sections \
 	-fno-split-wide-types -fno-inline-small-functions \
+    -fno-data-sections -fmerge-constants \
 	-DARDUINO=$(ARDUINO_VERSION)
 ifneq ($(HARDWARE_MOTHERBOARD),)
 CTUNING += -DMOTHERBOARD=${HARDWARE_MOTHERBOARD}

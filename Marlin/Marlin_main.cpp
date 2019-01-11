@@ -44,6 +44,7 @@
 #include "language.h"
 #include "pins_arduino.h"
 #include "tinkergnome.h"
+#include "powerbudget.h"
 #include "machinesettings.h"
 #include "filament_sensor.h"
 #include "preferences.h"
@@ -176,7 +177,7 @@ int feedmultiply=100; //100->1 200->2
 int saved_feedmultiply;
 int extrudemultiply[EXTRUDERS]=ARRAY_BY_EXTRUDERS(100, 100, 100); //100->1 200->2
 float current_position[NUM_AXIS] = { 0.0, 0.0, 0.0, 0.0 };
-float add_homeing[3]={0,0,0};
+float add_homing[3]={0,0,0};
 float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
 float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
 // Extruder offset, only in XY plane
@@ -569,11 +570,9 @@ void setup()
   // loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
   Config_RetrieveSettings();
   PowerBudget_RetrieveSettings();
-
 #if (EXTRUDERS > 1)
   Dual_RetrieveSettings();
 #endif
-
   lifetime_stats_init();
   tp_init();    // Initialize temperature loop
   plan_init();  // Initialize planner;
@@ -983,15 +982,14 @@ static void axis_is_at_home(int axis)
         }
     }
 
-
 #if (EXTRUDERS > 1)
-    current_position[axis] = ((axis == Z_AXIS) && active_extruder) ? baseHomePos + add_homeing_z2 : baseHomePos + add_homeing[axis];
+    current_position[axis] = ((axis == Z_AXIS) && active_extruder) ? baseHomePos + add_homing_z2 : baseHomePos + add_homing[axis];
     if (axis <= Y_AXIS)
     {
         current_position[axis] += roundOffset(axis, extruder_offset[axis][active_extruder]);
     }
 #else
-    current_position[axis] = baseHomePos + add_homeing[axis];
+    current_position[axis] = baseHomePos + add_homing[axis];
     // min_pos[axis] =          base_min_pos(axis);// + add_homeing[axis];
     // max_pos[axis] =          base_max_pos(axis);// + add_homeing[axis];
 #endif
@@ -1326,10 +1324,14 @@ void process_command(const char *strCmd, bool sendAck)
       #endif //FWRETRACT
     case 28: //G28 Home all Axis one at a time
       if ((printing_state == PRINT_STATE_RECOVER) || (printing_state == PRINT_STATE_HOMING))
-        break;
+      {
+          break;
+      }
 
       if ((printing_state != PRINT_STATE_START) && (printing_state != PRINT_STATE_ABORT))
+      {
         printing_state = PRINT_STATE_HOMING;
+      }
 
       st_synchronize();
       saved_feedrate = feedrate;
@@ -1459,25 +1461,25 @@ void process_command(const char *strCmd, bool sendAck)
       }
       #endif
 
-      if(code_seen(strCmd, axis_codes[X_AXIS]))
-      {
-        if(code_value_long() != 0) {
-          current_position[X_AXIS]=code_value()+add_homeing[X_AXIS];
-        }
-      }
+          if(code_seen(strCmd, axis_codes[X_AXIS]))
+          {
+            if(code_value_long() != 0) {
+              current_position[X_AXIS]=code_value()+add_homing[X_AXIS];
+            }
+          }
 
-      if(code_seen(strCmd, axis_codes[Y_AXIS])) {
-        if(code_value_long() != 0) {
-          current_position[Y_AXIS]=code_value()+add_homeing[Y_AXIS];
-        }
-      }
+          if(code_seen(strCmd, axis_codes[Y_AXIS])) {
+            if(code_value_long() != 0) {
+              current_position[Y_AXIS]=code_value()+add_homing[Y_AXIS];
+            }
+          }
 
-      if(code_seen(strCmd, axis_codes[Z_AXIS])) {
-        if(code_value_long() != 0) {
-          current_position[Z_AXIS]=code_value()+add_homeing[Z_AXIS];
-        }
-      }
-      plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
+          if(code_seen(strCmd, axis_codes[Z_AXIS])) {
+            if(code_value_long() != 0) {
+              current_position[Z_AXIS]=code_value()+add_homing[Z_AXIS];
+            }
+          }
+          plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
 #endif // DELTA
 
       #ifdef ENDSTOPS_ONLY_FOR_HOMING
@@ -2242,9 +2244,12 @@ void process_command(const char *strCmd, bool sendAck)
     }
     break;
     case 206: // M206 additional homing offset
-      for(int8_t i=0; i < 3; i++)
+      for(uint8_t i=0; i < 3; ++i)
       {
-        if(code_seen(strCmd, axis_codes[i])) add_homeing[i] = code_value();
+        if(code_seen(strCmd, axis_codes[i]))
+        {
+          add_homing[i] = code_value();
+        }
       }
       break;
     #ifdef FWRETRACT
@@ -3297,7 +3302,7 @@ static void prepare_move(const char *cmd)
     calculate_delta(destination);
     if (card.sdprinting && (printing_state == PRINT_STATE_RECOVER) && (destination[Z_AXIS] >= recover_height-0.01f))
     {
-      recover_start_print();
+      recover_start_print(cmd);
     }
     else if (printing_state != PRINT_STATE_RECOVER)
     {
@@ -3692,14 +3697,14 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ)
         }
 
         // calculate z offset
-        float zoffset = active_extruder ? add_homeing[Z_AXIS]-add_homeing_z2 : add_homeing_z2-add_homeing[Z_AXIS];
+        float zoffset = active_extruder ? add_homing[Z_AXIS]-add_homing_z2 : add_homing_z2-add_homing[Z_AXIS];
 
         float wipeOffset;
 
         {
             #define MIN_TOOLCHANGE_ZHOP  3.4f
             #define MAX_TOOLCHANGE_ZHOP 14.0f
-            float maxDiffZ = max_pos[Z_AXIS] + add_homeing[Z_AXIS] - current_position[Z_AXIS];
+            float maxDiffZ = max_pos[Z_AXIS] + add_homing[Z_AXIS] - current_position[Z_AXIS];
             maxDiffZ = constrain(maxDiffZ, 0.0f, MAX_TOOLCHANGE_ZHOP);
 
             if (IS_WIPE_ENABLED)
@@ -3737,10 +3742,10 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ)
             }
             // execute toolchange script
             current_position[Z_AXIS] = destination[Z_AXIS];
-            
+
             // Zhop before XY test
             plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
-            
+
             if (nextExtruder)
             {
                 cmdBuffer.processT1(moveZ, IS_WIPE_ENABLED);
@@ -3816,7 +3821,7 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ)
 
             // Zhop before XY test
             // plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
-            
+
             // reset wipe offset
             current_position[Z_AXIS] += wipeOffset;
 

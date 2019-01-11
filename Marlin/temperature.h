@@ -96,6 +96,16 @@ FORCE_INLINE bool isHeatingBed() {
 FORCE_INLINE bool isCoolingBed() {
   return target_temperature_bed + target_temperature_bed_diff < current_temperature_bed;
 }
+
+FORCE_INLINE void setTargetBed(const uint16_t &celsius)
+{
+#ifdef BED_MAXTEMP
+  target_temperature_bed = constrainmax(celsius, BED_MAXTEMP - 15);
+#else
+  target_temperature_bed = celsius;
+#endif // BED_MAXTEMP
+}
+
 #endif // TEMP_SENSOR_BED
 
 FORCE_INLINE int degTargetHotend(uint8_t extruder) {
@@ -104,15 +114,6 @@ FORCE_INLINE int degTargetHotend(uint8_t extruder) {
 
 FORCE_INLINE void setTargetHotend(const uint16_t &celsius, uint8_t extruder) {
   target_temperature[extruder] = constrainmax(celsius, HEATER_0_MAXTEMP - 15);
-}
-
-FORCE_INLINE void setTargetBed(const uint16_t &celsius)
-{
-#ifdef BED_MAXTEMP
-  target_temperature_bed = constrainmax(celsius, BED_MAXTEMP - 15);
-#else
-  target_temperature_bed = celsius;
-#endif
 }
 
 FORCE_INLINE bool isHeatingHotend(uint8_t extruder){

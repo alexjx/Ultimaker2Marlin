@@ -144,10 +144,6 @@ static void lcd_preferences_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
         strcpy_P(buffer, PSTR("Screen contrast"));
     else if (nr == index++)
         strcpy_P(buffer, PSTR("Heater timeout"));
-//#if TEMP_SENSOR_BED != 0
-//    else if (nr == index++)
-//        strcpy_P(buffer, PSTR("Buildplate PID"));
-//#endif
     else if (nr == index++)
         strcpy_P(buffer, PSTR("Temperature control"));
     else if (nr == index++)
@@ -281,7 +277,7 @@ void start_move_material()
     set_extrude_min_temp(0);
     // reset e-position
     current_position[E_AXIS] = 0;
-    plan_set_e_position(0, menu_extruder, true);
+    plan_set_e_position(current_position[E_AXIS], menu_extruder, true);
     // heatup nozzle
     target_temperature[menu_extruder] = material[menu_extruder].temperature[0];
     target_temperature_diff[menu_extruder] = 0;
@@ -662,8 +658,8 @@ static void lcd_led_details(uint8_t nr)
 
 static void init_maintenance_led()
 {
-    lcd_cache[0] = led_mode;
-    lcd_cache[1] = led_brightness_level;
+    cache._byte[0] = led_mode;
+    cache._byte[1] = led_brightness_level;
 }
 
 static void lcd_menu_maintenance_led()
@@ -676,7 +672,7 @@ static void lcd_menu_maintenance_led()
         {
             if (led_mode != LED_MODE_ALWAYS_ON)
                 analogWrite(LED_PIN, 0);
-            if ((led_mode != lcd_cache[0]) || (led_brightness_level != lcd_cache[1]))
+            if ((led_mode != cache._byte[0]) || (led_brightness_level != cache._byte[1]))
                 Config_StoreSettings();
             menu.return_to_previous();
         }
@@ -712,7 +708,7 @@ static void lcd_menu_maintenance_led()
 
 static void lcd_uimode_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[20] = {' '};
+    char buffer[LINE_ENTRY_TEXT_LENGTH] = {' '};
 
     if (nr == 0)
     {
@@ -740,7 +736,7 @@ static void lcd_uimode_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 
 static void lcd_clicksound_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[20] = {' '};
+    char buffer[LINE_ENTRY_TEXT_LENGTH] = {' '};
     if (nr == 0)
     {
         lcd_cpyreturn(buffer);
@@ -777,10 +773,9 @@ static void lcd_clicksound_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
     lcd_draw_scroll_entry(offsetY, buffer, flags);
 }
 
-
 static void lcd_scrollentry_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
 {
-    char buffer[20] = {' '};
+    char buffer[LINE_ENTRY_TEXT_LENGTH] = {' '};
 
     if (nr == 0)
     {

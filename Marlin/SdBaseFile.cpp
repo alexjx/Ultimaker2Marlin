@@ -1151,7 +1151,7 @@ int8_t SdBaseFile::readDir(dir_t* dir, char* longFilename) {
 			longFilename[n+12] = VFAT->name3[2];
 			//If this VFAT entry is the last one, add a NUL terminator at the end of the string
 			if (VFAT->sequenceNumber & 0x40)
-				longFilename[n+13] = '\0';
+				longFilename[n + FILENAME_LENGTH] = '\0';
 		}
     }
     // return if normal file or subdirectory

@@ -26,7 +26,7 @@
 #define TOOLCHANGE_RETRACT_SPEED   18*60
 
 uint8_t dual_state = DUAL_ENABLED | DUAL_TOOLCHANGE | DUAL_WIPE;
-float add_homeing_z2 = 0.0f;
+float add_homing_z2 = 0.0f;
 float dock_position[2] = {0.0f, 0.0f};
 float wipe_position[2] = {0.0f, 0.0f};
 float toolchange_retractlen[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0.0f, 0.0f, 0.0f);
@@ -58,13 +58,13 @@ void Dual_RetrieveSettings()
     bool bValid = Dual_RetrieveVersion(version);
     if (!bValid)
     {
-        add_homeing_z2 = add_homeing[Z_AXIS];
+        add_homing_z2 = add_homing[Z_AXIS];
         Dual_StoreAddHomeingZ2();
         Dual_StoreExtruderOffset();
     }
     else
     {
-        add_homeing_z2 = eeprom_read_float((const float*)EEPROM_ADDHOMEING_Z2);
+        add_homing_z2 = eeprom_read_float((const float*)EEPROM_ADDHOMEING_Z2);
         eeprom_read_block(extruder_offset, (uint8_t*)EEPROM_EXTRUDER_OFFSET, sizeof(extruder_offset));
     }
     if (!bValid || version < 1)
@@ -141,7 +141,7 @@ void Dual_PrintSettings()
     SERIAL_EOL;
 
     SERIAL_ECHO_START;
-    SERIAL_ECHOPAIR("Home offset z2 (mm): ", add_homeing_z2);
+    SERIAL_ECHOPAIR("Home offset z2 (mm): ", add_homing_z2);
     SERIAL_EOL;
 
     SERIAL_ECHO_START;

@@ -5,6 +5,7 @@
 #include "UltiLCD2_menu_utils.h"
 #include "UltiLCD2_hi_lib.h"
 #include "UltiLCD2.h"
+#include "cardreader.h"
 
 #define LCD_TIMEOUT_TO_STATUS (MILLISECONDS_PER_SECOND*30UL)		// 30 Sec.
 
@@ -219,8 +220,7 @@ void LCDMenu::drawMenuString(uint8_t left, uint8_t top, uint8_t width, uint8_t h
 
     if (split)
     {
-        strncpy(buffer, str, split - str);
-        buffer[split - str] = '\0';
+        strlcpy(buffer, str, split - str);
         ++split;
 
         // calculate text position

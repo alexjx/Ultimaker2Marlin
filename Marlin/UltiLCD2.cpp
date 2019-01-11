@@ -16,17 +16,16 @@
 #include "preferences.h"
 #include "tinkergnome.h"
 
-// coefficient for the exponential moving average
-// K1 defined in Configuration.h in the PID settings
-#define K2 (1.0f-K1)
+// coefficients (smoothing factor) for the temperature display
+#define LCD_K1 0.95
+#define LCD_K2 (1.0f-LCD_K1)
 
-#define LCD_CHARS_PER_LINE 20
 
 uint8_t led_brightness_level = 100;
 uint8_t led_mode = LED_MODE_ALWAYS_ON;
 float dsp_temperature[EXTRUDERS] = { 20.0 };
 float dsp_temperature_bed = 20.0;
-char lcd_status_message[LCD_CHARS_PER_LINE+1] = {0};
+char lcd_status_message[LINE_ENTRY_TEXT_LENGTH+1] = {0};
 
 //#define SPECIAL_STARTUP
 #define MILLIS_GLOW  (1000L / 30L)
@@ -174,10 +173,10 @@ void lcd_update()
     // refresh the displayed temperatures
     for(uint8_t e=0; e<EXTRUDERS; ++e)
     {
-        dsp_temperature[e] = (K2 * current_temperature[e]) + (K1 * dsp_temperature[e]);
+        dsp_temperature[e] = (LCD_K2 * current_temperature[e]) + (LCD_K1 * dsp_temperature[e]);
     }
 #if TEMP_SENSOR_BED != 0
-    dsp_temperature_bed = (K2 * current_temperature_bed) + (K1 * dsp_temperature_bed);
+    dsp_temperature_bed = (LCD_K2 * current_temperature_bed) + (LCD_K1 * dsp_temperature_bed);
 #endif
 }
 
@@ -275,7 +274,7 @@ void lcd_setstatus(const char* message)
 {
     if (message)
     {
-        strncpy(lcd_status_message, message, LCD_CHARS_PER_LINE);
+        strlcpy(lcd_status_message, message, LINE_ENTRY_TEXT_LENGTH);
     }
     else
     {

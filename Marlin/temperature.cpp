@@ -38,6 +38,7 @@
 #include "preferences.h"
 #include "tinkergnome.h"
 #include "powerbudget.h"
+#include "cardreader.h"
 
 #define HEATER_TIMEOUT_1   (1000L * 30L)   //  30 seconds
 #define HEATER_TIMEOUT_2   (1000L * 90L)   //  90 seconds
@@ -145,7 +146,7 @@ static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 16383, 16383, 16383 );
 static void min_temp_error(uint8_t e);
 static void max_temp_error(uint8_t e);
 
-#ifdef BED_MAXTEMP
+#if (TEMP_SENSOR_BED != 0) && defined(BED_MAXTEMP)
 static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
 #endif
 
@@ -1092,7 +1093,7 @@ void tp_init()
   }
 #endif //MAXTEMP 2
 
-#ifdef BED_MINTEMP
+#if (TEMP_SENSOR_BED != 0) && defined(BED_MINTEMP)
   /* No bed MINTEMP error implemented?!? */ /*
   while(analog2tempBed(bed_minttemp_raw) < BED_MINTEMP) {
 #if HEATER_BED_RAW_LO_TEMP < HEATER_BED_RAW_HI_TEMP
@@ -1103,8 +1104,9 @@ void tp_init()
   }
   */
 #endif //BED_MINTEMP
-#ifdef BED_MAXTEMP
-  while(analog2tempBed(bed_maxttemp_raw) > BED_MAXTEMP) {
+#if (TEMP_SENSOR_BED != 0) && defined(BED_MAXTEMP)
+  while(analog2tempBed(bed_maxttemp_raw) > BED_MAXTEMP)
+  {
 #if HEATER_BED_RAW_LO_TEMP < HEATER_BED_RAW_HI_TEMP
     bed_maxttemp_raw -= OVERSAMPLENR;
 #else
@@ -1137,9 +1139,9 @@ void disable_heater()
     target_temperature_diff[e]=0;
     soft_pwm[e]=0;
   }
-   #if defined(HEATER_0_PIN) && HEATER_0_PIN > -1
-     WRITE(HEATER_0_PIN,LOW);
-   #endif
+  #if defined(HEATER_0_PIN) && HEATER_0_PIN > -1
+    WRITE(HEATER_0_PIN,LOW);
+  #endif
 
   #if defined(HEATER_1_PIN) && HEATER_1_PIN > -1
     WRITE(HEATER_1_PIN,LOW);
