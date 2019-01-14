@@ -274,6 +274,7 @@ void lcd_setstatus(const char* message)
     if (message)
     {
         strncpy(lcd_status_message, message, LCD_CHARS_PER_LINE);
+        lcd_status_message[LCD_CHARS_PER_LINE] = '\0';  // always terminate the string
     }
     else
     {
