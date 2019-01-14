@@ -275,6 +275,7 @@ void lcd_setstatus(const char* message)
     if (message)
     {
         strlcpy(lcd_status_message, message, LINE_ENTRY_TEXT_LENGTH);
+        lcd_status_message[LINE_ENTRY_TEXT_LENGTH] = '\0';
     }
     else
     {
