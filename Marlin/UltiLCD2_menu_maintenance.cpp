@@ -81,6 +81,10 @@ static void lcd_advanced_item(uint8_t nr, uint8_t offsetY, uint8_t flags)
         strcpy_P(buffer, PSTR("Adjust buildplate"));
     else if (nr == index++)
         strcpy_P(buffer, PSTR("Expert functions"));
+#ifdef CUSTOM_USER_MENUS
+    else if (nr == index++)
+        strcpy_P(buffer, PSTR("User functions"));
+#endif
     else
         strcpy_P(buffer, PSTR("???"));
 
@@ -91,7 +95,7 @@ static void lcd_advanced_details(uint8_t nr)
 {
     char buffer[32] = {0};
     buffer[0] = '\0';
-    if (!(ui_mode & UI_MODE_EXPERT) && (nr > 8+BED_MENU_OFFSET+2*EXTRUDERS))
+    if (!(ui_mode & UI_MODE_EXPERT) && (nr > 8 + BED_MENU_OFFSET + 2 * EXTRUDERS))
         ++nr;
 
 #if EXTRUDERS > 1
@@ -335,9 +339,114 @@ void lcd_dual_move_material()
 
 #endif // EXTRUDERS
 
+#ifdef CUSTOM_USER_MENUS
+static void lcd_user_function_items(uint8_t nr, uint8_t offsetY, uint8_t flags) {
+  char buffer[32] = { 0 };
+  uint8_t index = 0;
+  if (nr == index++) {
+    strcpy_P(buffer, PSTR("< RETURN"));
+  }
+#ifdef USER_DESC_1
+  else if (nr == index++) {
+    strcpy_P(buffer, PSTR(USER_DESC_1));
+  }
+#endif
+#ifdef USER_DESC_2
+  else if (nr == index++) {
+    strcpy_P(buffer, PSTR(USER_DESC_2));
+  }
+#endif
+#ifdef USER_DESC_3
+  else if (nr == index++) {
+    strcpy_P(buffer, PSTR(USER_DESC_3));
+  }
+#endif
+#ifdef USER_DESC_4
+  else if (nr == index++) {
+    strcpy_P(buffer, PSTR(USER_DESC_4));
+  }
+#endif
+#ifdef USER_DESC_5
+  else if (nr == index++) {
+    strcpy_P(buffer, PSTR(USER_DESC_5));
+  }
+#endif
+  else {
+    strcpy_P(buffer + 1, PSTR("???"));
+  }
+
+  lcd_draw_scroll_entry(offsetY, buffer, flags);
+}
+
+void lcd_menu_user_functions() {
+  int lcd_user_function_items_nr = 1
+#if defined USER_DESC_1 && defined USER_GCODE_1
+                                   + 1
+#endif
+#if defined USER_DESC_2 && defined USER_GCODE_2
+                                   + 1
+#endif
+#if defined USER_DESC_3 && defined USER_GCODE_3
+                                   + 1
+#endif
+#if defined USER_DESC_4 && defined USER_GCODE_4
+                                   + 1
+#endif
+#if defined USER_DESC_5 && defined USER_GCODE_5
+                                   + 1
+#endif
+    ;
+
+  lcd_scroll_menu(PSTR("User functions"), lcd_user_function_items_nr, lcd_user_function_items, NULL);
+  int index = 0;
+  if (lcd_lib_button_pressed) {
+    if (IS_SELECTED_SCROLL(index++)) {
+      menu.return_to_previous();
+    }
+#if defined USER_DESC_1 && defined USER_GCODE_1
+    else if (IS_SELECTED_SCROLL(index++)) {
+      enqueue_command_list_P(PSTR(USER_GCODE_1));
+      lcd_lib_keyclick();
+    }
+#endif
+#if defined USER_DESC_2 && defined USER_GCODE_2
+    else if (IS_SELECTED_SCROLL(index++)) {
+      enqueue_command_list_P(PSTR(USER_GCODE_2));
+      lcd_lib_keyclick();
+    }
+#endif
+#if defined USER_DESC_3 && defined USER_GCODE_3
+    else if (IS_SELECTED_SCROLL(index++)) {
+      enqueue_command_list_P(PSTR(USER_GCODE_3));
+      lcd_lib_keyclick();
+    }
+#endif
+#if defined USER_DESC_4 && defined USER_GCODE_4
+    else if (IS_SELECTED_SCROLL(index++)) {
+      enqueue_command_list_P(PSTR(USER_GCODE_4));
+      lcd_lib_keyclick();
+    }
+#endif
+#if defined USER_DESC_5 && defined USER_GCODE_5
+    else if (IS_SELECTED_SCROLL(index++)) {
+      enqueue_command_list_P(PSTR(USER_GCODE_5));
+      lcd_lib_keyclick();
+    }
+#endif
+  }
+  lcd_lib_update_screen();
+}
+#endif
+
 void lcd_menu_maintenance_advanced()
 {
-    lcd_scroll_menu(PSTR("ADVANCED"), BED_MENU_OFFSET + EXTRUDERS + ((ui_mode & UI_MODE_EXPERT) ? 10 : 9), lcd_advanced_item, lcd_advanced_details);
+    int menu_item_nr = BED_MENU_OFFSET + EXTRUDERS + ((ui_mode & UI_MODE_EXPERT) ? 10 : 9)
+#ifdef CUSTOM_USER_MENUS
+                       + 1
+#endif
+        ;
+
+    lcd_scroll_menu(PSTR("ADVANCED"), menu_item_nr, lcd_advanced_item, lcd_advanced_details);
     if (lcd_lib_button_pressed)
     {
         uint8_t index = 0;
@@ -412,7 +521,15 @@ void lcd_menu_maintenance_advanced()
             menu.add_menu(menu_t(lcd_menu_first_run_start_bed_leveling, SCROLL_MENU_ITEM_POS(0)));
         }
         else if (IS_SELECTED_SCROLL(index++))
+        {
             menu.add_menu(menu_t(lcd_menu_maintenance_expert, SCROLL_MENU_ITEM_POS(0)));
+        }
+#ifdef CUSTOM_USER_MENUS
+        else if (IS_SELECTED_SCROLL(index++))
+        {
+            menu.add_menu(menu_t(lcd_menu_user_functions, SCROLL_MENU_ITEM_POS(0)));
+        }
+#endif
     }
     lcd_lib_update_screen();
 }

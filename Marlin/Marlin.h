@@ -183,6 +183,7 @@ uint8_t StoppedReason();
 void clear_command_queue();
 void enquecommand(const char *cmd); //put an ascii command at the end of the current buffer.
 void enquecommand_P(const char *cmd); //put an ascii command at the end of the current buffer, read from flash
+void enqueue_command_list_P(const char *cmdlist); // enqueue an ascii command list
 uint8_t commands_queued();
 void cmd_synchronize();
 void clamp_to_software_endstops(float target[3]);

@@ -16,6 +16,7 @@ Following are the changes so far:
 * Ported the retraction after insert material from the original firmware.
 * Tick stats for extruder temperature also. (for tracking PTFE tube life)
 * Aggressive PID value
+* Port User Function from Marlin for preheat chamber etc...
 
 # Readme from TinkerGonome Fork
 * Download the latest version from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>

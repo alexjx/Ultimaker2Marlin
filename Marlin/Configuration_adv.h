@@ -272,7 +272,7 @@
 #define MM_PER_ARC_SEGMENT 1
 #define N_ARC_CORRECTION 25
 
-const int8_t dropsegments=5; //everything with less than this number of steps will be ignored as move and joined with the next movement
+const int8_t dropsegments = 5; //everything with less than this number of steps will be ignored as move and joined with the next movement
 
 // If you are using a RAMPS board or cheap E-bay purchased boards that do not detect when an SD card is inserted
 // You can get round this by connecting a push button or single throw switch to the pin defined as SDCARDCARDDETECT
@@ -298,6 +298,31 @@ const int8_t dropsegments=5; //everything with less than this number of steps wi
 #if (POWER_SUPPLY == 2)
   #define PS_ON_AWAKE  HIGH
   #define PS_ON_ASLEEP LOW
+#endif
+
+#define CUSTOM_USER_MENUS
+#if defined CUSTOM_USER_MENUS
+
+#define USER_DESC_1 "Preheat Chamber"
+#define USER_GCODE_1 \
+    "G28 Z0\n" \
+    "G28 X0 Y0\n" \
+    "G1 X120 Y120 F9000\n" \
+    "G1 Z5\n" \
+    "M106 255\n" \
+    "M140 S130\n"
+
+//   #define USER_DESC_2 "Preheat for PLA"
+//   #define USER_GCODE_2 "M140 S" STRINGIFY(PREHEAT_1_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_1_TEMP_HOTEND)
+
+//   #define USER_DESC_3 "Preheat for ABS"
+//   #define USER_GCODE_3 "M140 S" STRINGIFY(PREHEAT_2_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_2_TEMP_HOTEND)
+
+//   #define USER_DESC_4 "Heat Bed/Home/Level"
+//   #define USER_GCODE_4 "M140 S" STRINGIFY(PREHEAT_2_TEMP_BED) "\nG28\nG29"
+
+//   #define USER_DESC_5 "Home & Info"
+//   #define USER_GCODE_5 "G28\nM503"
 #endif
 
 //===========================================================================

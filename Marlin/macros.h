@@ -24,4 +24,6 @@
 
 #define COUNT(a) (sizeof(a)/sizeof(*a))
 
+#define STRINGIFY(exp) #exp
+
 #endif //__MACROS_H
