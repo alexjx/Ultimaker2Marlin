@@ -449,10 +449,22 @@ void enquecommand_P(const char *cmd)
     finishenque();
 }
 
-uint8_t commands_queued()
-{
-    return buflen;
+void enqueue_command_list_P(const char *pstr) {
+  char cmd[32];
+  char next_char;
+  do {
+    strncpy_P(cmd, pstr, 32);
+    int length = 0;
+    while ((next_char = cmd[length]) != '\n' && next_char) {
+      length++;
+    };
+    cmd[length] = '\0';
+    enquecommand(cmd);
+    pstr = next_char ? pstr + length + 1 : NULL;
+  } while (pstr != NULL);
 }
+
+uint8_t commands_queued() { return buflen; }
 
 void cmd_synchronize()
 {

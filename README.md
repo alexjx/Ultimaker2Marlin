@@ -1,5 +1,26 @@
+# Jia's Fork of TinkerGnome Firmware
+
+This is my modification of the TinkerGnome's firmware for my Ultimaker 2+ Extended clone.
+Following are the changes so far:
+
+* Made configuration changes for DWMaker Extended
+  * Change Z range to 305
+  * Change max temperature to 290
+  * Change max bed temperature to 130
+  * Lower max acc to ~~1700.0~~ 1500.0
+  * Lower max jerk to 10.0
+  * Lower bang-bang check interval to 4s
+  * Limited Y axis to 222 for metal slider block.
+  * Adjust all material diameter to 1.75.
+* ~~Remove raising platform when first run. It's kind scaring since I'd expect the head move before platform.~~ (it makes sense now...)
+* Ported the retraction after insert material from the original firmware.
+* Tick stats for extruder temperature also. (for tracking PTFE tube life)
+* Aggressive PID value
+* Port User Function from Marlin for preheat chamber etc...
+
+# Readme from TinkerGonome Fork
 * Download the latest version from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>
-* Description <a href="http://umforum.ultimaker.com/index.php?/topic/10474-tinker-firmware/">en français</a>
+* Description <a href="http://umforum.ultimaker.com/index.php?/topic/10474-tinker-firmware/">en franï¿½ais</a>
 
 
 ### Changelist for this fork:
@@ -20,9 +41,9 @@ Marlin 3D Printer Firmware
 
 Quick Information
 -----------------
-The <a href="https://github.com/">Open Source Marlin project</a> is a firmware for 3D printers based on the RepRap 3D printer hardware and is 
+The <a href="https://github.com/">Open Source Marlin project</a> is a firmware for 3D printers based on the RepRap 3D printer hardware and is
 used in 3D printers from many brands. The variant presented here is a fork for use in the Ultimaker printers.
- 
+
 The Marlin software was derived from the <a href="https://github.com/kliment/Sprinter">Sprinter</a> and <a href="https://github.com/simen/grbl/tree">grbl</a> projects by Erik van der Zalm.
 Many features have been added by community members like: bkubicek, Lampmaker, Bradley Feldman, and others...
 
@@ -123,7 +144,7 @@ Implemented G Codes
 *  M502 - reverts to the default "factory settings".  You still need to store them in EEPROM afterwards if you want to.
 *  M503 - print the current settings (from memory not from eeprom)
 *  M540 - Use S[0|1] to enable or disable the stop SD card print on endstop hit (not active in the Ultimaker printers, requires compiling with ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED)
-*  M600 - Pause for filament change X[pos] Y[pos] Z[relative lift] E[initial retract] L[later retract distance for removal]. Experimental feature. Requires compilation with FILAMENTCHANGEENABLE to enable. 
+*  M600 - Pause for filament change X[pos] Y[pos] Z[relative lift] E[initial retract] L[later retract distance for removal]. Experimental feature. Requires compilation with FILAMENTCHANGEENABLE to enable.
 *  M907 - Set digital trimpot motor current using axis codes.
 *  M908 - Control digital trimpot directly.
 *  M923 - Select file and start printing. (M923 filename.g)
