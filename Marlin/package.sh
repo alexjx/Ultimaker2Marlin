@@ -47,8 +47,8 @@ elif [ -d "D:/Arduino" ]; then
 	ARDUINO_PATH=D:/Arduino
 	ARDUINO_VERSION=165
 else
-	ARDUINO_PATH=/usr/share/arduino
-	ARDUINO_VERSION=105
+	ARDUINO_PATH=/opt/arduino-1.8.8
+	ARDUINO_VERSION=188
 fi
 
 
@@ -58,6 +58,8 @@ fi
 
 # read optional tool change scripts from sd card
 #define TCSDSCRIPT
+
+mkdir -p resources/firmware
 
 # -----------------------
 # UM2+

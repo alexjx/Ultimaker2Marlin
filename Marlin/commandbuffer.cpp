@@ -178,7 +178,7 @@ void CommandBuffer::processT0(bool bRetract, bool bWipe)
     {
         processScript(t0);
         if (bRetract)
-        {9
+        {
             toolchange_retract(current_position[X_AXIS], current_position[Y_AXIS], toolchange_retractfeedrate[1]/60, 1);
         }
     }
