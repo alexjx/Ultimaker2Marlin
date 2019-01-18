@@ -309,6 +309,7 @@ void start_move_material()
     plan_set_e_position(current_position[E_AXIS], active_extruder, true);
     // heatup nozzle
     target_temperature[active_extruder] = material[active_extruder].temperature[0];
+    target_temperature_reason[active_extruder] = 10;
 
     if (ui_mode & UI_MODE_EXPERT)
     {
@@ -538,9 +539,12 @@ static void lcd_menu_maintenance_advanced_heatup()
 {
     if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
     {
-        target_temperature[active_extruder] = constrain(int(target_temperature[active_extruder]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM)
-                                                      , 0, get_maxtemp(active_extruder) - 15);
-        lcd_lib_encoder_pos = 0;
+      target_temperature[active_extruder] = constrain(
+        int(target_temperature[active_extruder]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM),
+        0,
+        get_maxtemp(active_extruder) - 15);
+      target_temperature_reason[active_extruder] = 11;
+      lcd_lib_encoder_pos = 0;
     }
     if (lcd_lib_button_pressed)
         lcd_change_to_previous_menu();
@@ -576,6 +580,7 @@ static void lcd_menu_maintenance_extrude()
     {
         set_extrude_min_temp(EXTRUDE_MINTEMP);
         target_temperature[active_extruder] = 0;
+        target_temperature_reason[active_extruder] = 12;
         menu.return_to_previous();
     }
     // reset heater timeout until target temperature is reached

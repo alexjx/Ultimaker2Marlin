@@ -1253,6 +1253,7 @@ void lcd_menu_print_heatup_tg()
                 continue;
 #endif
             target_temperature[e] = material[e].temperature[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
+            target_temperature_reason[e] = 6;
         }
 
 #if TEMP_SENSOR_BED != 0
@@ -2756,26 +2757,26 @@ static void lcd_extrude_return()
     if (!card.sdprinting())
     {
         target_temperature[active_extruder] = 0;
+        target_temperature_reason[active_extruder] = 7;
     }
 }
 
-static void lcd_extrude_toggle_heater()
-{
-    // second target temperature
-    uint16_t temp2(material[active_extruder].temperature[0]*9/20);
-    temp2 -= temp2 % 10;
-    if (!target_temperature[active_extruder])
-    {
-        target_temperature[active_extruder] = temp2;
-    }
-    else if (target_temperature[active_extruder] > temp2)
-    {
-        target_temperature[active_extruder] = 0;
-    }
-    else
-    {
-        target_temperature[active_extruder] = material[active_extruder].temperature[0];
-    }
+static void lcd_extrude_toggle_heater() {
+  // second target temperature
+  uint16_t temp2(material[active_extruder].temperature[0] * 9 / 20);
+  temp2 -= temp2 % 10;
+  if (!target_temperature[active_extruder]) {
+    target_temperature[active_extruder] = temp2;
+    target_temperature_reason[active_extruder] = 8;
+  }
+  else if (target_temperature[active_extruder] > temp2) {
+    target_temperature[active_extruder] = 0;
+    target_temperature_reason[active_extruder] = 8;
+  }
+  else {
+    target_temperature[active_extruder] = material[active_extruder].temperature[0];
+    target_temperature_reason[active_extruder] = 8;
+  }
 }
 
 static void lcd_extrude_temperature()

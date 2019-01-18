@@ -84,6 +84,7 @@ bool MachineSettings::recall(uint8_t index)
     for (int i=0; i<EXTRUDERS; i++)
     {
       target_temperature[i] = settings[index]->HotendTemperature[i];
+      target_temperature_reason[i] = 1;
       extrudemultiply[i] = settings[index]->extrudemultiply[i];
     }
     for (int i=0; i<NUM_AXIS; i++)

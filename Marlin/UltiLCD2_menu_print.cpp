@@ -593,6 +593,7 @@ void lcd_menu_print_select()
 #endif
 
                             target_temperature[e] = 0;//material[e].temperature;
+                            target_temperature_reason[e] = 13;
 #if TEMP_SENSOR_BED != 0
                             target_temperature_bed = max(target_temperature_bed, material[e].bed_temperature);
 #endif
@@ -674,6 +675,7 @@ void lcd_menu_print_heatup()
                 continue;
 #endif
             target_temperature[e] = material[e].temperature[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
+            target_temperature_reason[e] = 14;
             // printing_state = PRINT_STATE_START;
         }
 
@@ -1099,9 +1101,10 @@ void lcd_menu_print_tune_heatup_nozzle0()
 {
     if (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM != 0)
     {
-        target_temperature[0] = constrain(int(target_temperature[0]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM)
-                                         , 0, get_maxtemp(0) - 15);
-        lcd_lib_encoder_pos = 0;
+      target_temperature[0] = constrain(
+        int(target_temperature[0]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM), 0, get_maxtemp(0) - 15);
+      target_temperature_reason[0] = 15;
+      lcd_lib_encoder_pos = 0;
     }
     if (lcd_lib_button_pressed)
         menu.return_to_previous();
@@ -1127,6 +1130,7 @@ void lcd_menu_print_tune_heatup_nozzle1()
     {
         target_temperature[1] = constrain(int(target_temperature[1]) + (lcd_lib_encoder_pos / ENCODER_TICKS_PER_SCROLL_MENU_ITEM)
                                          , 0, get_maxtemp(1) - 15);
+        target_temperature_reason[1] = 16;
         lcd_lib_encoder_pos = 0;
     }
     if (lcd_lib_button_pressed)

@@ -596,6 +596,7 @@ static void lcd_main_preheat()
             if ((PREHEAT_FLAG(e)) & (target_temperature[e] < 1))
             {
                 target_temperature[e] = (material[e].temperature[0] / 5 * 4);
+                target_temperature_reason[e] = 9;
                 target_temperature[e] -= target_temperature[e] % 10;
             }
         }

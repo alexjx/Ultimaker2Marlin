@@ -2940,6 +2940,15 @@ void process_command(const char *strCmd, bool sendAck)
             SERIAL_ECHOPAIR("Current Z", current_position[Z_AXIS]);
             SERIAL_EOL;
         }
+      case 10101:  // M10101 - Print temperature set reason
+      {
+        SERIAL_ECHO_START;
+        for (int i = 0; i < EXTRUDERS; i++) {
+          char buffer[32] = {0};
+          snprintf(buffer, 31, "Extruder %d: %d", i, target_temperature_reason[i]);
+          SERIAL_ECHOLN(buffer);
+        }
+      }
     }
   }
 

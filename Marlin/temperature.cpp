@@ -43,6 +43,7 @@
 //=============================public variables============================
 //===========================================================================
 uint16_t target_temperature[EXTRUDERS] = { 0 };
+uint8_t target_temperature_reason[EXTRUDERS] = { 0 };
 int current_temperature_raw[EXTRUDERS] = { 0 };
 float current_temperature[EXTRUDERS] = { 0.0 };
 #if TEMP_SENSOR_BED != 0
@@ -1071,6 +1072,7 @@ void disable_all_heaters()
   #endif
   #if defined(TEMP_0_PIN) && TEMP_0_PIN > -1
   target_temperature[0]=0;
+  target_temperature_reason[0]= 2;
   soft_pwm[0]=0;
    #if defined(HEATER_0_PIN) && HEATER_0_PIN > -1
      WRITE(HEATER_0_PIN,LOW);
@@ -1079,6 +1081,7 @@ void disable_all_heaters()
 
   #if defined(TEMP_1_PIN) && TEMP_1_PIN > -1 && EXTRUDERS > 1
     target_temperature[1]=0;
+      target_temperature_reason[1]= 2;
     soft_pwm[1]=0;
     #if defined(HEATER_1_PIN) && HEATER_1_PIN > -1
       WRITE(HEATER_1_PIN,LOW);
@@ -1087,6 +1090,7 @@ void disable_all_heaters()
 
   #if defined(TEMP_2_PIN) && TEMP_2_PIN > -1 && EXTRUDERS > 2
     target_temperature[2]=0;
+      target_temperature_reason[2]= 2;
     soft_pwm[2]=0;
     #if defined(HEATER_2_PIN) && HEATER_2_PIN > -1
       WRITE(HEATER_2_PIN,LOW);
@@ -1569,13 +1573,18 @@ int get_maxtemp(uint8_t e)
 
 void setTargetHotend(const uint16_t &celsius, uint8_t extruder) {
   target_temperature[extruder] = celsius;
-  if (target_temperature[extruder] >= HEATER_0_MAXTEMP - 15)
+  target_temperature_reason[extruder] = 3;
+
+  if (target_temperature[extruder] >= HEATER_0_MAXTEMP - 15) {
     target_temperature[extruder] = HEATER_0_MAXTEMP - 15;
+    target_temperature_reason[extruder] = 4;
+  }
 }
 
 void cooldownHotend(uint8_t extruder)
 {
     target_temperature[extruder] = 0;
+    target_temperature_reason[extruder] = 5;
 }
 
 #if (TEMP_SENSOR_BED != 0) && defined(BED_MAXTEMP)
