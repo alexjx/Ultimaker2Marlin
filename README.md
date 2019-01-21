@@ -17,6 +17,7 @@ Following are the changes so far:
 * Tick stats for extruder temperature also. (for tracking PTFE tube life)
 * Aggressive PID value
 * Port User Function from Marlin for preheat chamber etc...
+* Add 2 degree hysteresis to the fan on/off logic.
 
 # Readme from TinkerGonome Fork
 * Download the latest version from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>

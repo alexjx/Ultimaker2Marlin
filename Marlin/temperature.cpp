@@ -705,63 +705,67 @@ void manage_heater()
         WRITE(HOTEND_FAN2_PIN, 0);
     }
   #endif
-  {
-    //For the UM2 the head fan is connected to PJ6, which does not have an Arduino PIN definition. So use direct register access.
-    DDRJ |= _BV(6);
-    if (current_temperature[0] > EXTRUDER_AUTO_FAN_TEMPERATURE
+    {
+      //For the UM2 the head fan is connected to PJ6, which does not have an Arduino PIN definition. So use direct register access.
+      DDRJ |= _BV(6);
+      if (current_temperature[0] > EXTRUDER_AUTO_FAN_TEMPERATURE
 #if (EXTRUDERS > 1) && (!defined(HOTEND_FAN2_PIN) || (HOTEND_FAN2_PIN < 0))
-        || current_temperature[1] > EXTRUDER_AUTO_FAN_TEMPERATURE
+          || current_temperature[1] > EXTRUDER_AUTO_FAN_TEMPERATURE
 #endif
 #if (EXTRUDERS > 2) && (!defined(HOTEND_FAN2_PIN) || (HOTEND_FAN2_PIN < 0))
-        || current_temperature[2] > EXTRUDER_AUTO_FAN_TEMPERATURE
+          || current_temperature[2] > EXTRUDER_AUTO_FAN_TEMPERATURE
 #endif
-        )
-    {
+      ) {
         PORTJ |= _BV(6);
-    }else{
-        PORTJ &=~_BV(6);
+      }
+      else if (current_temperature[0] < EXTRUDER_AUTO_FAN_TEMPERATURE - TEMP_HYSTERESIS
+#if (EXTRUDERS > 1) && (!defined(HOTEND_FAN2_PIN) || (HOTEND_FAN2_PIN < 0))
+               || current_temperature[1] < EXTRUDER_AUTO_FAN_TEMPERATURE - TEMP_HYSTERESIS
+#endif
+#if (EXTRUDERS > 2) && (!defined(HOTEND_FAN2_PIN) || (HOTEND_FAN2_PIN < 0))
+               || current_temperature[2] < EXTRUDER_AUTO_FAN_TEMPERATURE - TEMP_HYSTERESIS
+#endif
+      ) {
+        PORTJ &= ~_BV(6);
+      }
     }
-  }
 
-  #if TEMP_SENSOR_BED != 0
+#if TEMP_SENSOR_BED != 0
 
-  if (!pidTempBed())
-  {
-    if(millis() - previous_millis_bed_heater < BED_CHECK_INTERVAL)
-      return;
-    previous_millis_bed_heater = millis();
-  }
+    if (!pidTempBed()) {
+      if (millis() - previous_millis_bed_heater < BED_CHECK_INTERVAL)
+        return;
+      previous_millis_bed_heater = millis();
+    }
 
-  #ifdef PIDTEMPBED
-  if (pidTempBed())
-  {
-    pid_input = current_temperature_bed;
+#ifdef PIDTEMPBED
+    if (pidTempBed()) {
+      pid_input = current_temperature_bed;
 
-    #ifndef PID_OPENLOOP
-		  pid_error_bed = int(degTargetBed()) - pid_input;
-		  pTerm_bed = bedKp * pid_error_bed;
-		  temp_iState_bed += pid_error_bed;
-		  temp_iState_bed = constrain(temp_iState_bed, temp_iState_min_bed, temp_iState_max_bed);
-		  iTerm_bed = bedKi * temp_iState_bed;
+#ifndef PID_OPENLOOP
+      pid_error_bed = int(degTargetBed()) - pid_input;
+      pTerm_bed = bedKp * pid_error_bed;
+      temp_iState_bed += pid_error_bed;
+      temp_iState_bed = constrain(temp_iState_bed, temp_iState_min_bed, temp_iState_max_bed);
+      iTerm_bed = bedKi * temp_iState_bed;
 
-		  //K1 defined in Configuration.h in the PID settings
-		  #define K2 (1.0-K1)
-		  dTerm_bed= (bedKd * (pid_input - temp_dState_bed))*K2 + (K1 * dTerm_bed);
-		  temp_dState_bed = pid_input;
+//K1 defined in Configuration.h in the PID settings
+#define K2 (1.0 - K1)
+    dTerm_bed = (bedKd * (pid_input - temp_dState_bed)) * K2 + (K1 * dTerm_bed);
+    temp_dState_bed = pid_input;
 
-		  pid_output = constrain(pTerm_bed + iTerm_bed - dTerm_bed, 0, MAX_BED_POWER);
+    pid_output = constrain(pTerm_bed + iTerm_bed - dTerm_bed, 0, MAX_BED_POWER);
 
-    #else
+#else
       pid_output = constrain(int(degTargetBed()), 0, MAX_BED_POWER);
-    #endif //PID_OPENLOOP
+#endif  //PID_OPENLOOP
 
-	  if((current_temperature_bed > BED_MINTEMP) && (current_temperature_bed < BED_MAXTEMP))
-	  {
-	    soft_pwm_bed = limit_power(power_buildplate, (int)pid_output >> 1, budget);
-	  }
-	  else {
-	    soft_pwm_bed = 0;
-	  }
+    if ((current_temperature_bed > BED_MINTEMP) && (current_temperature_bed < BED_MAXTEMP)) {
+      soft_pwm_bed = limit_power(power_buildplate, (int)pid_output >> 1, budget);
+    }
+    else {
+      soft_pwm_bed = 0;
+    }
   }
   else // printbed bang-bang mode
   #endif//!PIDTEMPBED
