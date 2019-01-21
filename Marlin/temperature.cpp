@@ -662,16 +662,25 @@ void manage_heater()
         // For the UM2 the head fan is connected to PJ6, which does not have an
         // Arduino PIN definition. So use direct register access.
         DDRJ |= _BV(6);
-        if (current_temperature[0] > EXTRUDER_AUTO_FAN_TEMPERATURE
+    if (current_temperature[0] > EXTRUDER_AUTO_FAN_ON_TEMPERATURE
 #if EXTRUDERS > 1
-            || current_temperature[1] > EXTRUDER_AUTO_FAN_TEMPERATURE
+        || current_temperature[1] > EXTRUDER_AUTO_FAN_ON_TEMPERATURE
 #endif
 #if EXTRUDERS > 2
-            || current_temperature[2] > EXTRUDER_AUTO_FAN_TEMPERATURE
+        || current_temperature[2] > EXTRUDER_AUTO_FAN_ON_TEMPERATURE
 #endif
         ) {
             PORTJ |= _BV(6);
-        } else {
+    }
+    // add some hysteresis to the fan off
+    else if (current_temperature[0] < EXTRUDER_AUTO_FAN_OFF_TEMPERATURE
+#if EXTRUDERS > 1
+             && current_temperature[1] < EXTRUDER_AUTO_FAN_OFF_TEMPERATURE
+#endif
+#if EXTRUDERS > 2
+             && current_temperature[2] < EXTRUDER_AUTO_FAN_OFF_TEMPERATURE
+#endif
+    ) {
             PORTJ &= ~_BV(6);
         }
     }
