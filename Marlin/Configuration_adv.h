@@ -313,6 +313,21 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
     "M106 255\n" \
     "M140 S130\n"
 
+#define USER_DESC_2 "Cancel Preheat Chamber"
+#define USER_GCODE_2     \
+  "G28 Z0\n"             \
+  "G28 X0 Y0\n"          \
+  "M106 0\n"           \
+  "M140 S0\n"
+
+#define USER_DESC_3 "Raise Platform for Calibration"
+#define USER_GCODE_3   \
+  "G28 Z0\n"           \
+  "G28 X0 Y0\n"        \
+  "G1 X30 Y30 F9000\n" \
+  "M84 X Y E\n"        \
+  "G1 Z0.1"
+
 //   #define USER_DESC_2 "Preheat for PLA"
 //   #define USER_GCODE_2 "M140 S" STRINGIFY(PREHEAT_1_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_1_TEMP_HOTEND)
 
