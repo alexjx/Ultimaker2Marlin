@@ -136,7 +136,14 @@ void lcd_menu_change_material_preheat() {
 
   // check target temp and waiting time
   if (temp > target - 5 && temp < target + 5) {
-    quickStop();
+    // use quickStop() here is wrong, since there is a G28 queued for homing.
+    // but we didn't sync with it. If we call quickStop() here, G28 will trigger
+    // endstop error, and we could not blindly call st_synchronize(), since will
+    // recursively call into lcd_update() again.
+    while(blocks_queued()) {
+      idle(false);
+    }
+
     set_extrude_min_temp(0);
     current_position[E_AXIS] = 0.0f;
     plan_set_e_position(current_position[E_AXIS], active_extruder, true);
@@ -159,11 +166,20 @@ void lcd_menu_change_material_preheat() {
     max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 
     current_position[E_AXIS] -= 1.0 / volume_to_filament_length[active_extruder];
-    plan_buffer_line(
-      current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], active_extruder);
+    plan_buffer_line(current_position[X_AXIS],
+                     current_position[Y_AXIS],
+                     current_position[Z_AXIS],
+                     current_position[E_AXIS],
+                     max_feedrate[E_AXIS],
+                     active_extruder);
+
     current_position[E_AXIS] -= FILAMENT_REVERSAL_LENGTH / volume_to_filament_length[active_extruder];
-    plan_buffer_line(
-      current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], active_extruder);
+    plan_buffer_line(current_position[X_AXIS],
+                     current_position[Y_AXIS],
+                     current_position[Z_AXIS],
+                     current_position[E_AXIS],
+                     max_feedrate[E_AXIS],
+                     active_extruder);
 
     max_feedrate[E_AXIS] = old_max_feedrate_e;
     retract_acceleration = old_retract_acceleration;

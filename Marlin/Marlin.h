@@ -99,7 +99,7 @@ FORCE_INLINE void serialprintPGM(const char *str)
 void process_command(const char *strCmd, bool sendAck);
 void process_command_P(const char *strCmd);
 
-void idle(); // the standard idle routine calls manage_inactivity()
+void idle(bool update_lcd=true);  // the standard idle routine calls manage_inactivity()
 
 #if defined(X_ENABLE_PIN) && X_ENABLE_PIN > -1
   #define  enable_x() WRITE(X_ENABLE_PIN, X_ENABLE_ON)

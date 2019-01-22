@@ -3099,13 +3099,15 @@ void controllerFan() {
 /**
  * Standard idle routine keeps the machine alive
  */
-void idle() {
+void idle(bool update_lcd) {
   static unsigned long lastSerialCommandTime = 0;
 
   manage_heater();
   manage_inactivity();
 
-  lcd_update();
+  if (update_lcd)
+    lcd_update();
+
   lifetime_stats_tick();
 
   // detect serial communication
