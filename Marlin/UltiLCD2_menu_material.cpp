@@ -187,37 +187,41 @@ void lcd_menu_change_material_preheat()
     // check target temp
     if (temp > target - 5 && temp < target + 5)
     {
-        quickStop();
-        set_extrude_min_temp(0);
-        current_position[E_AXIS] = 0.0f;
-        plan_set_e_position(current_position[E_AXIS], menu_extruder, true);
+      // use quickStop() here is wrong, since there is a G28 queued for homing.
+      // but we didn't sync with it. If we call quickStop() here, G28 will trigger
+      // endstop error, and we could not blindly call st_synchronize(), since will
+      // recursively call into lcd_update() again.
+      while (blocks_queued()) {
+        idle(false);
+      }
 
-        // Do a forward push before pulling back the material, reducing blobs at
-        // the end of the filament.
-        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],
-                         current_position[Z_AXIS],
-                         20.0 / volume_to_filament_length[active_extruder],
-                         retract_feedrate / 60.0, active_extruder);
+      set_extrude_min_temp(0);
+      current_position[E_AXIS] = 0.0f;
+      plan_set_e_position(current_position[E_AXIS], menu_extruder, true);
 
-        float old_max_feedrate_e = max_feedrate[E_AXIS];
-        float old_retract_acceleration = retract_acceleration;
-        float old_max_e_jerk = max_e_jerk;
+      // Do a forward push before pulling back the material, reducing blobs at
+      // the end of the filament.
+      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 20.0 / volume_to_filament_length[active_extruder], retract_feedrate / 60.0, active_extruder);
 
-        max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
-        retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(menu_extruder);
-        max_e_jerk = FILAMENT_LONG_MOVE_JERK;
+      float old_max_feedrate_e = max_feedrate[E_AXIS];
+      float old_retract_acceleration = retract_acceleration;
+      float old_max_e_jerk = max_e_jerk;
 
-        current_position[E_AXIS] -= 1.0 / volume_to_filament_length[menu_extruder];
-        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
-        current_position[E_AXIS] -= FILAMENT_REVERSAL_LENGTH / volume_to_filament_length[menu_extruder];
-        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
+      max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
+      retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(menu_extruder);
+      max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 
-        max_feedrate[E_AXIS] = old_max_feedrate_e;
-        retract_acceleration = old_retract_acceleration;
-        max_e_jerk = old_max_e_jerk;
+      current_position[E_AXIS] -= 1.0 / volume_to_filament_length[menu_extruder];
+      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
+      current_position[E_AXIS] -= FILAMENT_REVERSAL_LENGTH / volume_to_filament_length[menu_extruder];
+      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
 
-        menu.replace_menu(menu_t(lcd_menu_change_material_remove), false);
-        return;
+      max_feedrate[E_AXIS] = old_max_feedrate_e;
+      retract_acceleration = old_retract_acceleration;
+      max_e_jerk = old_max_e_jerk;
+
+      menu.replace_menu(menu_t(lcd_menu_change_material_remove), false);
+      return;
     }
     lcd_lib_update_screen();
 }

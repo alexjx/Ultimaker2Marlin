@@ -100,7 +100,7 @@ FORCE_INLINE void serialprintPGM(const char *str)
 void process_command(const char *strCmd, bool sendAck);
 void process_command_P(const char *strCmd);
 
-void idle(); // the standard idle routine calls manage_inactivity()
+void idle(bool update_lcd=true);  // the standard idle routine calls manage_inactivity()
 
 extern uint8_t position_state;
 #define KNOWNPOS_X 1

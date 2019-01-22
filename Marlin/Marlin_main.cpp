@@ -3419,30 +3419,28 @@ void controllerFan()
 /**
  * Standard idle routine keeps the machine alive
  */
-void idle()
-{
-    static unsigned long lastSerialCommandTime = 0;
+void idle(bool update_lcd) {
+  static unsigned long lastSerialCommandTime = 0;
 
-    manage_heater();
-    manage_inactivity();
+  manage_heater();
+  manage_inactivity();
 
+  if (update_lcd)
     lcd_update();
-    lifetime_stats_tick();
 
-    // detect serial communication
-    if (commands_queued() && serialCmd)
-    {
-      sleep_state |= SLEEP_SERIAL_CMD;
-      lastSerialCommandTime = millis();
-    }
-    else if ((lastSerialCommandTime>0) && ((millis() - lastSerialCommandTime) < SERIAL_CONTROL_TIMEOUT))
-    {
-        sleep_state |= SLEEP_SERIAL_CMD;
-    }
-    else
-    {
-      sleep_state &= ~SLEEP_SERIAL_CMD;
-    }
+  lifetime_stats_tick();
+
+  // detect serial communication
+  if (commands_queued() && serialCmd) {
+    sleep_state |= SLEEP_SERIAL_CMD;
+    lastSerialCommandTime = millis();
+  }
+  else if ((lastSerialCommandTime > 0) && ((millis() - lastSerialCommandTime) < SERIAL_CONTROL_TIMEOUT)) {
+    sleep_state |= SLEEP_SERIAL_CMD;
+  }
+  else {
+    sleep_state &= ~SLEEP_SERIAL_CMD;
+  }
 }
 
 static void manage_inactivity()
