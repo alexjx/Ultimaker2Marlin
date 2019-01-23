@@ -304,7 +304,7 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
 #define CUSTOM_USER_MENUS
 #if defined CUSTOM_USER_MENUS
 
-#define USER_DESC_1 "Preheat Chamber"
+#define USER_DESC_1 "Preheat chamber"
 #define USER_GCODE_1 \
     "G28 Z0\n" \
     "G28 X0 Y0\n" \
@@ -313,26 +313,20 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
     "M106 255\n" \
     "M140 S130\n"
 
-#define USER_DESC_2 "Cancel Preheat Chamber"
+#define USER_DESC_2 "Cancel Preheat"
 #define USER_GCODE_2     \
   "G28 Z0\n"             \
   "G28 X0 Y0\n"          \
   "M106 0\n"           \
   "M140 S0\n"
 
-#define USER_DESC_3 "Raise Platform for Calibration"
+#define USER_DESC_3 "Platform manual calibrate"
 #define USER_GCODE_3   \
   "G28 Z0\n"           \
   "G28 X0 Y0\n"        \
   "G1 X30 Y30 F9000\n" \
   "M84 X Y E\n"        \
   "G1 Z0.1"
-
-//   #define USER_DESC_2 "Preheat for PLA"
-//   #define USER_GCODE_2 "M140 S" STRINGIFY(PREHEAT_1_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_1_TEMP_HOTEND)
-
-//   #define USER_DESC_3 "Preheat for ABS"
-//   #define USER_GCODE_3 "M140 S" STRINGIFY(PREHEAT_2_TEMP_BED) "\nM104 S" STRINGIFY(PREHEAT_2_TEMP_HOTEND)
 
 //   #define USER_DESC_4 "Heat Bed/Home/Level"
 //   #define USER_GCODE_4 "M140 S" STRINGIFY(PREHEAT_2_TEMP_BED) "\nG28\nG29"
