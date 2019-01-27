@@ -300,8 +300,7 @@ static void lcd_menu_change_material_insert_wait_user() {
 
   if (target_temperature[active_extruder] && (printing_state == PRINT_STATE_NORMAL) && (movesplanned() < 2)) {
     current_position[E_AXIS] += 0.5 / volume_to_filament_length[active_extruder];
-    plan_buffer_line(
-      current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], FILAMENT_INSERT_SPEED, active_extruder);
+    plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], FILAMENT_INSERT_SPEED, active_extruder);
   }
 
   lcd_question_screen(NULL, lcd_menu_change_material_insert_wait_user_ready, PSTR("READY"), NULL, cancelMaterialInsert, PSTR("CANCEL"));
@@ -338,13 +337,13 @@ static void lcd_menu_change_material_insert_wait_user_ready() {
   retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(active_extruder);
   max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 
-  quickStop();
+  // quickStop();
+
   current_position[E_AXIS] = 0.0f;
   plan_set_e_position(current_position[E_AXIS], active_extruder, true);
 
   current_position[E_AXIS] += FILAMENT_FORWARD_LENGTH / volume_to_filament_length[active_extruder];
-  plan_buffer_line(
-    current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], active_extruder);
+  plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], active_extruder);
 
   // Put back original values.
   max_feedrate[E_AXIS] = old_max_feedrate_e;

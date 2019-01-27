@@ -139,8 +139,7 @@ static uint8_t prev_block_index(uint8_t block_index) {
 // given acceleration:
 FORCE_INLINE float estimate_acceleration_distance(float initial_rate, float target_rate, float acceleration) {
   if (acceleration != 0) {
-    return ((target_rate * target_rate - initial_rate * initial_rate) /
-            (2.0 * acceleration));
+    return ((target_rate * target_rate - initial_rate * initial_rate) / (2.0 * acceleration));
   }
   else {
     return 0.0;  // acceleration was 0, set acceleration distance to 0
@@ -154,8 +153,7 @@ FORCE_INLINE float estimate_acceleration_distance(float initial_rate, float targ
 
 FORCE_INLINE float intersection_distance(float initial_rate, float final_rate, float acceleration, float distance) {
   if (acceleration != 0) {
-    return ((2.0 * acceleration * distance - initial_rate * initial_rate + final_rate * final_rate) /
-            (4.0 * acceleration));
+    return ((2.0 * acceleration * distance - initial_rate * initial_rate + final_rate * final_rate) / (4.0 * acceleration));
   }
   else {
     return 0.0;  // acceleration was 0, set intersection distance to 0
