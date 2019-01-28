@@ -487,7 +487,7 @@ void setup_powerhold()
     SET_OUTPUT(SUICIDE_PIN);
     WRITE(SUICIDE_PIN, HIGH);
   #endif
-  #if defined(PS_ON_PIN) && PS_ON_PIN > -1
+  #if defined(PS_ON_PIN) && PS_ON_PIN > -1 && defined(PS_ON_AWAKE)
     SET_OUTPUT(PS_ON_PIN);
     WRITE(PS_ON_PIN, PS_ON_AWAKE);
   #endif
@@ -1964,7 +1964,7 @@ void process_command(const char *strCmd, bool sendAck)
       #endif //HEATER_2_PIN
     #endif
 
-    #if defined(PS_ON_PIN) && PS_ON_PIN > -1
+    #if defined(PS_ON_PIN) && PS_ON_PIN > -1 && defined(PS_ON_AWAKE)
       case 80: // M80 - ATX Power On
         SET_OUTPUT(PS_ON_PIN); //GND
         WRITE(PS_ON_PIN, PS_ON_AWAKE);
@@ -1976,7 +1976,7 @@ void process_command(const char *strCmd, bool sendAck)
       #if defined(SUICIDE_PIN) && SUICIDE_PIN > -1
         st_synchronize();
         suicide();
-      #elif defined(PS_ON_PIN) && PS_ON_PIN > -1
+      #elif defined(PS_ON_PIN) && PS_ON_PIN > -1 && defined(PS_ON_ASLEEP)
         SET_OUTPUT(PS_ON_PIN);
         WRITE(PS_ON_PIN, PS_ON_ASLEEP);
       #endif

@@ -40,7 +40,7 @@ float pid2[3] = {DEFAULT_Kp, DEFAULT_Ki*PID_dT, DEFAULT_Kd/PID_dT};
 uint16_t motor_current_e2 = 0;
 #endif
 #if EXTRUDERS > 1
-float e2_steps_per_unit = 282.0f;
+float e2_steps_per_unit = DEFAULT_E2_STEPS_PER_UNIT;
 #endif
 
 uint8_t axis_direction = DEFAULT_AXIS_DIR;

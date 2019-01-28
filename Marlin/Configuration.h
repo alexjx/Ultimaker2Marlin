@@ -446,7 +446,8 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 
 // default settings
 #ifdef UM2PLUS
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {80.0,80.0,200,369}  // default steps per unit for ultimaker2.1 JarJar
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {80.0, 80.0, 200.0, 369.0}  // default steps per unit for ultimaker2.1 JarJar
+#define DEFAULT_E2_STEPS_PER_UNIT     369.0
 #else
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {80.0,80.0,200,282}  // default steps per unit for ultimaker2
 #endif
