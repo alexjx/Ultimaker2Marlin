@@ -12,12 +12,9 @@ Following are the changes so far:
   * Lower bang-bang check interval to 4s
   * Limited Y axis to 222 for metal slider block.
   * Adjust all material diameter to 1.75.
-* ~~Remove raising platform when first run. It's kind scaring since I'd expect the head move before platform.~~ (it makes sense now...)
 * Ported the retraction after insert material from the original firmware.
-* Tick stats for extruder temperature also. (for tracking PTFE tube life)
-* Aggressive PID value
 * Port User Function from Marlin for preheat chamber etc...
-* Add 2 degree hysteresis to the fan on/off logic.
+* Add temperature hysteresis to the fan on/off logic.
 
 # Readme from TinkerGonome Fork
 * Download the latest version from the <a href="https://github.com/TinkerGnome/Ultimaker2Marlin/releases">Release page</a>
