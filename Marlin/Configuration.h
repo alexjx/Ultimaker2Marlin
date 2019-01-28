@@ -76,7 +76,7 @@
 // 1 = ATX
 // 2 = X-Box 360 203Watts (the blue wire connected to PS_ON and the red wire to VCC)
 
-#define POWER_SUPPLY 2
+#define POWER_SUPPLY 0
 
 #define UM2PLUS
 
@@ -187,7 +187,7 @@
 #ifndef HEATER_2_MAXTEMP
     #define HEATER_2_MAXTEMP 305
 #endif
-#define BED_MAXTEMP 200
+#define BED_MAXTEMP 145
 
 //Check if the heater heats up MAX_HEATING_TEMPERATURE_INCREASE within MAX_HEATING_CHECK_MILLIS while the PID was at the maximum.
 // If not, raise an error because most likely the heater is not heating up the temperature sensor. Indicating an issue in the system.
@@ -224,10 +224,10 @@
     //#define  DEFAULT_Kd 114
 
 #ifdef UM2PLUS
-// Ultimaker2 JarJar
-    #define  DEFAULT_Kp 12.0
-    #define  DEFAULT_Ki 0.75
-    #define  DEFAULT_Kd 55.0
+    // Ultimaker2 JarJar
+    #define DEFAULT_Kp 9.32
+    #define DEFAULT_Ki 0.67
+    #define DEFAULT_Kd 32.34
 #else
     // Ultimaker2
     #define DEFAULT_Kp 8.90
@@ -453,7 +453,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define DEFAULT_MAX_FEEDRATE          {300, 300, 40, 45}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 
-#define DEFAULT_ACCELERATION          1700   // X, Y, Z and E max acceleration in mm/s^2 for printing moves
+#define DEFAULT_ACCELERATION          1500   // X, Y, Z and E max acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
