@@ -309,7 +309,7 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
     "G28 X0 Y0\n" \
     "G1 X120 Y120 F9000\n" \
     "G1 Z5\n" \
-    "M106 255\n" \
+    "M106 S255\n" \
     "M140 S130\n"
 
 #define USER_DESC_2 "Cancel Preheat"

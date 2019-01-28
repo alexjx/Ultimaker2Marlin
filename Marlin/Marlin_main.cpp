@@ -459,7 +459,9 @@ void enqueue_command_list_P(const char *pstr) {
       length++;
     };
     cmd[length] = '\0';
-    enquecommand(cmd);
+    if (length > 0) {
+      enquecommand(cmd);
+    }
     pstr = next_char ? pstr + length + 1 : NULL;
   } while (pstr != NULL);
 }
