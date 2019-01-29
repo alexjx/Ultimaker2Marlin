@@ -352,7 +352,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define DISABLE_E false // For all extruders
 
 #ifdef UM2PLUS
-  #define DEFAULT_AXIS_DIR 0xFD
+  #define DEFAULT_AXIS_DIR 0xED
 #else
   #ifdef UM2GO
     #define DEFAULT_AXIS_DIR 0x1D
