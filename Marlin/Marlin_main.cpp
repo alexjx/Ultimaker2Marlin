@@ -2425,45 +2425,49 @@ void process_command(const char *strCmd, bool sendAck)
     #endif // M300
 
     #ifdef PIDTEMP
-    case 301: // M301
-      {
-        if(code_seen(strCmd, 'P'))
-        {
-            Kp = code_value();
-        #if EXTRUDERS > 1
-            if (active_extruder) pid2[0] = Kp;
-        #endif // EXTRUDERS
-        }
-
-        if(code_seen(strCmd, 'I'))
-        {
-            Ki = scalePID_i(code_value());
-        #if EXTRUDERS > 1
-            if (active_extruder) pid2[1] = Ki;
-        #endif // EXTRUDERS
-        }
-
-        if(code_seen(strCmd, 'D'))
-        {
-            Kd = scalePID_d(code_value());
-        #if EXTRUDERS > 1
-            if (active_extruder) pid2[2] = Kd;
-        #endif // EXTRUDERS
-        }
-
-        updatePID();
-        SERIAL_PROTOCOLPGM(MSG_OK);
-        SERIAL_PROTOCOLPGM(" p:");
-        SERIAL_PROTOCOL(Kp);
-        SERIAL_PROTOCOLPGM(" i:");
-        SERIAL_PROTOCOL(unscalePID_i(Ki));
-        SERIAL_PROTOCOLPGM(" d:");
-        SERIAL_PROTOCOL(unscalePID_d(Kd));
-        SERIAL_EOL;
+    case 301:  // M301
+    {
+      uint8_t extruder = active_extruder;
+      if (code_seen(strCmd, 'T')) {
+        extruder = code_value();
       }
-      break;
-    #endif //PIDTEMP
-    #if defined(PIDTEMPBED) && (TEMP_SENSOR_BED != 0)
+
+      if (code_seen(strCmd, 'P')) {
+        Kp = code_value();
+#if EXTRUDERS > 1
+        if (extruder)
+          pid2[0] = Kp;
+#endif  // EXTRUDERS
+      }
+
+      if (code_seen(strCmd, 'I')) {
+        Ki = scalePID_i(code_value());
+#if EXTRUDERS > 1
+        if (extruder)
+          pid2[1] = Ki;
+#endif  // EXTRUDERS
+      }
+
+      if (code_seen(strCmd, 'D')) {
+        Kd = scalePID_d(code_value());
+#if EXTRUDERS > 1
+        if (extruder)
+          pid2[2] = Kd;
+#endif  // EXTRUDERS
+      }
+
+      updatePID();
+      SERIAL_PROTOCOLPGM(MSG_OK);
+      SERIAL_PROTOCOLPGM(" p:");
+      SERIAL_PROTOCOL(Kp);
+      SERIAL_PROTOCOLPGM(" i:");
+      SERIAL_PROTOCOL(unscalePID_i(Ki));
+      SERIAL_PROTOCOLPGM(" d:");
+      SERIAL_PROTOCOL(unscalePID_d(Kd));
+      SERIAL_EOL;
+    } break;
+#endif  //PIDTEMP
+#if defined(PIDTEMPBED) && (TEMP_SENSOR_BED != 0)
     case 304: // M304
       {
         if (pidTempBed())
@@ -2515,19 +2519,21 @@ void process_command(const char *strCmd, bool sendAck)
     }
     break;
 	#endif
-    case 303: // M303 PID autotune
+    case 303:  // M303 PID autotune
     {
       float temp = 150.0;
-      int e=0;
-      int c=5;
-      if (code_seen(strCmd, 'E')) e=code_value();
-        if (e<0)
-          temp=70;
-      if (code_seen(strCmd, 'S')) temp=code_value();
-      if (code_seen(strCmd, 'C')) c=code_value();
+      int e = 0;
+      int c = 5;
+      if (code_seen(strCmd, 'E'))
+        e = code_value();
+      if (e < 0)
+        temp = 70;
+      if (code_seen(strCmd, 'S'))
+        temp = code_value();
+      if (code_seen(strCmd, 'C'))
+        c = code_value();
       PID_autotune(temp, e, c);
-    }
-    break;
+    } break;
     case 400: // M400 finish all moves
     {
       st_synchronize();
