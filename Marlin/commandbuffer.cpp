@@ -307,65 +307,51 @@ void CommandBuffer::move2dock(bool bRetract) {
 }
 #endif  // EXTRUDERS
 
-void CommandBuffer::move2heatup()
-{
-    float x, y;
+void CommandBuffer::move2heatup() {
+  float x, y;
 #if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        /*x = wipe_position[X_AXIS]+roundOffset(X_AXIS, extruder_offset[X_AXIS][active_extruder]);
-        if (current_position[Y_AXIS] >= dock_position[Y_AXIS] + TOOLCHANGE_DISTANCEY)
-        {
-        // y = 65.0f;
-            CommandBuffer::moveHead(x, dock_position[Y_AXIS] + TOOLCHANGE_DISTANCEY, 200);
-        }*/
-        x = max_pos[X_AXIS] - 10.0;
-        y = min_pos[Y_AXIS] + 10.0;
+  if
+    IS_DUAL_ENABLED {
+      x = max_pos[X_AXIS] - 10.0;
+      y = min_pos[Y_AXIS] + 10.0;
     }
-    else
-    {
-        x = max(5.0f, min_pos[X_AXIS] + roundOffset(X_AXIS, extruder_offset[X_AXIS][active_extruder]) + 5);
-        y = min_pos[Y_AXIS] + 10.0;
-    }
-#else
-    x = max(5.0f, min_pos[X_AXIS] + 5);
+  else {
+    x = max(5.0f, min_pos[X_AXIS] + roundOffset(X_AXIS, extruder_offset[X_AXIS][active_extruder]) + 5);
     y = min_pos[Y_AXIS] + 10.0;
-#endif
-    CommandBuffer::moveHead(x, y, 200);
-}
-
-void CommandBuffer::move2front()
-{
-#if (EXTRUDERS > 1)
-    float x = IS_DUAL_ENABLED ? wipe_position[X_AXIS]+roundOffset(X_AXIS, extruder_offset[X_AXIS][active_extruder]) : AXIS_CENTER_POS(X_AXIS);
-    float y = IS_DUAL_ENABLED ? int(min_pos[Y_AXIS])+10 : int(min_pos[Y_AXIS])+10;
+  }
 #else
-    float x = AXIS_CENTER_POS(X_AXIS);
-    float y = int(min_pos[Y_AXIS])+10;
+  x = max(5.0f, min_pos[X_AXIS] + 5);
+  y = min_pos[Y_AXIS] + 10.0;
 #endif
-    CommandBuffer::moveHead(x, y, 200);
+  CommandBuffer::moveHead(x, y, 200);
 }
 
-void CommandBuffer::homeHead()
-{
-    enquecommand_P(PSTR("G28 X0 Y0"));
+void CommandBuffer::move2front() {
+#if (EXTRUDERS > 1)
+  float x = IS_DUAL_ENABLED ? wipe_position[X_AXIS] + roundOffset(X_AXIS, extruder_offset[X_AXIS][active_extruder]) : AXIS_CENTER_POS(X_AXIS);
+  float y = IS_DUAL_ENABLED ? int(min_pos[Y_AXIS]) + 10 : int(min_pos[Y_AXIS]) + 10;
+#else
+  float x = AXIS_CENTER_POS(X_AXIS);
+  float y = int(min_pos[Y_AXIS]) + 10;
+#endif
+  CommandBuffer::moveHead(x, y, 200);
 }
 
-void CommandBuffer::homeBed()
-{
-    enquecommand_P(PSTR("G28 Z0"));
+void CommandBuffer::homeHead() {
+  enquecommand_P(PSTR("G28 X0 Y0"));
 }
 
-void CommandBuffer::homeAll()
-{
-    enquecommand_P(PSTR("G28"));
+void CommandBuffer::homeBed() {
+  enquecommand_P(PSTR("G28 Z0"));
 }
 
-void CommandBuffer::dwell(const unsigned long m)
-{
-    unsigned long target_millis = millis() + m;
-    while(millis() < target_millis )
-    {
-        idle();
-    }
+void CommandBuffer::homeAll() {
+  enquecommand_P(PSTR("G28"));
+}
+
+void CommandBuffer::dwell(const unsigned long m) {
+  unsigned long target_millis = millis() + m;
+  while (millis() < target_millis) {
+    idle();
+  }
 }
