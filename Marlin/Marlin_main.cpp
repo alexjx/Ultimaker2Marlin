@@ -3811,17 +3811,8 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ)
         {
             if (printing_state < PRINT_STATE_END)
             {
-
-                // move to heatup pos
-                //CommandBuffer::move2heatup();
-
                 // wait for nozzle heatup
                 reheatNozzle(active_extruder);
-                /*if (printing_state == PRINT_STATE_ABORT)
-                {
-                    CommandBuffer::move2SafeYPos();
-                }
-                else*/
                 {
                     if (IS_WIPE_ENABLED)
                     {

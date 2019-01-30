@@ -310,19 +310,18 @@ static void init_head_position()
     }
 }
 
-static void lcd_dockmove_init()
-{
-    // save current variables
-    TARGET_POS(X_AXIS) = dock_position[X_AXIS];
-    TARGET_POS(Y_AXIS) = dock_position[Y_AXIS];
-    OLD_ACCEL = acceleration;
-    OLD_JERK = max_xy_jerk;
-    // home head if necessary
-    init_head_position();
-    // move to dock position
-    CommandBuffer::move2dock(false);
-    acceleration = 250;
-    max_xy_jerk = 5;
+static void lcd_dockmove_init() {
+  // save current variables
+  TARGET_POS(X_AXIS) = dock_position[X_AXIS];
+  TARGET_POS(Y_AXIS) = dock_position[Y_AXIS];
+  OLD_ACCEL = acceleration;
+  OLD_JERK = max_xy_jerk;
+  // home head if necessary
+  init_head_position();
+  // move to dock position
+  CommandBuffer::move2dock(false);
+  acceleration = 250;
+  max_xy_jerk = 5;
 }
 
 static void lcd_dockmove_quit()
@@ -331,9 +330,7 @@ static void lcd_dockmove_quit()
     acceleration = OLD_ACCEL;
     max_xy_jerk = OLD_JERK ;
     // home head
-    //CommandBuffer::move2SafeYPos();
     CommandBuffer::moveHead(dock_position[X_AXIS] - 10, current_position[Y_AXIS], 100);
-    // CommandBuffer::homeHead();
     CommandBuffer::moveHead(min_pos[X_AXIS], max_pos[Y_AXIS], 200);
     enquecommand_P(PSTR("M84 X Y"));
     menu.return_to_previous();
