@@ -2688,11 +2688,7 @@ static void lcd_extrude_headtofront()
     }
     cmd_synchronize();
 
-#if (EXTRUDERS > 1)
-    CommandBuffer::moveHead(AXIS_CENTER_POS(X_AXIS), min_pos[Y_AXIS] + (IS_DUAL_ENABLED ? 65 : 10), 180);
-#else
     CommandBuffer::moveHead(AXIS_CENTER_POS(X_AXIS), min_pos[Y_AXIS] + 10, 180);
-#endif
     enquecommand_P(PSTR("M84 X0 Y0"));
 }
 
