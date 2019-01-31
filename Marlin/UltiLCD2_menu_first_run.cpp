@@ -509,10 +509,10 @@ static void lcd_menu_first_run_material_load_heatup()
 static void runMaterialForward()
 {
     //Override the max feedrate and acceleration values to get a better insert speed and speedup/slowdown
-    //float old_max_feedrate_e = max_feedrate[E_AXIS];
+    float old_max_feedrate_e = max_feedrate[E_AXIS];
     float old_retract_acceleration = retract_acceleration;
     float old_max_e_jerk = max_e_jerk;
-    //max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(active_extruder);
+    max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(active_extruder);
     retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(active_extruder);
     max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 
@@ -523,7 +523,7 @@ static void runMaterialForward()
     plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], 0);
 
     //Put back original values.
-    //max_feedrate[E_AXIS] = old_max_feedrate_e;
+    max_feedrate[E_AXIS] = old_max_feedrate_e;
     retract_acceleration = old_retract_acceleration;
     max_e_jerk = old_max_e_jerk;
 }

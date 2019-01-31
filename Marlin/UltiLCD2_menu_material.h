@@ -38,7 +38,7 @@ struct materialSettings
 
 extern struct materialSettings material[EXTRUDERS];
 
-#define FILAMENT_FAST_STEPS  15000
+#define FILAMENT_FAST_STEPS 25830
 #define FILAMENT_LONG_ACCELERATION_STEPS    7200
 
 #define FILAMENT_REVERSAL_LENGTH      (FILAMENT_BOWDEN_LENGTH + 50)

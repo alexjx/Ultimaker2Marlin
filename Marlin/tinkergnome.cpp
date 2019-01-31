@@ -2875,10 +2875,10 @@ static void lcd_extrude_init_pull()
     digipot_current(2, motor_current_setting[2]*2/3);
 #endif
     //increase max. feedrate and reduce acceleration
-    //OLD_FEEDRATE = max_feedrate[E_AXIS];
+    OLD_FEEDRATE = max_feedrate[E_AXIS];
     OLD_ACCEL = retract_acceleration;
     OLD_JERK = max_e_jerk;
-    //max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
+    max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
     retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(menu_extruder);
     max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 }
