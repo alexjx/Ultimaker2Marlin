@@ -1764,63 +1764,55 @@ void process_command(const char *strCmd, bool sendAck)
         gcode_M105(strCmd);
         return; // "ok" already printed
       break;
-    case 109:
-    {// M109 - Wait for extruder heater to reach target.
-      if (printing_state == PRINT_STATE_ABORT)
-      {
+    case 109: {  // M109 - Wait for extruder heater to reach target.
+      if (printing_state == PRINT_STATE_ABORT) {
         break;
       }
-      if(setTargetedHotend(strCmd, 109))
-	  {
+      if (setTargetedHotend(strCmd, 109)) {
         break;
       }
-      #ifdef AUTOTEMP
-        autotemp_enabled=false;
-      #endif
-      if (code_seen(strCmd, 'S'))
-      {
+#ifdef AUTOTEMP
+      autotemp_enabled = false;
+#endif
+      if (code_seen(strCmd, 'S')) {
         float newTemperatureF = code_value();
         uint16_t newTemperature = roundTemperature(newTemperatureF);
         // update temperature state
         temperature_state |= (EXTRUDER_PREHEAT << tmp_extruder);
-        if ((active_extruder != tmp_extruder) && (newTemperature < target_temperature[tmp_extruder]))
-        {
-          if ((target_temperature[tmp_extruder] - newTemperature) > (target_temperature[tmp_extruder]/10))
-          {
+        if ((active_extruder != tmp_extruder) && (newTemperature < target_temperature[tmp_extruder])) {
+          if ((target_temperature[tmp_extruder] - newTemperature) > (target_temperature[tmp_extruder] / 10)) {
             temperature_state |= (EXTRUDER_STANDBY << tmp_extruder);
             temperature_state &= ~(EXTRUDER_AUTOSTANDBY << tmp_extruder);
           }
         }
-        else if (newTemperature > target_temperature[tmp_extruder])
-        {
+        else if (newTemperature > target_temperature[tmp_extruder]) {
           temperature_state &= ~(EXTRUDER_STANDBY << tmp_extruder);
         }
         setTargetHotend(newTemperature, tmp_extruder);
       }
-      #ifdef AUTOTEMP
-        if (code_seen(strCmd, 'S')) autotemp_min=code_value();
-        if (code_seen(strCmd, 'B')) autotemp_max=code_value();
-        if (code_seen(strCmd, 'F'))
-        {
-          autotemp_factor=code_value();
-          autotemp_enabled=true;
-        }
-      #endif
-      if (printing_state == PRINT_STATE_RECOVER)
-	  {
-		  break;
-	  }
+#ifdef AUTOTEMP
+      if (code_seen(strCmd, 'S'))
+        autotemp_min = code_value();
+      if (code_seen(strCmd, 'B'))
+        autotemp_max = code_value();
+      if (code_seen(strCmd, 'F')) {
+        autotemp_factor = code_value();
+        autotemp_enabled = true;
+      }
+#endif
+      if (printing_state == PRINT_STATE_RECOVER) {
+        break;
+      }
 
       /* See if we are heating up or cooling down */
-      bool target_direction = isHeatingHotend(tmp_extruder); // true if heating, false if cooling
+      bool target_direction = isHeatingHotend(tmp_extruder);  // true if heating, false if cooling
 
       // don't wait to cool down after a tool change
 #if EXTRUDERS > 1
-      if ((printing_state == PRINT_STATE_TOOLREADY) && (!target_direction || (degHotend(tmp_extruder) >= (degTargetHotend(tmp_extruder)-TEMP_WINDOW))))
-      {
-          break;
+      if ((printing_state == PRINT_STATE_TOOLREADY) && (!target_direction || (degHotend(tmp_extruder) >= (degTargetHotend(tmp_extruder) - TEMP_WINDOW)))) {
+        break;
       }
-#endif //EXTRUDERS
+#endif  //EXTRUDERS
 
       printing_state = PRINT_STATE_HEATING;
       LCD_MESSAGEPGM(MSG_HEATING);
@@ -1828,59 +1820,51 @@ void process_command(const char *strCmd, bool sendAck)
       setWatch();
       codenum = millis();
 
-      #ifdef TEMP_RESIDENCY_TIME
-        long residencyStart = -1;
-        /* continue to loop until we have reached the target temp
+#ifdef TEMP_RESIDENCY_TIME
+      long residencyStart = -1;
+      /* continue to loop until we have reached the target temp
           _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
-        while((residencyStart == -1) ||
-              (residencyStart >= 0 && (((unsigned int) (millis() - residencyStart)) < TEMP_RESIDENCY_TIME)) )
-        {
-      #else
-        while ( target_direction ? (isHeatingHotend(tmp_extruder)) : (isCoolingHotend(tmp_extruder)&&(CooldownNoWait==false)) )
-        {
-      #endif //TEMP_RESIDENCY_TIME
-          if( (millis() - codenum) > 2000UL )
-          { //Print Temp Reading and remaining time every 2 seconds while heating up/cooling down
-            #if (TEMP_SENSOR_0 != 0) || (TEMP_SENSOR_BED != 0) || defined(HEATER_0_USES_MAX6675)
-              print_heaterstates();
-            #endif
-            #ifdef TEMP_RESIDENCY_TIME
-              SERIAL_PROTOCOLPGM(" W:");
-              if(residencyStart > -1)
-              {
-                 codenum = (TEMP_RESIDENCY_TIME - (millis() - residencyStart)) / 1000UL;
-                 SERIAL_PROTOCOLLN( codenum );
-              }
-              else
-              {
-                 SERIAL_PROTOCOLLNPGM( "?" );
-              }
-            #else
-              SERIAL_EOL;
-            #endif
-            codenum = millis();
+      while ((residencyStart == -1) ||
+             (residencyStart >= 0 && (((unsigned int)(millis() - residencyStart)) < TEMP_RESIDENCY_TIME))) {
+#else
+      while (target_direction ? (isHeatingHotend(tmp_extruder)) : (isCoolingHotend(tmp_extruder) && (CooldownNoWait == false))) {
+#endif                                        //TEMP_RESIDENCY_TIME
+        if ((millis() - codenum) > 2000UL) {  //Print Temp Reading and remaining time every 2 seconds while heating up/cooling down
+#if (TEMP_SENSOR_0 != 0) || (TEMP_SENSOR_BED != 0) || defined(HEATER_0_USES_MAX6675)
+          print_heaterstates();
+#endif
+#ifdef TEMP_RESIDENCY_TIME
+          SERIAL_PROTOCOLPGM(" W:");
+          if (residencyStart > -1) {
+            codenum = (TEMP_RESIDENCY_TIME - (millis() - residencyStart)) / 1000UL;
+            SERIAL_PROTOCOLLN(codenum);
           }
-          idle();
-		  #ifdef TEMP_RESIDENCY_TIME
-            /* start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
-              or when current temp falls outside the hysteresis after target temp was reached */
-          if ((residencyStart == -1 &&  target_direction && (degHotend(tmp_extruder) >= (degTargetHotend(tmp_extruder)-TEMP_WINDOW))) ||
-              (residencyStart == -1 && !target_direction && (degHotend(tmp_extruder) <= (degTargetHotend(tmp_extruder)+TEMP_WINDOW))) ||
-              (residencyStart > -1 && labs(degHotend(tmp_extruder) - degTargetHotend(tmp_extruder)) > TEMP_HYSTERESIS && (!target_direction || !CooldownNoWait)) )
-          {
-            residencyStart = millis();
+          else {
+            SERIAL_PROTOCOLLNPGM("?");
           }
-        #endif //TEMP_RESIDENCY_TIME
-          if (printing_state != PRINT_STATE_HEATING)
-          {
-              // print aborted
-              break;
-          }
+#else
+          SERIAL_EOL;
+#endif
+          codenum = millis();
         }
-        LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
-        previous_millis_cmd = millis();
+        idle();
+#ifdef TEMP_RESIDENCY_TIME
+        /* start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
+              or when current temp falls outside the hysteresis after target temp was reached */
+        if ((residencyStart == -1 && target_direction && (degHotend(tmp_extruder) >= (degTargetHotend(tmp_extruder) - TEMP_WINDOW))) ||
+            (residencyStart == -1 && !target_direction && (degHotend(tmp_extruder) <= (degTargetHotend(tmp_extruder) + TEMP_WINDOW))) ||
+            (residencyStart > -1 && labs(degHotend(tmp_extruder) - degTargetHotend(tmp_extruder)) > TEMP_HYSTERESIS && (!target_direction || !CooldownNoWait))) {
+          residencyStart = millis();
+        }
+#endif  //TEMP_RESIDENCY_TIME
+        if (printing_state != PRINT_STATE_HEATING) {
+          // print aborted
+          break;
+        }
       }
-      break;
+      LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
+      previous_millis_cmd = millis();
+    } break;
     case 190: // M190 - Wait for bed heater to reach target.
     #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1 && TEMP_SENSOR_BED != 0
         if (code_seen(strCmd, 'S')) setTargetBed(code_value());
