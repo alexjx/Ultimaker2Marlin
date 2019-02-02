@@ -705,12 +705,12 @@ void manage_heater() {
     ) {
       PORTJ |= _BV(6);
     }
-    else if (current_temperature[0] < EXTRUDER_AUTO_FAN_TEMPERATURE - TEMP_HYSTERESIS
+    else if (current_temperature[0] < EXTRUDER_AUTO_FAN_TEMPERATURE - 5
 #if (EXTRUDERS > 1) && (!defined(HOTEND_FAN2_PIN) || (HOTEND_FAN2_PIN < 0))
-             && current_temperature[1] < EXTRUDER_AUTO_FAN_TEMPERATURE - TEMP_HYSTERESIS
+             && current_temperature[1] < EXTRUDER_AUTO_FAN_TEMPERATURE - 5
 #endif
 #if (EXTRUDERS > 2) && (!defined(HOTEND_FAN2_PIN) || (HOTEND_FAN2_PIN < 0))
-             && current_temperature[2] < EXTRUDER_AUTO_FAN_TEMPERATURE - TEMP_HYSTERESIS
+             && current_temperature[2] < EXTRUDER_AUTO_FAN_TEMPERATURE - 5
 #endif
     ) {
       PORTJ &= ~_BV(6);
