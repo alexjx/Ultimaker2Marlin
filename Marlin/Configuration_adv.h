@@ -356,6 +356,10 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
   "G1 X120 Y110 F9000\n" \
   "G1 Z0.1 F9000"
 
+#define USER_DESC_8 "Move to Center"
+#define USER_GCODE_8 \
+  "G1 X120 Y110 F9000\n"
+
 #endif
 
 //===========================================================================
