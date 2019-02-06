@@ -372,6 +372,16 @@ static void lcd_user_function_items(uint8_t nr, uint8_t offsetY, uint8_t flags) 
     strcpy_P(buffer, PSTR(USER_DESC_5));
   }
 #endif
+#ifdef USER_DESC_6
+  else if (nr == index++) {
+    strcpy_P(buffer, PSTR(USER_DESC_6));
+  }
+#endif
+#ifdef USER_DESC_7
+  else if (nr == index++) {
+    strcpy_P(buffer, PSTR(USER_DESC_7));
+  }
+#endif
   else {
     strcpy_P(buffer + 1, PSTR("???"));
   }
@@ -394,6 +404,12 @@ void lcd_menu_user_functions() {
                                    + 1
 #endif
 #if defined USER_DESC_5 && defined USER_GCODE_5
+                                   + 1
+#endif
+#if defined USER_DESC_6 && defined USER_GCODE_6
+                                   + 1
+#endif
+#if defined USER_DESC_7 && defined USER_GCODE_7
                                    + 1
 #endif
     ;
@@ -431,6 +447,18 @@ void lcd_menu_user_functions() {
 #if defined USER_DESC_5 && defined USER_GCODE_5
     else if (IS_SELECTED_SCROLL(index++)) {
       enqueue_command_list_P(PSTR(USER_GCODE_5));
+      lcd_lib_keyclick();
+    }
+#endif
+#if defined USER_DESC_6 && defined USER_GCODE_6
+    else if (IS_SELECTED_SCROLL(index++)) {
+      enqueue_command_list_P(PSTR(USER_GCODE_6));
+      lcd_lib_keyclick();
+    }
+#endif
+#if defined USER_DESC_7 && defined USER_GCODE_7
+    else if (IS_SELECTED_SCROLL(index++)) {
+      enqueue_command_list_P(PSTR(USER_GCODE_7));
       lcd_lib_keyclick();
     }
 #endif
