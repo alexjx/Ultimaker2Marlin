@@ -70,6 +70,99 @@ static void lcd_position_z_axis();
 #define EXPERT_VERSION 7
 
 void tinkergnome_LoadSettings() {
+  axis_direction = GET_AXIS_DIRECTION();
+
+#if defined(PIDTEMPBED) && (TEMP_SENSOR_BED != 0)
+  // read buildplate pid coefficients
+  float pidBed[3];
+  eeprom_read_block(pidBed, (uint8_t *)EEPROM_PID_BED, sizeof(pidBed));
+  bedKp = pidBed[0];
+  bedKi = pidBed[1];
+  bedKd = pidBed[2];
+#endif
+
+#if EXTRUDERS > 1
+  e2_steps_per_unit = GET_STEPS_E2();
+#endif
+
+  // read heater check variables
+  heater_check_temp = GET_HEATER_CHECK_TEMP();
+  heater_check_time = GET_HEATER_CHECK_TIME();
+
+#if EXTRUDERS > 1
+  eeprom_read_block(pid2, (uint8_t *)EEPROM_PID_2, sizeof(pid2));
+#endif
+
+#if EXTRUDERS > 1 && defined(MOTOR_CURRENT_PWM_E_PIN) && MOTOR_CURRENT_PWM_E_PIN > -1
+  motor_current_e2 = GET_MOTOR_CURRENT_E2();
+#endif
+
+  // read end of print retraction length from eeprom
+  end_of_print_retraction = GET_END_RETRACT();
+
+  // read axis limits from eeprom
+  eeprom_read_block(min_pos, (uint8_t *)EEPROM_AXIS_LIMITS, sizeof(min_pos));
+  eeprom_read_block(max_pos, (uint8_t *)(EEPROM_AXIS_LIMITS + sizeof(min_pos)), sizeof(max_pos));
+
+  heater_timeout = GET_HEATER_TIMEOUT();
+  control_flags = GET_CONTROL_FLAGS();
+
+  ui_mode = GET_UI_MODE();
+  led_sleep_brightness = GET_SLEEP_BRIGHTNESS();
+  lcd_sleep_contrast = GET_SLEEP_CONTRAST();
+  led_sleep_glow = GET_SLEEP_GLOW();
+  led_timeout = constrain(GET_LED_TIMEOUT(), 0, LED_DIM_MAXTIME);
+  lcd_timeout = constrain(GET_LCD_TIMEOUT(), 0, LED_DIM_MAXTIME);
+  lcd_contrast = GET_LCD_CONTRAST();
+  if (lcd_contrast == 0) {
+    lcd_contrast = 0xDF;
+  }
+}
+
+void tinkergnome_StoreSettings() {
+  SET_EXPERT_VERSION(EXPERT_VERSION);
+  SET_AXIS_DIRECTION(axis_direction);
+
+  // PID BED
+#if defined(PIDTEMPBED) && (TEMP_SENSOR_BED != 0)
+  float pidBed[3] = {bedKp, bedKi, bedKd};
+  eeprom_write_block(pidBed, (uint8_t *)EEPROM_PID_BED, sizeof(pidBed));
+#endif
+
+#if EXTRUDERS > 1
+  SET_STEPS_E2(e2_steps_per_unit);
+  eeprom_write_block(pid2, (uint8_t *)EEPROM_PID_2, sizeof(pid2));
+#endif
+
+  SET_HEATER_CHECK_TEMP(heater_check_temp);
+  SET_HEATER_CHECK_TIME(heater_check_time);
+
+#if EXTRUDERS > 1 && defined(MOTOR_CURRENT_PWM_E_PIN) && MOTOR_CURRENT_PWM_E_PIN > -1
+  SET_MOTOR_CURRENT_E2(motor_current_e2);
+#else
+  SET_MOTOR_CURRENT_E2(motor_current_setting[2]);
+#endif  // EXTRUDERS
+
+  SET_END_RETRACT(end_of_print_retraction);
+  eeprom_write_block(min_pos, (uint8_t *)EEPROM_AXIS_LIMITS, sizeof(min_pos));
+  eeprom_write_block(max_pos, (uint8_t *)(EEPROM_AXIS_LIMITS + sizeof(min_pos)), sizeof(max_pos));
+
+  SET_HEATER_TIMEOUT(heater_timeout);
+
+  SET_CONTROL_FLAGS(control_flags);
+
+  SET_UI_MODE(ui_mode);
+  SET_SLEEP_BRIGHTNESS(led_sleep_brightness);
+  SET_SLEEP_CONTRAST(lcd_sleep_contrast);
+  SET_SLEEP_GLOW(led_sleep_glow);
+  SET_LED_TIMEOUT(led_timeout);
+  SET_LCD_TIMEOUT(lcd_timeout);
+  SET_LCD_CONTRAST(lcd_contrast);
+}
+
+void tinkergnome_init() {
+  sleep_state = 0x0;
+
   uint16_t version = GET_EXPERT_VERSION() + 1;
 
   if (version > 7) {
@@ -203,52 +296,6 @@ void tinkergnome_LoadSettings() {
   if (version < EXPERT_VERSION + 1) {
     SET_EXPERT_VERSION(EXPERT_VERSION);
   }
-}
-
-void tinkergnome_StoreSettings() {
-  SET_EXPERT_VERSION(EXPERT_VERSION);
-  SET_AXIS_DIRECTION(axis_direction);
-
-  // PID BED
-#if defined(PIDTEMPBED) && (TEMP_SENSOR_BED != 0)
-  float pidBed[3] = {bedKp, bedKi, bedKd};
-  eeprom_write_block(pidBed, (uint8_t *)EEPROM_PID_BED, sizeof(pidBed));
-#endif
-
-#if EXTRUDERS > 1
-  SET_STEPS_E2(e2_steps_per_unit);
-  eeprom_write_block(pid2, (uint8_t *)EEPROM_PID_2, sizeof(pid2));
-#endif
-
-  SET_HEATER_CHECK_TEMP(heater_check_temp);
-  SET_HEATER_CHECK_TIME(heater_check_time);
-
-#if EXTRUDERS > 1 && defined(MOTOR_CURRENT_PWM_E_PIN) && MOTOR_CURRENT_PWM_E_PIN > -1
-  SET_MOTOR_CURRENT_E2(motor_current_e2);
-#else
-  SET_MOTOR_CURRENT_E2(motor_current_setting[2]);
-#endif  // EXTRUDERS
-
-  SET_END_RETRACT(end_of_print_retraction);
-  eeprom_write_block(min_pos, (uint8_t *)EEPROM_AXIS_LIMITS, sizeof(min_pos));
-  eeprom_write_block(max_pos, (uint8_t *)(EEPROM_AXIS_LIMITS + sizeof(min_pos)), sizeof(max_pos));
-
-  SET_HEATER_TIMEOUT(heater_timeout);
-
-  SET_CONTROL_FLAGS(control_flags);
-
-  SET_UI_MODE(ui_mode);
-  SET_SLEEP_BRIGHTNESS(led_sleep_brightness);
-  SET_SLEEP_CONTRAST(lcd_sleep_contrast);
-  SET_SLEEP_GLOW(led_sleep_glow);
-  SET_LED_TIMEOUT(led_timeout);
-  SET_LCD_TIMEOUT(lcd_timeout);
-  SET_LCD_CONTRAST(lcd_contrast);
-}
-
-void tinkergnome_init() {
-  sleep_state = 0x0;
-  tinkergnome_LoadSettings();
 }
 
 void menu_printing_init()

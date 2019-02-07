@@ -2564,7 +2564,7 @@ void process_command(const char *strCmd, bool sendAck)
     #ifdef ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
     case 540:
     {
-        if(code_seen(strCmd, 'S')) abort_on_endstop_hit = code_value() > 0;
+        if(code_seen(strCmd, 'S')) ab ort_on_endstop_hit = code_value() > 0;
     }
     break;
     #endif
