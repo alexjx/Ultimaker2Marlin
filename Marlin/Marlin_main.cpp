@@ -2529,11 +2529,13 @@ void process_command(const char *strCmd, bool sendAck)
     case 500: // M500 Store settings in EEPROM
     {
         Config_StoreSettings();
+        tinkergnome_StoreSettings();
     }
     break;
     case 501: // M501 Read settings from EEPROM
     {
         Config_RetrieveSettings();
+        tinkergnome_LoadSettings();
         // reset extruder status
         for (uint8_t e=0; e<EXTRUDERS; ++e)
         {
