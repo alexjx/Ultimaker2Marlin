@@ -117,6 +117,8 @@ void tinkergnome_LoadSettings() {
   if (lcd_contrast == 0) {
     lcd_contrast = 0xDF;
   }
+
+  tinkergnome_PrintSettings();
 }
 
 void tinkergnome_StoreSettings() {
@@ -159,6 +161,36 @@ void tinkergnome_StoreSettings() {
   SET_LCD_TIMEOUT(lcd_timeout);
   SET_LCD_CONTRAST(lcd_contrast);
 }
+
+#ifdef EEPROM_CHITCHAT
+void tinkergnome_PrintSettings() {
+  SERIAL_ECHO_START;
+  SERIAL_ECHOLNPGM("PID Bed:");
+  SERIAL_ECHO_START;
+  SERIAL_ECHOPAIR(" Kp", bedKp);
+  SERIAL_ECHOPAIR(" Ki", unscalePID_i(bedKi));
+  SERIAL_ECHOPAIR(" Kd", unscalePID_d(bedKd));
+  SERIAL_EOL;
+
+#if EXTRUDERS > 1
+  SERIAL_ECHO_START;
+  SERIAL_ECHOLNPGM("Extruder 2 Steps / mm:");
+  SERIAL_ECHO_START;
+  SERIAL_ECHOPAIR("  E2: ", e2_steps_per_unit);
+  SERIAL_EOL;
+#endif
+
+#ifdef PIDTEMP
+  SERIAL_ECHO_START;
+  SERIAL_ECHOLNPGM("E2 PID settings:");
+  SERIAL_ECHO_START;
+  SERIAL_ECHOPAIR("   M301 T1 P", pid2[0]);
+  SERIAL_ECHOPAIR(" I", unscalePID_i(pid2[1]));
+  SERIAL_ECHOPAIR(" D", unscalePID_d(pid2[2]));
+  SERIAL_EOL;
+#endif
+}
+#endif
 
 void tinkergnome_init() {
   sleep_state = 0x0;
@@ -296,6 +328,8 @@ void tinkergnome_init() {
   if (version < EXPERT_VERSION + 1) {
     SET_EXPERT_VERSION(EXPERT_VERSION);
   }
+
+  tinkergnome_PrintSettings();
 }
 
 void menu_printing_init()

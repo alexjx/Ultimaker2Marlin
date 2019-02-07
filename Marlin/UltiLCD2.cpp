@@ -40,7 +40,6 @@ static void lcd_menu_special_startup();
 
 void lcd_init()
 {
-    tinkergnome_init();
     lcd_lib_init();
     if (!lcd_material_verify_material_settings())
     {

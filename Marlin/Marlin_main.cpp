@@ -595,6 +595,7 @@ void setup()
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
   servo_init();
+  tinkergnome_init();
 
   lcd_init();
 
