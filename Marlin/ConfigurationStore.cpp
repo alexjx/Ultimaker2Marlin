@@ -47,58 +47,57 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size)
 #endif
 
 #ifdef EEPROM_SETTINGS
-void Config_StoreSettings()
-{
-  char ver[4]= "000";
-  int i=EEPROM_OFFSET;
-  EEPROM_WRITE_VAR(i,ver); // invalidate data first
-  EEPROM_WRITE_VAR(i,axis_steps_per_unit);
-  EEPROM_WRITE_VAR(i,max_feedrate);
-  EEPROM_WRITE_VAR(i,max_acceleration_units_per_sq_second);
-  EEPROM_WRITE_VAR(i,acceleration);
-  EEPROM_WRITE_VAR(i,retract_acceleration);
-  EEPROM_WRITE_VAR(i,minimumfeedrate);
-  EEPROM_WRITE_VAR(i,mintravelfeedrate);
-  EEPROM_WRITE_VAR(i,minsegmenttime);
-  EEPROM_WRITE_VAR(i,max_xy_jerk);
-  EEPROM_WRITE_VAR(i,max_z_jerk);
-  EEPROM_WRITE_VAR(i,max_e_jerk);
-  EEPROM_WRITE_VAR(i,add_homing);
-  #ifndef ULTIPANEL
+void Config_StoreSettings() {
+  char ver[4] = "000";
+  int i = EEPROM_OFFSET;
+  EEPROM_WRITE_VAR(i, ver);  // invalidate data first
+  EEPROM_WRITE_VAR(i, axis_steps_per_unit);
+  EEPROM_WRITE_VAR(i, max_feedrate);
+  EEPROM_WRITE_VAR(i, max_acceleration_units_per_sq_second);
+  EEPROM_WRITE_VAR(i, acceleration);
+  EEPROM_WRITE_VAR(i, retract_acceleration);
+  EEPROM_WRITE_VAR(i, minimumfeedrate);
+  EEPROM_WRITE_VAR(i, mintravelfeedrate);
+  EEPROM_WRITE_VAR(i, minsegmenttime);
+  EEPROM_WRITE_VAR(i, max_xy_jerk);
+  EEPROM_WRITE_VAR(i, max_z_jerk);
+  EEPROM_WRITE_VAR(i, max_e_jerk);
+  EEPROM_WRITE_VAR(i, add_homing);
+#ifndef ULTIPANEL
   int plaPreheatHotendTemp = PLA_PREHEAT_HOTEND_TEMP, plaPreheatHPBTemp = PLA_PREHEAT_HPB_TEMP, plaPreheatFanSpeed = PLA_PREHEAT_FAN_SPEED;
   int absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP, absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP, absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
-  #endif
-  EEPROM_WRITE_VAR(i,plaPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,plaPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,plaPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,absPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,absPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,absPreheatFanSpeed);
-  #ifdef PIDTEMP
-    EEPROM_WRITE_VAR(i,Kp);
-    EEPROM_WRITE_VAR(i,Ki);
-    EEPROM_WRITE_VAR(i,Kd);
-  #else
-	float dummy = 3000.0f;
-    EEPROM_WRITE_VAR(i,dummy);
-    dummy = 0.0f;
-    EEPROM_WRITE_VAR(i,dummy);
-    EEPROM_WRITE_VAR(i,dummy);
-  #endif
-  EEPROM_WRITE_VAR(i,motor_current_setting);
-  #ifdef ENABLE_ULTILCD2
-  EEPROM_WRITE_VAR(i,led_brightness_level);
-  EEPROM_WRITE_VAR(i,led_mode);
-  #else
-  uint8_t dummyByte=0;
-  EEPROM_WRITE_VAR(i,dummyByte);
-  EEPROM_WRITE_VAR(i,dummyByte);
-  #endif
-  EEPROM_WRITE_VAR(i,retract_length);
-  EEPROM_WRITE_VAR(i,retract_feedrate);
-  char ver2[4]=EEPROM_VERSION;
-  i=EEPROM_OFFSET;
-  EEPROM_WRITE_VAR(i,ver2); // validate data
+#endif
+  EEPROM_WRITE_VAR(i, plaPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i, plaPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i, plaPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i, absPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i, absPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i, absPreheatFanSpeed);
+#ifdef PIDTEMP
+  EEPROM_WRITE_VAR(i, Kp);
+  EEPROM_WRITE_VAR(i, Ki);
+  EEPROM_WRITE_VAR(i, Kd);
+#else
+  float dummy = 3000.0f;
+  EEPROM_WRITE_VAR(i, dummy);
+  dummy = 0.0f;
+  EEPROM_WRITE_VAR(i, dummy);
+  EEPROM_WRITE_VAR(i, dummy);
+#endif
+  EEPROM_WRITE_VAR(i, motor_current_setting);
+#ifdef ENABLE_ULTILCD2
+  EEPROM_WRITE_VAR(i, led_brightness_level);
+  EEPROM_WRITE_VAR(i, led_mode);
+#else
+  uint8_t dummyByte = 0;
+  EEPROM_WRITE_VAR(i, dummyByte);
+  EEPROM_WRITE_VAR(i, dummyByte);
+#endif
+  EEPROM_WRITE_VAR(i, retract_length);
+  EEPROM_WRITE_VAR(i, retract_feedrate);
+  char ver2[4] = EEPROM_VERSION;
+  i = EEPROM_OFFSET;
+  EEPROM_WRITE_VAR(i, ver2);  // validate data
   SERIAL_ECHO_START;
   SERIAL_ECHOLNPGM("Settings Stored");
 }
