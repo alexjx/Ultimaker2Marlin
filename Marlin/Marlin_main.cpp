@@ -706,35 +706,34 @@ static void gcode_line_error(const char* err, bool doFlush) {
   serial_count = 0;
 }
 
-inline void get_serial_commands()
-{
+inline void get_serial_commands() {
   long gcode_N;
-  while( buflen < BUFSIZE && MYSERIAL.available() > 0)
-  {
+  while (buflen < BUFSIZE && MYSERIAL.available() > 0) {
     char serial_char = MYSERIAL.read();
     /**
      * If the character ends the line
      */
-    if (serial_char == '\n' || serial_char == '\r')
-    {
-      comment_mode = false; // end of line == end of comment
-      if (!serial_count) continue; // skip empty lines
+    if (serial_char == '\n' || serial_char == '\r') {
+      comment_mode = false;  // end of line == end of comment
+      if (!serial_count)
+        continue;  // skip empty lines
 
-      cmd_line_buffer[serial_count] = 0; // terminate string
-      serial_count = 0; //reset buffer
+      cmd_line_buffer[serial_count] = 0;  // terminate string
+      serial_count = 0;                   //reset buffer
 
-      char* command = cmd_line_buffer;
-      while (*command == ' ') command++; // skip any leading spaces
-      char* npos = (*command == 'N') ? command : NULL; // Require the N parameter to start the line
-      char* apos = strchr(command, '*');
+      char *command = cmd_line_buffer;
+      while (*command == ' ')
+        command++;                                      // skip any leading spaces
+      char *npos = (*command == 'N') ? command : NULL;  // Require the N parameter to start the line
+      char *apos = strchr(command, '*');
 
       if (npos) {
-
         boolean M110 = strstr_P(command, PSTR("M110")) != NULL;
 
         if (M110) {
-          char* n2pos = strchr(command + 4, 'N');
-          if (n2pos) npos = n2pos;
+          char *n2pos = strchr(command + 4, 'N');
+          if (n2pos)
+            npos = n2pos;
         }
 
         gcode_N = strtol(npos + 1, NULL, 10);
@@ -746,7 +745,8 @@ inline void get_serial_commands()
 
         if (apos) {
           byte checksum = 0, count = 0;
-          while (command[count] != '*') checksum ^= command[count++];
+          while (command[count] != '*')
+            checksum ^= command[count++];
 
           if (strtol(apos + 1, NULL, 10) != checksum) {
             gcode_line_error(PSTR(MSG_ERR_CHECKSUM_MISMATCH), true);
@@ -762,14 +762,14 @@ inline void get_serial_commands()
         gcode_LastN = gcode_N;
         // if no errors, continue parsing
       }
-      else if (apos) { // No '*' without 'N'
+      else if (apos) {  // No '*' without 'N'
         gcode_line_error(PSTR(MSG_ERR_NO_LINENUMBER_WITH_CHECKSUM), false);
         return;
       }
 
       // Movement commands alert when stopped
       if (IsStopped()) {
-        char* gpos = strchr(command, 'G');
+        char *gpos = strchr(command, 'G');
         if (gpos) {
           int codenum = strtol(gpos + 1, NULL, 10);
           switch (codenum) {
@@ -787,11 +787,9 @@ inline void get_serial_commands()
 #ifdef ENABLE_ULTILCD2
       // no printing screen for unrelated commands
       bool isSerialCmd = true;
-      char* cmdpos = strchr(command, 'M');
-      if (cmdpos)
-      {
-        if (++cmdpos)
-        {
+      char *cmdpos = strchr(command, 'M');
+      if (cmdpos) {
+        if (++cmdpos) {
           int codenum = strtol(cmdpos, NULL, 10);
           switch (codenum) {
             case 20:
@@ -808,7 +806,6 @@ inline void get_serial_commands()
 #else
       insertcommand(command, true);
 #endif
-
     }
     else if (serial_count >= MAX_CMD_SIZE - 1) {
       // Keep fetching, but ignore normal characters beyond the max length
@@ -818,13 +815,16 @@ inline void get_serial_commands()
       if (MYSERIAL.available() > 0) {
         // if we have one more character, copy it over
         serial_char = MYSERIAL.read();
-        if (!comment_mode) cmd_line_buffer[serial_count++] = serial_char;
+        if (!comment_mode)
+          cmd_line_buffer[serial_count++] = serial_char;
       }
       // otherwise do nothing
     }
-    else { // it's not a newline, carriage return or escape char
-      if (serial_char == ';') comment_mode = true;
-      if (!comment_mode) cmd_line_buffer[serial_count++] = serial_char;
+    else {  // it's not a newline, carriage return or escape char
+      if (serial_char == ';')
+        comment_mode = true;
+      if (!comment_mode)
+        cmd_line_buffer[serial_count++] = serial_char;
     }
   }
 }
@@ -3741,8 +3741,7 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ) {
 
       plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
 
-      if
-        IS_TOOLCHANGE_ENABLED {
+      if IS_TOOLCHANGE_ENABLED {
           if (IS_WIPE_ENABLED && (printing_state < PRINT_STATE_END)) {
             // limit fan speed during priming
             printing_state = PRINT_STATE_PRIMING;
