@@ -2457,7 +2457,7 @@ void process_command(const char *strCmd, bool sendAck)
       }
 
       updatePID();
-      SERIAL_PROTOCOLPGM(MSG_OK);
+      // SERIAL_PROTOCOLPGM(MSG_OK);
       SERIAL_PROTOCOLPGM(" p:");
       SERIAL_PROTOCOL(Kp);
       SERIAL_PROTOCOLPGM(" i:");
@@ -2477,7 +2477,7 @@ void process_command(const char *strCmd, bool sendAck)
             if(code_seen(strCmd, 'D')) bedKd = scalePID_d(code_value());
 
             updatePID();
-            SERIAL_PROTOCOLPGM(MSG_OK);
+            // SERIAL_PROTOCOLPGM(MSG_OK);
             SERIAL_PROTOCOLPGM(" p:");
             SERIAL_PROTOCOL(bedKp);
             SERIAL_PROTOCOLPGM(" i:");
