@@ -3668,216 +3668,194 @@ void reheatNozzle(uint8_t e)
     }
 }
 
-bool changeExtruder(uint8_t nextExtruder, bool moveZ)
-{
-    if ((printing_state == PRINT_STATE_ABORT) || (nextExtruder == active_extruder))
-    {
-        return false;
+bool changeExtruder(uint8_t nextExtruder, bool moveZ) {
+  if ((printing_state == PRINT_STATE_ABORT) || (nextExtruder == active_extruder)) {
+    SERIAL_ECHO_START;
+    SERIAL_ECHOLNPGM("Extruder is already active or current aborting");
+    return false;
+  }
+
+  if (!(position_state & (KNOWNPOS_X | KNOWNPOS_Y))) {
+    // head not homed
+    active_extruder = nextExtruder;
+    SERIAL_ECHO_START;
+    SERIAL_ECHOLNPGM("Header position not yet known");
+    return false;
+  }
+
+  // finish planned moves
+  st_synchronize();
+
+  if (printing_state == PRINT_STATE_ABORT) {
+    SERIAL_ECHOLNPGM("Print aborting");
+    return false;
+  }
+
+  if IS_DUAL_ENABLED {
+      if (printing_state < PRINT_STATE_END) {
+        printing_state = PRINT_STATE_TOOLCHANGE;
+      }
+      float old_feedrate = feedrate;
+      float oldjerk = max_xy_jerk;
+      float oldaccel = acceleration;
+
+      max_xy_jerk = 20;
+      acceleration = 3000;
+
+      memcpy(destination, current_position, sizeof(destination));
+
+      // reset xy offsets
+      for (uint8_t axis = X_AXIS; axis <= Y_AXIS; ++axis) {
+        current_position[axis] -= roundOffset(axis, extruder_offset[axis][active_extruder]);
+      }
+
+      // calculate z offset
+      float zoffset = active_extruder ? add_homing[Z_AXIS] - add_homing_z2 : add_homing_z2 - add_homing[Z_AXIS];
+
+      float wipeOffset;
+
+      {
+#define MIN_TOOLCHANGE_ZHOP 3.4f
+#define MAX_TOOLCHANGE_ZHOP 14.0f
+        float maxDiffZ = max_pos[Z_AXIS] + add_homing[Z_AXIS] - current_position[Z_AXIS];
+        maxDiffZ = constrain(maxDiffZ, 0.0f, MAX_TOOLCHANGE_ZHOP);
+
+        if (IS_WIPE_ENABLED) {
+          wipeOffset = min(maxDiffZ, max(MIN_TOOLCHANGE_ZHOP, MAX_TOOLCHANGE_ZHOP - current_position[Z_AXIS]));
+        }
+        else {
+          wipeOffset = min(maxDiffZ, MIN_TOOLCHANGE_ZHOP);
+        }
+#undef MIN_TOOLCHANGE_ZHOP
+#undef MAX_TOOLCHANGE_ZHOP
+      }
+
+      if (moveZ) {
+        current_position[Z_AXIS] -= wipeOffset;
+
+        // lower buildplate if necessary
+        if (zoffset < 0.0f) {
+          current_position[Z_AXIS] += zoffset;
+        }
+      }
+
+      plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
+
+      if
+        IS_TOOLCHANGE_ENABLED {
+          if (IS_WIPE_ENABLED && (printing_state < PRINT_STATE_END)) {
+            // limit fan speed during priming
+            printing_state = PRINT_STATE_PRIMING;
+            check_axes_activity();
+          }
+          // execute toolchange script
+          current_position[Z_AXIS] = destination[Z_AXIS];
+
+          // Zhop before XY test
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS] / 60, active_extruder);
+
+          if (nextExtruder) {
+            cmdBuffer.processT1(moveZ, IS_WIPE_ENABLED);
+          }
+          else {
+            cmdBuffer.processT0(moveZ, IS_WIPE_ENABLED);
+          }
+        }
+
+      // set new extruder xy offsets
+      for (uint8_t axis = X_AXIS; axis <= Y_AXIS; ++axis) {
+        current_position[axis] += roundOffset(axis, extruder_offset[axis][nextExtruder]);
+      }
+
+      // Set the new active extruder and restore position
+      active_extruder = nextExtruder;
+
+      // clear temperature flags
+      temperature_state &= ~(EXTRUDER_PREHEAT << active_extruder);
+      temperature_state &= ~(EXTRUDER_STANDBY << active_extruder);
+      temperature_state &= ~(EXTRUDER_AUTOSTANDBY << active_extruder);
+
+      SERIAL_ECHO_START;
+      SERIAL_ECHOPGM(MSG_ACTIVE_EXTRUDER);
+      SERIAL_PROTOCOLLN((int)active_extruder);
+
+      plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
+
+      if (moveZ) {
+        if (printing_state < PRINT_STATE_END) {
+          // wait for nozzle heatup
+          reheatNozzle(active_extruder);
+          {
+            if (IS_WIPE_ENABLED) {
+#ifdef PREVENT_DANGEROUS_EXTRUDE
+              if (degHotend(active_extruder) >= get_extrude_min_temp())
+#endif
+              {
+                // execute wipe script
+                cmdBuffer.processWipe(PRINT_STATE_TOOLCHANGE);
+              }
+              // finish wipe moves
+              st_synchronize();
+            }
+            else if (TOOLCHANGE_RETRACTED(active_extruder)
+#ifdef PREVENT_DANGEROUS_EXTRUDE
+                     && (degHotend(active_extruder) >= get_extrude_min_temp())
+#endif
+            ) {
+              // recover toolchange retract
+              recover_toolchange_retract(active_extruder, false);
+            }
+          }
+        }
+
+        // Zhop before XY test
+        // plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
+
+        // reset wipe offset
+        current_position[Z_AXIS] += wipeOffset;
+
+        // raise buildplate if necessary
+        if (zoffset > 0.0f) {
+          current_position[Z_AXIS] += zoffset;
+        }
+      }
+
+      // restore settings
+      feedrate = old_feedrate;
+      max_xy_jerk = oldjerk;
+      acceleration = oldaccel;
+
+      current_position[E_AXIS] = destination[E_AXIS];
+      destination[X_AXIS] = current_position[X_AXIS];
+      destination[Y_AXIS] = current_position[Y_AXIS];
+
+      if (printing_state < PRINT_STATE_ABORT) {
+        printing_state = PRINT_STATE_TOOLREADY;
+      }
+  }
+  else {
+    // Offset extruder (X, Y)
+    for (uint8_t axis = X_AXIS; axis <= Y_AXIS; ++axis) {
+      current_position[axis] = current_position[axis] -
+                               roundOffset(axis, extruder_offset[axis][active_extruder]) +
+                               roundOffset(axis, extruder_offset[axis][nextExtruder]);
     }
 
-    if (!(position_state & (KNOWNPOS_X | KNOWNPOS_Y)))
-    {
-        // head not homed
-        active_extruder = nextExtruder;
-        return false;
-    }
+    // Set the new active extruder and position
+    active_extruder = nextExtruder;
 
-    // finish planned moves
-    st_synchronize();
+    // clear temperature flags
+    temperature_state &= ~(EXTRUDER_PREHEAT << active_extruder);
+    temperature_state &= ~(EXTRUDER_STANDBY << active_extruder);
+    temperature_state &= ~(EXTRUDER_AUTOSTANDBY << active_extruder);
 
-    if (printing_state == PRINT_STATE_ABORT)
-    {
-        return false;
-    }
-
-    if IS_DUAL_ENABLED
-    {
-        if (printing_state < PRINT_STATE_END)
-        {
-            printing_state = PRINT_STATE_TOOLCHANGE;
-        }
-        float old_feedrate = feedrate;
-        float oldjerk = max_xy_jerk;
-        float oldaccel = acceleration;
-
-        max_xy_jerk  = 20;
-        acceleration = 3000;
-
-        memcpy(destination, current_position, sizeof(destination));
-
-        // reset xy offsets
-        for(uint8_t axis = X_AXIS; axis <= Y_AXIS; ++axis)
-        {
-           current_position[axis] -= roundOffset(axis, extruder_offset[axis][active_extruder]);
-        }
-
-        // calculate z offset
-        float zoffset = active_extruder ? add_homing[Z_AXIS]-add_homing_z2 : add_homing_z2-add_homing[Z_AXIS];
-
-        float wipeOffset;
-
-        {
-            #define MIN_TOOLCHANGE_ZHOP  3.4f
-            #define MAX_TOOLCHANGE_ZHOP 14.0f
-            float maxDiffZ = max_pos[Z_AXIS] + add_homing[Z_AXIS] - current_position[Z_AXIS];
-            maxDiffZ = constrain(maxDiffZ, 0.0f, MAX_TOOLCHANGE_ZHOP);
-
-            if (IS_WIPE_ENABLED)
-            {
-                wipeOffset = min(maxDiffZ, max(MIN_TOOLCHANGE_ZHOP, MAX_TOOLCHANGE_ZHOP - current_position[Z_AXIS]));
-            }
-            else
-            {
-                wipeOffset = min(maxDiffZ, MIN_TOOLCHANGE_ZHOP);
-            }
-            #undef MIN_TOOLCHANGE_ZHOP
-            #undef MAX_TOOLCHANGE_ZHOP
-        }
-
-        if (moveZ)
-        {
-            current_position[Z_AXIS] -= wipeOffset;
-
-            // lower buildplate if necessary
-            if (zoffset < 0.0f)
-            {
-               current_position[Z_AXIS] += zoffset;
-            }
-        }
-
-        plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
-
-        if IS_TOOLCHANGE_ENABLED
-        {
-            if (IS_WIPE_ENABLED && (printing_state < PRINT_STATE_END))
-            {
-                // limit fan speed during priming
-                printing_state = PRINT_STATE_PRIMING;
-                check_axes_activity();
-            }
-            // execute toolchange script
-            current_position[Z_AXIS] = destination[Z_AXIS];
-
-            // Zhop before XY test
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
-
-            if (nextExtruder)
-            {
-                cmdBuffer.processT1(moveZ, IS_WIPE_ENABLED);
-            }
-            else
-            {
-                cmdBuffer.processT0(moveZ, IS_WIPE_ENABLED);
-            }
-        }
-
-        // set new extruder xy offsets
-        for(uint8_t axis = X_AXIS; axis <= Y_AXIS; ++axis)
-        {
-           current_position[axis] += roundOffset(axis, extruder_offset[axis][nextExtruder]);
-        }
-
-
-
-
-        // Set the new active extruder and restore position
-        active_extruder = nextExtruder;
-
-        // clear temperature flags
-        temperature_state &= ~(EXTRUDER_PREHEAT << active_extruder);
-        temperature_state &= ~(EXTRUDER_STANDBY << active_extruder);
-        temperature_state &= ~(EXTRUDER_AUTOSTANDBY << active_extruder);
-
-        SERIAL_ECHO_START;
-        SERIAL_ECHOPGM(MSG_ACTIVE_EXTRUDER);
-        SERIAL_PROTOCOLLN((int)active_extruder);
-
-        plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
-
-        if (moveZ)
-        {
-            if (printing_state < PRINT_STATE_END)
-            {
-                // wait for nozzle heatup
-                reheatNozzle(active_extruder);
-                {
-                    if (IS_WIPE_ENABLED)
-                    {
-            #ifdef PREVENT_DANGEROUS_EXTRUDE
-                        if (degHotend(active_extruder) >= get_extrude_min_temp())
-            #endif
-                        {
-                            // execute wipe script
-                            cmdBuffer.processWipe(PRINT_STATE_TOOLCHANGE);
-                        }
-                        // finish wipe moves
-                        st_synchronize();
-                    }
-                    else if (TOOLCHANGE_RETRACTED(active_extruder)
-            #ifdef PREVENT_DANGEROUS_EXTRUDE
-                      && (degHotend(active_extruder) >= get_extrude_min_temp())
-            #endif
-                            )
-                    {
-                        // recover toolchange retract
-                        recover_toolchange_retract(active_extruder, false);
-                    }
-                }
-            }
-
-            // Zhop before XY test
-            // plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
-
-            // reset wipe offset
-            current_position[Z_AXIS] += wipeOffset;
-
-            // raise buildplate if necessary
-            if (zoffset > 0.0f)
-            {
-               current_position[Z_AXIS] += zoffset;
-            }
-
-        }
-
-        // restore settings
-        feedrate = old_feedrate;
-		max_xy_jerk = oldjerk;
-        acceleration = oldaccel;
-
-        current_position[E_AXIS] = destination[E_AXIS];
-        destination[X_AXIS] = current_position[X_AXIS];
-        destination[Y_AXIS] = current_position[Y_AXIS];
-
-        if (printing_state < PRINT_STATE_ABORT)
-        {
-            printing_state = PRINT_STATE_TOOLREADY;
-        }
-    }
-    else
-    {
-        // Offset extruder (X, Y)
-        for(uint8_t axis = X_AXIS; axis <= Y_AXIS; ++axis)
-        {
-           current_position[axis] = current_position[axis] -
-                                    roundOffset(axis, extruder_offset[axis][active_extruder]) +
-                                    roundOffset(axis, extruder_offset[axis][nextExtruder]);
-        }
-
-        // Set the new active extruder and position
-        active_extruder = nextExtruder;
-
-        // clear temperature flags
-        temperature_state &= ~(EXTRUDER_PREHEAT << active_extruder);
-        temperature_state &= ~(EXTRUDER_STANDBY << active_extruder);
-        temperature_state &= ~(EXTRUDER_AUTOSTANDBY << active_extruder);
-
-		SERIAL_ECHO_START;
-        SERIAL_ECHOPGM(MSG_ACTIVE_EXTRUDER);
-        SERIAL_PROTOCOLLN((int)active_extruder);
-
-    }
-    // restore position
-    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
-    return true;
+    SERIAL_ECHO_START;
+    SERIAL_ECHOPGM("DUAL DISABLED: ");
+    SERIAL_ECHOPGM(MSG_ACTIVE_EXTRUDER);
+    SERIAL_PROTOCOLLN((int)active_extruder);
+  }
+  // restore position
+  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
+  return true;
 }
 #endif
