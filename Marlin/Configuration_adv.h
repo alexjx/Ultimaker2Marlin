@@ -304,19 +304,19 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
 #if defined CUSTOM_USER_MENUS
 
 #define USER_DESC_1 "Preheat chamber"
-#define USER_GCODE_1 \
-    "G28 Z0\n" \
-    "G28 X0 Y0\n" \
-    "G1 X120 Y120 F9000\n" \
-    "G1 Z5\n" \
-    "M106 S255\n" \
-    "M140 S130\n"
-
-#define USER_DESC_2 "Cancel Preheat"
-#define USER_GCODE_2     \
+#define USER_GCODE_1     \
   "G28 Z0\n"             \
   "G28 X0 Y0\n"          \
-  "M106 0\n"           \
+  "G1 X120 Y120 F9000\n" \
+  "G1 Z5\n"              \
+  "M106 S255\n"          \
+  "M140 S130\n"
+
+#define USER_DESC_2 "Cancel Preheat"
+#define USER_GCODE_2 \
+  "G28 Z0\n"         \
+  "G28 X0 Y0\n"      \
+  "M107\n"           \
   "M140 S0\n"
 
 #define USER_DESC_3 "P. Calib: Raise"
@@ -327,32 +327,32 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
   "G1 Z0.1\n"
 
 #define USER_DESC_4 "P. Calib: Front Right"
-#define USER_GCODE_4 \
-  "G1 Z5 F9000\n" \
+#define USER_GCODE_4    \
+  "G1 Z5 F9000\n"       \
   "G1 X200 Y30 F9000\n" \
   "G1 Z0.1 F9000"
 
 #define USER_DESC_5 "P. Calib: Back Right"
-#define USER_GCODE_5   \
-  "G1 Z5 F9000\n" \
+#define USER_GCODE_5     \
+  "G1 Z5 F9000\n"        \
   "G1 X200 Y200 F9000\n" \
   "G1 Z0.1 F9000"
 
 #define USER_DESC_6 "P. Calib: Back Left"
-#define USER_GCODE_6 \
-  "G1 Z5 F9000\n" \
+#define USER_GCODE_6    \
+  "G1 Z5 F9000\n"       \
   "G1 X30 Y200 F9000\n" \
   "G1 Z0.1 F9000"
 
 #define USER_DESC_7 "P. Calib: Front Left"
-#define USER_GCODE_7 \
-  "G1 Z5 F9000\n" \
+#define USER_GCODE_7   \
+  "G1 Z5 F9000\n"      \
   "G1 X30 Y30 F9000\n" \
   "G1 Z0.1 F9000"
 
 #define USER_DESC_8 "Move to Center"
-#define USER_GCODE_8 \
-  "G1 Z5 F9000\n" \
+#define USER_GCODE_8     \
+  "G1 Z5 F9000\n"        \
   "G1 X120 Y110 F9000\n" \
   "G1 Z0.1 F9000"
 
