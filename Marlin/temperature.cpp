@@ -872,28 +872,26 @@ static float analog2tempBed(int raw) {
 
 /* Called to get the raw values into the the actual temperatures. The raw values are created in interrupt context,
     and this function is called from normal context as it is too slow to run in interrupts and will block the stepper routine otherwise */
-static void updateTemperaturesFromRawValues()
-{
+static void updateTemperaturesFromRawValues() {
 #ifdef HEATER_0_USES_MAX6675
-	current_temperature_raw[0] = read_max6675();
+  current_temperature_raw[0] = read_max6675();
 #endif
 
-    for(uint8_t e=0;e<EXTRUDERS;++e)
-    {
-        current_temperature[e] = analog2temp(current_temperature_raw[e], e);
-    }
-    #if TEMP_SENSOR_BED != 0
-      current_temperature_bed = analog2tempBed(current_temperature_bed_raw);
-    #endif
-    #ifdef TEMP_SENSOR_1_AS_REDUNDANT
-      redundant_temperature = analog2temp(redundant_temperature_raw, 1);
-    #endif
-    //Reset the watchdog after we know we have a temperature measurement.
-    watchdog_reset();
+  for (uint8_t e = 0; e < EXTRUDERS; ++e) {
+    current_temperature[e] = analog2temp(current_temperature_raw[e], e);
+  }
+#if TEMP_SENSOR_BED != 0
+  current_temperature_bed = analog2tempBed(current_temperature_bed_raw);
+#endif
+#ifdef TEMP_SENSOR_1_AS_REDUNDANT
+  redundant_temperature = analog2temp(redundant_temperature_raw, 1);
+#endif
+  //Reset the watchdog after we know we have a temperature measurement.
+  watchdog_reset();
 
-    CRITICAL_SECTION_START;
-    temp_meas_ready = false;
-    CRITICAL_SECTION_END;
+  CRITICAL_SECTION_START;
+  temp_meas_ready = false;
+  CRITICAL_SECTION_END;
 }
 
 void tp_init()
