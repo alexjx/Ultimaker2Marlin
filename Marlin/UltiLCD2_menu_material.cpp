@@ -387,7 +387,13 @@ static void lcd_menu_change_material_insert_wait_user_ready()
     retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(menu_extruder);
     max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 
-    quickStop();
+    // use quickStop() here is wrong, since there is a G28 queued for homing.
+    // but we didn't sync with it. If we call quickStop() here, G28 will trigger
+    // endstop error, and we could not blindly call st_synchronize(), since will
+    // recursively call into lcd_update() again.
+    while (blocks_queued()) {
+      idle(false);
+    }
     current_position[E_AXIS] = 0.0f;
     plan_set_e_position(current_position[E_AXIS], menu_extruder, true);
 
@@ -439,38 +445,40 @@ static void lcd_menu_change_material_insert_forward()
     lcd_lib_update_screen();
 }
 
-static void materialInsertReady()
-{
-    //Set E motor power to default.
-    quickStop();
+static void materialInsertReady() {
+  // use quickStop() here is wrong, since there is a G28 queued for homing.
+  // but we didn't sync with it. If we call quickStop() here, G28 will trigger
+  // endstop error, and we could not blindly call st_synchronize(), since will
+  // recursively call into lcd_update() again.
+  while (blocks_queued()) {
+    idle(false);
+  }
+
+  //Set E motor power to default.
 #if EXTRUDERS > 1 && defined(MOTOR_CURRENT_PWM_E_PIN) && MOTOR_CURRENT_PWM_E_PIN > -1
-    digipot_current(2, menu_extruder ? motor_current_e2 : motor_current_setting[2]);
+  digipot_current(2, menu_extruder ? motor_current_e2 : motor_current_setting[2]);
 #else
-    digipot_current(2, motor_current_setting[2]);
+  digipot_current(2, motor_current_setting[2]);
 #endif
-    lcd_remove_menu();
+  lcd_remove_menu();
 
-    // retract material
-    current_position[E_AXIS] = 0.0f;
-    plan_set_e_position(current_position[E_AXIS], menu_extruder, true);
-    if (EXTRUDER_RETRACTED(menu_extruder))
-    {
-        current_position[E_AXIS] -= retract_recover_length[menu_extruder];
-    }
-    else
-    {
-        current_position[E_AXIS] -= end_of_print_retraction / volume_to_filament_length[menu_extruder];
-    }
-    plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_feedrate/60, menu_extruder);
+  // retract material
+  current_position[E_AXIS] = 0.0f;
+  plan_set_e_position(current_position[E_AXIS], menu_extruder, true);
+  if (EXTRUDER_RETRACTED(menu_extruder)) {
+    current_position[E_AXIS] -= retract_recover_length[menu_extruder];
+  }
+  else {
+    current_position[E_AXIS] -= end_of_print_retraction / volume_to_filament_length[menu_extruder];
+  }
+  plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_feedrate / 60, menu_extruder);
 
-    if (!card.sdprinting())
-    {
-        // cool down nozzle
-        for(uint8_t n=0; n<EXTRUDERS; n++)
-        {
-            setTargetHotend(0, n);
-        }
+  if (!card.sdprinting()) {
+    // cool down nozzle
+    for (uint8_t n = 0; n < EXTRUDERS; n++) {
+      setTargetHotend(0, n);
     }
+  }
 }
 
 static void lcd_menu_change_material_insert()
