@@ -554,13 +554,15 @@ void manage_heater() {
 
 #ifndef PID_OPENLOOP
     pid_error[e] = target_temp - pid_input;
-    //K1 defined in Configuration.h in the PID settings
-    #define K2 (1.0 - K1)
-    #if EXTRUDERS > 1
-        dTerm[e] = ((e ? pid2[2] : Kd) * (pid_input - temp_dState[e])) * K2 + (K1 * dTerm[e]);
-    #else
-        dTerm[e] = (Kd * (pid_input - temp_dState[e])) * K2 + (K1 * dTerm[e]);
-    #endif
+
+//K1 defined in Configuration.h in the PID settings
+#define K2 (1.0 - K1)
+#if EXTRUDERS > 1
+    dTerm[e] = ((e ? pid2[2] : Kd) * (pid_input - temp_dState[e])) * K2 + (K1 * dTerm[e]);
+#else
+    dTerm[e] = (Kd * (pid_input - temp_dState[e])) * K2 + (K1 * dTerm[e]);
+#endif
+
     if (pid_error[e] > PID_FUNCTIONAL_RANGE) {
       pid_output = BANG_MAX;
       pid_reset[e] = true;
