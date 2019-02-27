@@ -2098,6 +2098,7 @@ void process_command(const char *strCmd, bool sendAck)
       {
         lcd_clearstatus();
       }
+      ClearToSend();
       break;
     case 114: // M114
       SERIAL_PROTOCOLPGM("X:");
@@ -2913,6 +2914,30 @@ void process_command(const char *strCmd, bool sendAck)
       gcode_LastN = Stopped_gcode_LastN;
       FlushSerialRequestResend();
     break;
+
+    case 5001:  // JIA EXTENSION: Set LED Inactive timeout
+    {
+      uint16_t v = led_timeout;
+      if (code_seen(strCmd, 'S')) {
+        v = code_value_long();
+      }
+      SERIAL_PROTOCOLPGM("ok old:");
+      SERIAL_PROTOCOL(led_timeout);
+      SERIAL_PROTOCOLPGM(" new:");
+      SERIAL_PROTOCOLLN(v);
+      led_timeout = v;
+      last_user_interaction = millis();
+      // turn on led if timeout is disabled
+      if (led_timeout == 0) {
+        analogWrite(LED_PIN, 255 * int(led_brightness_level) / 100);
+      }
+      // if we are requested for temporary dim
+      if (code_seen(strCmd, 'T')) {
+        sleep_state |= SLEEP_LED_DIMMED_T;
+      }
+      return;
+    }
+
 #ifdef ENABLE_ULTILCD2
     case 10000://M10000 - Clear the whole LCD
         if (printing_state == PRINT_STATE_RECOVER)
@@ -3012,7 +3037,6 @@ void process_command(const char *strCmd, bool sendAck)
 #endif//ENABLE_ULTILCD2
     }
   }
-
   else if(code_seen(strCmd, 'T'))
   {
     tmp_extruder = code_value();

@@ -73,7 +73,7 @@
 #define SLEEP_COOLING        0x08
 #define SLEEP_SERIAL_CMD     0x10
 #define SLEEP_SERIAL_SCREEN  0x20
-#define SLEEP_RESERVED       0x40
+#define SLEEP_LED_DIMMED_T   0x40
 #define SLEEP_UPDATE_LED     0x80
 
 // control flags

@@ -2730,13 +2730,19 @@ void manage_led_timeout()
             {
                 // dim LED
                 analogWrite(LED_PIN, 255 * min(led_sleep_brightness, led_brightness_level) / 100);
-                sleep_state ^= SLEEP_LED_DIMMED;
+                sleep_state |= SLEEP_LED_DIMMED;
             }
         }
         else if (sleep_state & SLEEP_LED_DIMMED)
         {
             analogWrite(LED_PIN, 255 * int(led_brightness_level) / 100);
-            sleep_state ^= SLEEP_LED_DIMMED;
+            sleep_state &= ~SLEEP_LED_DIMMED;
+
+            // for M5001 with T flag
+            if (sleep_state & SLEEP_LED_DIMMED_T) {
+              sleep_state ^= SLEEP_LED_DIMMED_T;
+              led_timeout = 0; // disable timeout
+            }
         }
     }
 }
