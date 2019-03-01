@@ -2987,7 +2987,7 @@ static void lcd_extrude_init_pull()
     OLD_ACCEL = retract_acceleration;
     OLD_JERK = max_e_jerk;
     max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
-    retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(menu_extruder);
+    retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) * 2.0 / e_steps_per_unit(menu_extruder);
     max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 }
 

@@ -212,7 +212,7 @@ void lcd_menu_change_material_preheat()
       max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 
       current_position[E_AXIS] -= 1.0 / volume_to_filament_length[menu_extruder];
-      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
+      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_feedrate, menu_extruder);
       current_position[E_AXIS] -= FILAMENT_REVERSAL_LENGTH / volume_to_filament_length[menu_extruder];
       plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
 
