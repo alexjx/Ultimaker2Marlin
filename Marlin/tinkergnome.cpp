@@ -3033,12 +3033,20 @@ static void lcd_extrude_fastmove(const float distance)
 
 static void lcd_extrude_pull()
 {
+  #ifdef PREVENT_LENGTHY_EXTRUDE
+    lcd_extrude_fastmove(-EXTRUDE_MAXLENGTH*9/10);
+  #else
     lcd_extrude_fastmove(-FILAMENT_REVERSAL_LENGTH*2);
+  #endif
 }
 
 static void lcd_extrude_load()
 {
+  #ifdef PREVENT_LENGTHY_EXTRUDE
+    lcd_extrude_fastmove(EXTRUDE_MAXLENGTH*9/10);
+  #else
     lcd_extrude_fastmove(FILAMENT_REVERSAL_LENGTH*2);
+  #endif
 }
 
 static void lcd_extrude_tune()
