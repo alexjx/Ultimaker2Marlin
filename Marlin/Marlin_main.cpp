@@ -1761,6 +1761,10 @@ void process_command(const char *strCmd, bool sendAck)
         }
         setTargetHotend(newTemperature, tmp_extruder);
       }
+      // set temp offset
+      if (code_seen(strCmd, 'O')) {
+        setTargetHotendOffset((int8_t)code_value(), tmp_extruder);
+      }
       if (printing_state != PRINT_STATE_RECOVER)
       {
         setWatch();
@@ -1768,7 +1772,12 @@ void process_command(const char *strCmd, bool sendAck)
       break;
     case 140: // M140 set bed temp
 #if TEMP_SENSOR_BED != 0
-      if (code_seen(strCmd, 'S')) setTargetBed(code_value());
+      if (code_seen(strCmd, 'S')) {
+        setTargetBed(code_value());
+      }
+      if (code_seen(strCmd, 'O')) {
+        setTargetBedOffset((int8_t)code_value());
+      }
 #endif // TEMP_SENSOR_BED
       break;
     case 105 : // M105

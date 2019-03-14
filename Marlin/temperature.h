@@ -106,6 +106,10 @@ FORCE_INLINE void setTargetBed(const uint16_t &celsius)
 #endif // BED_MAXTEMP
 }
 
+FORCE_INLINE void setTargetBedOffset(const int8_t &celsius) {
+  target_temperature_bed_diff = constrain(celsius, -10, 10);
+}
+
 #endif // TEMP_SENSOR_BED
 
 FORCE_INLINE int degTargetHotend(uint8_t extruder) {
@@ -114,6 +118,10 @@ FORCE_INLINE int degTargetHotend(uint8_t extruder) {
 
 FORCE_INLINE void setTargetHotend(const uint16_t &celsius, uint8_t extruder) {
   target_temperature[extruder] = constrainmax(celsius, HEATER_0_MAXTEMP - 15);
+}
+
+FORCE_INLINE void setTargetHotendOffset(const int8_t &celsius, uint8_t extruder) {
+  target_temperature_diff[extruder] = constrain(celsius, -99, 99);
 }
 
 FORCE_INLINE bool isHeatingHotend(uint8_t extruder){
