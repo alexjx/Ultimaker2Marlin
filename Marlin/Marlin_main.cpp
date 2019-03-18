@@ -3718,7 +3718,7 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ) {
 
   if (!(position_state & (KNOWNPOS_X | KNOWNPOS_Y))) {
     // head not homed
-    active_extruder = nextExtruder;
+    // active_extruder = nextExtruder;
     SERIAL_ECHO_START;
     SERIAL_ECHOLNPGM("Header position not yet known");
     return false;
