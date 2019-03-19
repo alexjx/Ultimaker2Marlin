@@ -3752,9 +3752,7 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ) {
 
       // calculate z offset
       float zoffset = active_extruder ? add_homing[Z_AXIS] - add_homing_z2 : add_homing_z2 - add_homing[Z_AXIS];
-
       float wipeOffset;
-
       {
 #define MIN_TOOLCHANGE_ZHOP 3.4f
 #define MAX_TOOLCHANGE_ZHOP 14.0f
@@ -3773,7 +3771,6 @@ bool changeExtruder(uint8_t nextExtruder, bool moveZ) {
 
       if (moveZ) {
         current_position[Z_AXIS] -= wipeOffset;
-
         // lower buildplate if necessary
         if (zoffset < 0.0f) {
           current_position[Z_AXIS] += zoffset;
