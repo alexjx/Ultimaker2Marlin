@@ -2931,10 +2931,6 @@ void process_command(const char *strCmd, bool sendAck)
       if (led_timeout == 0) {
         analogWrite(LED_PIN, 255 * int(led_brightness_level) / 100);
       }
-      // if we are requested for temporary dim
-      if (code_seen(strCmd, 'T')) {
-        sleep_state |= SLEEP_LED_DIMMED_T;
-      }
       return;
     }
 

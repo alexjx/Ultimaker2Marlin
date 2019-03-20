@@ -2719,32 +2719,21 @@ void lcd_menu_move_axes()
 }
 
 #if FAN2_PIN != LED_PIN
-void manage_led_timeout()
-{
-    if ((led_timeout > 0) && !(sleep_state & SLEEP_LED_OFF))
-    {
-        const unsigned long timeout=last_user_interaction + (led_timeout*MILLISECONDS_PER_MINUTE);
-        if (timeout < millis())
-        {
-            if (!(sleep_state & SLEEP_LED_DIMMED))
-            {
-                // dim LED
-                analogWrite(LED_PIN, 255 * min(led_sleep_brightness, led_brightness_level) / 100);
-                sleep_state |= SLEEP_LED_DIMMED;
-            }
-        }
-        else if (sleep_state & SLEEP_LED_DIMMED)
-        {
-            analogWrite(LED_PIN, 255 * int(led_brightness_level) / 100);
-            sleep_state &= ~SLEEP_LED_DIMMED;
-
-            // for M5001 with T flag
-            if (sleep_state & SLEEP_LED_DIMMED_T) {
-              sleep_state ^= SLEEP_LED_DIMMED_T;
-              led_timeout = 0; // disable timeout
-            }
-        }
+void manage_led_timeout() {
+  if ((led_timeout > 0) && !(sleep_state & SLEEP_LED_OFF)) {
+    const unsigned long timeout = last_user_interaction + (led_timeout * MILLISECONDS_PER_MINUTE);
+    if (timeout < millis()) {
+      if (!(sleep_state & SLEEP_LED_DIMMED)) {
+        // dim LED
+        analogWrite(LED_PIN, 255 * min(led_sleep_brightness, led_brightness_level) / 100);
+        sleep_state |= SLEEP_LED_DIMMED;
+      }
     }
+    else if (sleep_state & SLEEP_LED_DIMMED) {
+      analogWrite(LED_PIN, 255 * int(led_brightness_level) / 100);
+      sleep_state &= ~SLEEP_LED_DIMMED;
+    }
+  }
 }
 #endif
 
