@@ -794,14 +794,21 @@ inline void get_serial_commands() {
       if (cmdpos) {
         if (++cmdpos) {
           int codenum = strtol(cmdpos, NULL, 10);
-          switch (codenum) {
-            case 20:
-            case 21:
-            case 22:
-            case 27:
-            case 105:
-              isSerialCmd = false;
-              break;
+          // for none-standard commands
+          if (codenum > 5000 && codenum < 6000) {
+            isSerialCmd = false;
+          }
+          else {
+            switch (codenum) {
+              case 20:
+              case 21:
+              case 22:
+              case 27:
+              case 105:
+              case 117:
+                isSerialCmd = false;
+                break;
+            }
           }
         }
       }
