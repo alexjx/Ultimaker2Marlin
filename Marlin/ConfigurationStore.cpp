@@ -94,7 +94,7 @@ void Config_StoreSettings() {
   EEPROM_WRITE_VAR(i, dummyByte);
 #endif
   EEPROM_WRITE_VAR(i, retract_length[0]);
-  EEPROM_WRITE_VAR(i, retract_feedrate);
+  EEPROM_WRITE_VAR(i, retract_feedrate[0]);
   char ver2[4] = EEPROM_VERSION;
   i = EEPROM_OFFSET;
   EEPROM_WRITE_VAR(i, ver2);  // validate data
