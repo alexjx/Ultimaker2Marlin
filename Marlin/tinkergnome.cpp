@@ -1016,7 +1016,11 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
                 lcd_lib_draw_string_leftP(5, PSTR("Retract length"));
                 flags |= MENU_STATUSLINE;
             }
-            lcd_lib_draw_string_leftP(15, PSTR("Retract"));
+            if (active_extruder) {
+              lcd_lib_draw_string_leftP(15, PSTR("Retract(2)"));
+            } else {
+              lcd_lib_draw_string_leftP(15, PSTR("Retract(1)"));
+            }
             lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 15, retractLenGfx);
             // lcd_lib_draw_stringP(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 15, PSTR("L"));
             float_to_string2(retract_length[active_extruder], buffer, PSTR("mm"));
