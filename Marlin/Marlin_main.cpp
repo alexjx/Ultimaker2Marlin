@@ -1292,31 +1292,28 @@ void process_command(const char *strCmd, bool sendAck)
 
       break;
       #ifdef FWRETRACT
-      case 10: // G10 retract
+    case 10:  // G10 retract
       if (printing_state == PRINT_STATE_RECOVER)
         break;
-      if(!EXTRUDER_RETRACTED(active_extruder) && !TOOLCHANGE_RETRACTED(active_extruder))
-      {
+      if (!EXTRUDER_RETRACTED(active_extruder) && !TOOLCHANGE_RETRACTED(active_extruder)) {
         float oldFeedrate = feedrate;
         float oldpos = current_position[E_AXIS];
         memcpy(destination, current_position, sizeof(destination));
-        #if EXTRUDERS > 1
-        if (!IS_DUAL_ENABLED && code_seen(strCmd, 'S') && code_value_long() == 1)
-        {
-            destination[E_AXIS]-=toolchange_retractlen[active_extruder]/volume_to_filament_length[active_extruder];
-            feedrate=toolchange_retractfeedrate[active_extruder];
+#if EXTRUDERS > 1
+        if (!IS_DUAL_ENABLED && code_seen(strCmd, 'S') && code_value_long() == 1) {
+          destination[E_AXIS] -= toolchange_retractlen[active_extruder] / volume_to_filament_length[active_extruder];
+          feedrate = toolchange_retractfeedrate[active_extruder];
         }
-        else
-        {
-            destination[E_AXIS]-=retract_length/volume_to_filament_length[active_extruder];
-            feedrate=retract_feedrate;
+        else {
+          destination[E_AXIS] -= retract_length / volume_to_filament_length[active_extruder];
+          feedrate = retract_feedrate;
         }
-        #else
-        destination[E_AXIS]-=retract_length/volume_to_filament_length[active_extruder];
-        feedrate=retract_feedrate;
-        #endif
+#else
+        destination[E_AXIS] -= retract_length / volume_to_filament_length[active_extruder];
+        feedrate = retract_feedrate;
+#endif
         retract_recover_feedrate[active_extruder] = feedrate;
-        retract_recover_length[active_extruder] = current_position[E_AXIS]-destination[E_AXIS];//Set the recover length to whatever distance we retracted so we recover properly.
+        retract_recover_length[active_extruder] = current_position[E_AXIS] - destination[E_AXIS];  //Set the recover length to whatever distance we retracted so we recover properly.
         SET_EXTRUDER_RETRACT(active_extruder);
         prepare_move(strCmd);
         feedrate = oldFeedrate;
@@ -1325,28 +1322,27 @@ void process_command(const char *strCmd, bool sendAck)
       }
 
       break;
-      case 11: // G11 retract_recover
+    case 11:  // G11 retract_recover
       if (printing_state == PRINT_STATE_RECOVER)
         break;
-      if(EXTRUDER_RETRACTED(active_extruder))
-      {
-      #if EXTRUDERS > 1
+      if (EXTRUDER_RETRACTED(active_extruder)) {
+#if EXTRUDERS > 1
         recover_toolchange_retract(active_extruder, false);
-      #endif
+#endif
         float oldpos = current_position[E_AXIS];
         memcpy(destination, current_position, sizeof(destination));
-        destination[E_AXIS]+=retract_recover_length[active_extruder];
+        destination[E_AXIS] += retract_recover_length[active_extruder];
         float oldFeedrate = feedrate;
-        feedrate=retract_recover_feedrate[active_extruder];
+        feedrate = retract_recover_feedrate[active_extruder];
         CLEAR_EXTRUDER_RETRACT(active_extruder);
-		retract_recover_length[active_extruder] = 0.0f;
+        retract_recover_length[active_extruder] = 0.0f;
         prepare_move(strCmd);
         feedrate = oldFeedrate;
         destination[E_AXIS] = current_position[E_AXIS] = oldpos;
         plan_set_e_position(oldpos, active_extruder, false);
       }
       break;
-      #endif //FWRETRACT
+#endif       //FWRETRACT
     case 28: //G28 Home all Axis one at a time
       if ((printing_state == PRINT_STATE_RECOVER) || (printing_state == PRINT_STATE_HOMING))
       {
@@ -2271,45 +2267,47 @@ void process_command(const char *strCmd, bool sendAck)
         }
       }
       break;
-    #ifdef FWRETRACT
-    case 207: //M207 - set retract length S[positive mm] F[feedrate mm/min] Z[additional zlift/hop]
+#ifdef FWRETRACT
+    case 207:  //M207 - set retract length S[positive mm] F[feedrate mm/min] Z[additional zlift/hop]
     {
-      if(code_seen(strCmd, 'S'))
-      {
-        retract_length = code_value() ;
-      }
-      if(code_seen(strCmd, 'F'))
-      {
-        retract_feedrate = code_value() ;
-      }
-      if(code_seen(strCmd, 'Z'))
-      {
-        retract_zlift = code_value() ;
-      }
-    }break;
-    case 208: // M208 - set retract recover length S[positive mm surplus to the M207 S*] F[feedrate mm/min]
-    {
-      if(setTargetedHotend(strCmd, 208)){
+      if (setTargetedHotend(strCmd, 207)) {
         break;
       }
-      if(code_seen(strCmd, 'S'))
-      {
+      if (code_seen(strCmd, 'S')) {
+        retract_length = code_value();
+      }
+      if (code_seen(strCmd, 'F')) {
+        retract_feedrate = code_value();
+      }
+      if (code_seen(strCmd, 'Z')) {
+        retract_zlift = code_value();
+      }
+    } break;
+    case 208:  // M208 - set retract recover length S[positive mm surplus to the M207 S*] F[feedrate mm/min]
+    {
+      if (setTargetedHotend(strCmd, 208)) {
+        break;
+      }
+      if (code_seen(strCmd, 'S')) {
         retract_recover_length[tmp_extruder] = code_value();
       }
-      if(code_seen(strCmd, 'F'))
-      {
+      if (code_seen(strCmd, 'F')) {
         retract_recover_feedrate[tmp_extruder] = code_value();
       }
-    }break;
-    case 209: // M209 - S<1=true/0=false> enable automatic retract detect if the slicer did not support G10/11: every normal extrude-only move will be classified as retract depending on the direction.
+    } break;
+    case 209:  // M209 - S<1=true/0=false> enable automatic retract detect if the slicer did not support G10/11: every normal extrude-only move will be classified as retract depending on the direction.
     {
-      if(code_seen(strCmd, 'S'))
-      {
-        int t= code_value() ;
-        switch(t)
-        {
-          case 0: reset_retractstate();retract_state &= ~AUTO_RETRACT;break;
-          case 1: reset_retractstate();retract_state |= AUTO_RETRACT;break;
+      if (code_seen(strCmd, 'S')) {
+        int t = code_value();
+        switch (t) {
+          case 0:
+            reset_retractstate();
+            retract_state &= ~AUTO_RETRACT;
+            break;
+          case 1:
+            reset_retractstate();
+            retract_state |= AUTO_RETRACT;
+            break;
           default:
             SERIAL_ECHO_START;
             SERIAL_ECHOPGM(MSG_UNKNOWN_COMMAND);
@@ -2318,9 +2316,9 @@ void process_command(const char *strCmd, bool sendAck)
         }
       }
 
-    }break;
-    #endif // FWRETRACT
-    #if EXTRUDERS > 1
+    } break;
+#endif  // FWRETRACT
+#if EXTRUDERS > 1
     case 218: // M218 - set hotend offset (in mm), T<extruder_number> X<offset_on_X> Y<offset_on_Y>
     {
       if(setTargetedHotend(strCmd, 218)){
