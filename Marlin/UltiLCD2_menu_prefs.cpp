@@ -1317,9 +1317,13 @@ static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
             lcd_lib_draw_string_leftP(5, PSTR("Retract length"));
             flags |= MENU_STATUSLINE;
         }
-        lcd_lib_draw_string_leftP(16, PSTR("Retract"));
+        if (menu_extruder) {
+          lcd_lib_draw_string_leftP(16, PSTR("Retract(2)"));
+        } else {
+          lcd_lib_draw_string_leftP(16, PSTR("Retract(1)"));
+        }
         lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 16, retractLenGfx);
-        float_to_string2(retract_length[active_extruder], buffer, PSTR("mm"));
+        float_to_string2(retract_length[menu_extruder], buffer, PSTR("mm"));
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                               , 16
                               , 7*LCD_CHAR_SPACING
@@ -1337,7 +1341,7 @@ static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 26, retractSpeedGfx);
-        int_to_string(retract_feedrate[active_extruder] / 60 + 0.5, buffer, PSTR("mm/s"));
+        int_to_string(retract_feedrate[menu_extruder] / 60 + 0.5, buffer, PSTR("mm/s"));
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                               , 26
                               , 7*LCD_CHAR_SPACING
@@ -1366,33 +1370,35 @@ static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
     }
 }
 
-void lcd_menu_retraction()
-{
-    lcd_basic_screen();
-    lcd_lib_draw_hline(3, 124, 13);
+static void __lcd_menu_retraction() {
+  lcd_basic_screen();
+  lcd_lib_draw_hline(3, 124, 13);
 
-    menu.process_submenu(get_retract_menuoption, 5);
+  menu.process_submenu(get_retract_menuoption, 5);
 
-    uint8_t flags = 0;
+  uint8_t flags = 0;
 #if EXTRUDERS > 1
-    for (uint8_t index=0; index<6; ++index) {
-        menu.drawSubMenu(drawRetractSubmenu, index, flags);
-    }
+  for (uint8_t index=0; index<6; ++index) {
+      menu.drawSubMenu(drawRetractSubmenu, index, flags);
+  }
 #else
-    for (uint8_t index=0; index<5; ++index) {
-        menu.drawSubMenu(drawRetractSubmenu, index, flags);
-    }
+  for (uint8_t index=0; index<5; ++index) {
+      menu.drawSubMenu(drawRetractSubmenu, index, flags);
+  }
 #endif
-    if (!(flags & MENU_STATUSLINE))
-    {
-        lcd_lib_draw_string_leftP(5, PSTR("Retraction settings"));
-    }
+  if (!(flags & MENU_STATUSLINE))
+  {
+      lcd_lib_draw_string_leftP(5, PSTR("Retraction settings"));
+  }
 
-    lcd_lib_update_screen();
+  lcd_lib_update_screen();
 }
 
-static void lcd_store_motorcurrent()
-{
+void lcd_menu_retraction() {
+  lcd_select_nozzle(__lcd_menu_retraction, NULL);
+}
+
+static void lcd_store_motorcurrent() {
 #if (EXTRUDERS > 1) && defined(MOTOR_CURRENT_PWM_E_PIN) && (MOTOR_CURRENT_PWM_E_PIN > -1)
     for (uint8_t i=0; i<2; ++i)
     {
