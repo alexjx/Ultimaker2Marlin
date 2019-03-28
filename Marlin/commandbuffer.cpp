@@ -240,10 +240,10 @@ void CommandBuffer::processWipe(const uint8_t printState)
     // retract before wipe
     if (!EXTRUDER_RETRACTED(active_extruder))
     {
-        retract_recover_length[active_extruder] = retract_length/volume_to_filament_length[active_extruder];
-        SET_EXTRUDER_RETRACT(active_extruder);
+      retract_recover_length[active_extruder] = retract_length[active_extruder] / volume_to_filament_length[active_extruder];
+      SET_EXTRUDER_RETRACT(active_extruder);
     }
-    relative_e_move(-retract_recover_length[active_extruder], retract_feedrate/60, active_extruder);
+    relative_e_move(-retract_recover_length[active_extruder], retract_feedrate[active_extruder] / 60, active_extruder);
 
     // wait a short moment
     st_synchronize();

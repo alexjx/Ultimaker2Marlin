@@ -10,6 +10,7 @@
 #include "UltiLCD2_hi_lib.h"
 #include "UltiLCD2_menu_utils.h"
 #include "UltiLCD2_menu_prefs.h"
+#include "UltiLCD2_menu_dual.h"
 
 // #define WORD_SETTING(n) (cache._uint16[n])
 
@@ -1202,14 +1203,20 @@ void lcd_menu_axisdirection()
     lcd_lib_update_screen();
 }
 
-static void lcd_preset_retract_speed()
-{
-    lcd_tune_speed(retract_feedrate, 0, max_feedrate[E_AXIS]*60);
+static void __lcd_preset_retract_speed() {
+  lcd_tune_speed(retract_feedrate[menu_extruder], 0, max_feedrate[E_AXIS]*60);
 }
 
-static void lcd_preset_retract_length()
-{
-    lcd_tune_value(retract_length, 0, 50, 0.01);
+static void lcd_preset_retract_speed() {
+  lcd_select_nozzle(__lcd_preset_retract_speed, NULL);
+}
+
+static void __lcd_preset_retract_length() {
+  lcd_tune_value(retract_length[menu_extruder], 0, 50, 0.01);
+}
+
+static void lcd_preset_retract_length() {
+  lcd_select_nozzle(__lcd_preset_retract_length, NULL);
 }
 
 static void lcd_preset_endofprint_length()
@@ -1312,7 +1319,7 @@ static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
         }
         lcd_lib_draw_string_leftP(16, PSTR("Retract"));
         lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 16, retractLenGfx);
-        float_to_string2(retract_length, buffer, PSTR("mm"));
+        float_to_string2(retract_length[active_extruder], buffer, PSTR("mm"));
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                               , 16
                               , 7*LCD_CHAR_SPACING
@@ -1330,7 +1337,7 @@ static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
             flags |= MENU_STATUSLINE;
         }
         lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 26, retractSpeedGfx);
-        int_to_string(retract_feedrate / 60 + 0.5, buffer, PSTR("mm/s"));
+        int_to_string(retract_feedrate[active_extruder] / 60 + 0.5, buffer, PSTR("mm/s"));
         LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                               , 26
                               , 7*LCD_CHAR_SPACING

@@ -230,7 +230,9 @@ extern unsigned char fanSpeedSoftPwm;
 #define TOOLCHANGE_RETRACT   4
 #define AUTO_RETRACT       128
 extern uint8_t retract_state;
-extern float retract_length, retract_feedrate, retract_zlift;
+extern float retract_length[EXTRUDERS];
+extern float retract_feedrate[EXTRUDERS];
+extern float retract_zlift[EXTRUDERS];
 #define AUTORETRACT_ENABLED (retract_state & AUTO_RETRACT)
 #define EXTRUDER_RETRACTED(e) (retract_state & (EXTRUDER_RETRACT << e))
 #define SET_EXTRUDER_RETRACT(e) (retract_state |= (EXTRUDER_RETRACT << e))

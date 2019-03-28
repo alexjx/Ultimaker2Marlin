@@ -693,8 +693,8 @@ void lcd_menu_print_select()
                             target_temperature_bed = max(target_temperature_bed, material[e].bed_temperature);
 #endif
                             fanSpeedPercent = max(fanSpeedPercent, material[e].fan_speed);
-                            retract_feedrate = material[e].retraction_speed[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
-                            retract_length = material[e].retraction_length[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
+                            retract_feedrate[e] = material[e].retraction_speed[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
+                            retract_length[e] = material[e].retraction_length[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
                         }
 
                         if (printing_state == PRINT_STATE_RECOVER)
@@ -1391,9 +1391,9 @@ static void lcd_retraction_details(uint8_t nr)
 {
     char buffer[32] = {0};
     if(nr == 1)
-        float_to_string2(retract_length, buffer, PSTR("mm"));
+        float_to_string2(retract_length[active_extruder], buffer, PSTR("mm"));
     else if(nr == 2)
-        int_to_string(retract_feedrate / 60 + 0.5, buffer, PSTR("mm/sec"));
+        int_to_string(retract_feedrate[active_extruder] / 60 + 0.5, buffer, PSTR("mm/sec"));
     else if(nr == 3)
         float_to_string2(end_of_print_retraction, buffer, PSTR("mm"));
     else
@@ -1409,9 +1409,9 @@ static void lcd_menu_print_tune_retraction()
         if (IS_SELECTED_SCROLL(0))
             menu.return_to_previous();
         else if (IS_SELECTED_SCROLL(1))
-            LCD_EDIT_SETTING_FLOAT001(retract_length, "Retract length", "mm", 0, 50);
+            LCD_EDIT_SETTING_FLOAT001(retract_length[active_extruder], "Retract length", "mm", 0, 50);
         else if (IS_SELECTED_SCROLL(2))
-            LCD_EDIT_SETTING_SPEED(retract_feedrate, "Retract speed", "mm/sec", 0, max_feedrate[E_AXIS] * 60);
+            LCD_EDIT_SETTING_SPEED(retract_feedrate[active_extruder], "Retract speed", "mm/sec", 0, max_feedrate[E_AXIS] * 60);
     }
     lcd_lib_update_screen();
 }

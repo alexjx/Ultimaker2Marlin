@@ -543,14 +543,20 @@ static void lcd_print_flow_nozzle1()
 }
 #endif
 
-static void lcd_tune_retract_length()
-{
-    lcd_tune_value(retract_length, 0, 50, 0.01);
+static void __lcd_tune_retract_length() {
+    lcd_tune_value(retract_length[menu_extruder], 0, 50, 0.01);
 }
 
-static void lcd_tune_retract_speed()
-{
-    lcd_tune_speed(retract_feedrate, 0, max_feedrate[E_AXIS]*60);
+static void lcd_tune_retract_length() {
+  lcd_select_nozzle(__lcd_tune_retract_length, NULL);
+}
+
+static void __lcd_tune_retract_speed() {
+    lcd_tune_speed(retract_feedrate[menu_extruder], 0, max_feedrate[E_AXIS]*60);
+}
+
+static void lcd_tune_retract_speed() {
+  lcd_select_nozzle(__lcd_tune_retract_speed, NULL);
 }
 
 static void lcd_print_tune_accel()
@@ -1013,7 +1019,7 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
             lcd_lib_draw_string_leftP(15, PSTR("Retract"));
             lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 15, retractLenGfx);
             // lcd_lib_draw_stringP(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 15, PSTR("L"));
-            float_to_string2(retract_length, buffer, PSTR("mm"));
+            float_to_string2(retract_length[active_extruder], buffer, PSTR("mm"));
             LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                                   , 15
                                   , 7*LCD_CHAR_SPACING
@@ -1032,7 +1038,7 @@ static void drawPrintSubmenu (uint8_t nr, uint8_t &flags)
             }
             lcd_lib_draw_gfx(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 24, retractSpeedGfx);
             // lcd_lib_draw_stringP(LCD_GFX_WIDTH - 2*LCD_CHAR_MARGIN_RIGHT - 8*LCD_CHAR_SPACING, 24, PSTR("S"));
-            int_to_string(retract_feedrate / 60 + 0.5, buffer, PSTR("mm/s"));
+            int_to_string(retract_feedrate[active_extruder] / 60 + 0.5, buffer, PSTR("mm/s"));
             LCDMenu::drawMenuString(LCD_GFX_WIDTH-LCD_CHAR_MARGIN_RIGHT-7*LCD_CHAR_SPACING
                                   , 24
                                   , 7*LCD_CHAR_SPACING

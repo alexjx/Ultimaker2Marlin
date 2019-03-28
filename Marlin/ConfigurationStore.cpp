@@ -93,7 +93,7 @@ void Config_StoreSettings() {
   EEPROM_WRITE_VAR(i, dummyByte);
   EEPROM_WRITE_VAR(i, dummyByte);
 #endif
-  EEPROM_WRITE_VAR(i, retract_length);
+  EEPROM_WRITE_VAR(i, retract_length[0]);
   EEPROM_WRITE_VAR(i, retract_feedrate);
   char ver2[4] = EEPROM_VERSION;
   i = EEPROM_OFFSET;
@@ -224,8 +224,8 @@ void Config_RetrieveSettings()
         EEPROM_READ_VAR(i,dummyByte);
         EEPROM_READ_VAR(i,dummyByte);
         #endif
-        EEPROM_READ_VAR(i,retract_length);
-        EEPROM_READ_VAR(i,retract_feedrate);
+        EEPROM_READ_VAR(i, retract_length[0]);
+        EEPROM_READ_VAR(i, retract_feedrate[0]);
 
 		// Call updatePID (similar to when we have processed M301)
 		updatePID();
@@ -298,8 +298,10 @@ void Config_ResetDefault()
     led_brightness_level = 100;
     led_mode = LED_MODE_ALWAYS_ON;
     #endif
-    retract_length = 4.5;
-    retract_feedrate = 25 * 60;
+    for (int i = 0; i < EXTRUDERS; i++) {
+      retract_length[i] = 4.5;
+      retract_feedrate[i] = 25 * 60;
+    }
 
 SERIAL_ECHO_START;
 SERIAL_ECHOLNPGM("Hardcoded Default Settings Loaded");

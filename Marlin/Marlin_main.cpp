@@ -212,7 +212,9 @@ bool position_error;
 
 #ifdef FWRETRACT
   uint8_t retract_state=0;
-  float retract_length=4.5, retract_feedrate=25*60, retract_zlift=0.0;
+  float retract_length[EXTRUDERS] = ARRAY_BY_EXTRUDERS(4.5f, 4.5f, 4.5f);
+  float retract_feedrate[EXTRUDERS] = ARRAY_BY_EXTRUDERS(25 * 60, 25 * 60, 25 * 60);
+  float retract_zlift[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0.0f, 0.0f, 0.0f);
   float retract_recover_length[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0.0f, 0.0f, 0.0f);
   float retract_recover_feedrate[EXTRUDERS];
 #endif
@@ -223,7 +225,7 @@ uint8_t printing_state;
 //=============================private variables=============================
 //===========================================================================
 const char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
-static float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
+static float destination[NUM_AXIS] = {0.0, 0.0, 0.0, 0.0};
 #ifdef DELTA
 static float delta[3] = {0.0, 0.0, 0.0};
 #endif
@@ -604,7 +606,7 @@ void setup()
 
   for (uint8_t e=0; e<EXTRUDERS; ++e)
   {
-      retract_recover_feedrate[e] = retract_feedrate;
+      retract_recover_feedrate[e] = retract_feedrate[e];
 #if EXTRUDERS > 1
       SET_TOOLCHANGE_RETRACT(e);
       toolchange_recover_length[e] = toolchange_retractlen[e];
@@ -1305,12 +1307,12 @@ void process_command(const char *strCmd, bool sendAck)
           feedrate = toolchange_retractfeedrate[active_extruder];
         }
         else {
-          destination[E_AXIS] -= retract_length / volume_to_filament_length[active_extruder];
-          feedrate = retract_feedrate;
+          destination[E_AXIS] -= retract_length[active_extruder] / volume_to_filament_length[active_extruder];
+          feedrate = retract_feedrate[active_extruder];
         }
 #else
-        destination[E_AXIS] -= retract_length / volume_to_filament_length[active_extruder];
-        feedrate = retract_feedrate;
+        destination[E_AXIS] -= retract_length[active_extruder] / volume_to_filament_length[active_extruder];
+        feedrate = retract_feedrate[active_extruder];
 #endif
         retract_recover_feedrate[active_extruder] = feedrate;
         retract_recover_length[active_extruder] = current_position[E_AXIS] - destination[E_AXIS];  //Set the recover length to whatever distance we retracted so we recover properly.
@@ -2274,13 +2276,19 @@ void process_command(const char *strCmd, bool sendAck)
         break;
       }
       if (code_seen(strCmd, 'S')) {
-        retract_length = code_value();
+        retract_length[tmp_extruder] = code_value();
       }
       if (code_seen(strCmd, 'F')) {
-        retract_feedrate = code_value();
+        retract_feedrate[tmp_extruder] = code_value();
       }
       if (code_seen(strCmd, 'Z')) {
-        retract_zlift = code_value();
+        retract_zlift[tmp_extruder] = code_value();
+      }
+      if (code_seen(strCmd, 'R')) {
+
+      }
+      if (code_seen(strCmd, 'T')) {
+
       }
     } break;
     case 208:  // M208 - set retract recover length S[positive mm surplus to the M207 S*] F[feedrate mm/min]
@@ -2558,7 +2566,7 @@ void process_command(const char *strCmd, bool sendAck)
         // reset extruder status
         for (uint8_t e=0; e<EXTRUDERS; ++e)
         {
-            retract_recover_feedrate[e] = retract_feedrate;
+            retract_recover_feedrate[e] = retract_feedrate[e];
 #if EXTRUDERS > 1
             SET_TOOLCHANGE_RETRACT(e);
             toolchange_recover_length[e] = toolchange_retractlen[e];
@@ -2718,110 +2726,101 @@ void process_command(const char *strCmd, bool sendAck)
     break;
     #endif //FILAMENTCHANGEENABLE
     #ifdef ENABLE_ULTILCD2
-    case 601: //M601 Pause in UltiLCD2, X[pos] Y[pos] Z[relative lift] L[later retract distance]
+    case 601:  //M601 Pause in UltiLCD2, X[pos] Y[pos] Z[relative lift] L[later retract distance]
     {
-        if (printing_state == PRINT_STATE_RECOVER)
+      if (printing_state == PRINT_STATE_RECOVER)
+        break;
+
+      //        serial_action_P(PSTR("pause"));
+      card.pauseSDPrint();
+
+      st_synchronize();
+      float target[NUM_AXIS];
+      float lastpos[NUM_AXIS];
+      // preserve current position
+      memcpy(lastpos, current_position, sizeof(lastpos));
+      memcpy(target, current_position, sizeof(target));
+      recover_height = lastpos[Z_AXIS];
+
+      //retract
+      //Set the recover length to whatever distance we retracted so we recover properly.
+      retract_recover_length[active_extruder] = retract_length[active_extruder] / volume_to_filament_length[active_extruder];
+      target[E_AXIS] -= retract_recover_length[active_extruder];
+      plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate[active_extruder] / 60, active_extruder);
+      SET_EXTRUDER_RETRACT(active_extruder);
+
+      //lift Z
+      if (code_seen(strCmd, 'Z')) {
+        target[Z_AXIS] += code_value();
+      }
+      plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS] / 60, active_extruder);
+
+      //move xy
+      if (code_seen(strCmd, 'X')) {
+        target[X_AXIS] = code_value();
+      }
+      if (code_seen(strCmd, 'Y')) {
+        target[Y_AXIS] = code_value();
+      }
+      plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS] / 60, active_extruder);
+
+      // additional retract
+      float addRetractLength = 0.0f;
+      bool bAddRetract = code_seen(strCmd, 'L');
+      if (bAddRetract) {
+        addRetractLength = code_value() / volume_to_filament_length[active_extruder];
+        retract_recover_length[active_extruder] += addRetractLength;
+        target[E_AXIS] -= addRetractLength;
+      }
+      plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate[active_extruder] / 60, active_extruder);
+
+      memcpy(current_position, target, sizeof(current_position));
+      memcpy(destination, current_position, sizeof(destination));
+
+      //finish moves
+      st_synchronize();
+      //disable extruder steppers so filament can be removed
+      disable_e0();
+      disable_e1();
+      disable_e2();
+#if EXTRUDERS > 1
+      last_extruder = 0xFF;
+#endif
+      // serial_action_P(PSTR("pause"));
+      card.pauseSDPrint();
+      while (card.pause()) {
+        idle();
+        if (printing_state == PRINT_STATE_ABORT) {
           break;
-
-//        serial_action_P(PSTR("pause"));
-        card.pauseSDPrint();
-
-        st_synchronize();
-        float target[NUM_AXIS];
-        float lastpos[NUM_AXIS];
-        // preserve current position
-        memcpy(lastpos, current_position, sizeof(lastpos));
-        memcpy(target, current_position, sizeof(target));
-        recover_height = lastpos[Z_AXIS];
-
-        //retract
-        //Set the recover length to whatever distance we retracted so we recover properly.
-        retract_recover_length[active_extruder] = retract_length/volume_to_filament_length[active_extruder];
-        target[E_AXIS] -= retract_recover_length[active_extruder];
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
-        SET_EXTRUDER_RETRACT(active_extruder);
-
-        //lift Z
-        if(code_seen(strCmd, 'Z'))
-        {
-          target[Z_AXIS]+= code_value();
         }
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder);
+      }
 
-        //move xy
-        if(code_seen(strCmd, 'X'))
-        {
-          target[X_AXIS] = code_value();
-        }
-        if(code_seen(strCmd, 'Y'))
-        {
-          target[Y_AXIS] = code_value();
-        }
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
+      plan_set_e_position(target[E_AXIS], active_extruder, true);
 
-        // additional retract
-        float addRetractLength = 0.0f;
-        bool bAddRetract = code_seen(strCmd, 'L');
-        if(bAddRetract)
-        {
-          addRetractLength = code_value()/volume_to_filament_length[active_extruder];
-          retract_recover_length[active_extruder] += addRetractLength;
-          target[E_AXIS] -= addRetractLength;
+      if ((printing_state != PRINT_STATE_ABORT) && (card.sdprinting() || HAS_SERIAL_CMD)) {
+        //return to normal
+        if (bAddRetract) {
+          // revert the additional retract
+          target[E_AXIS] += addRetractLength;
+          plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate[active_extruder] / 60, active_extruder);  //Move back the L feed.
         }
-        plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder);
 
-        memcpy(current_position, target, sizeof(current_position));
+        memcpy(current_position, lastpos, sizeof(current_position));
         memcpy(destination, current_position, sizeof(destination));
 
-        //finish moves
-        st_synchronize();
-        //disable extruder steppers so filament can be removed
-        disable_e0();
-        disable_e1();
-        disable_e2();
-    #if EXTRUDERS > 1
-        last_extruder = 0xFF;
-    #endif
-        // serial_action_P(PSTR("pause"));
-        card.pauseSDPrint();
-        while(card.pause()){
-          idle();
-          if (printing_state == PRINT_STATE_ABORT)
-          {
-            break;
-          }
-        }
+        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS] / 60, active_extruder);            //move xy back
+        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS] / 60, active_extruder);  //move z back
 
-        plan_set_e_position(target[E_AXIS], active_extruder, true);
-
-        if ((printing_state != PRINT_STATE_ABORT) && (card.sdprinting() || HAS_SERIAL_CMD))
-        {
-            //return to normal
-            if(bAddRetract)
-            {
-                // revert the additional retract
-                target[E_AXIS] += addRetractLength;
-                plan_buffer_line(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[E_AXIS], retract_feedrate/60, active_extruder); //Move back the L feed.
-            }
-
-            memcpy(current_position, lastpos, sizeof(current_position));
-            memcpy(destination, current_position, sizeof(destination));
-
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], target[Z_AXIS], target[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder); //move xy back
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], target[E_AXIS], homing_feedrate[Z_AXIS]/60, active_extruder); //move z back
-
-            //final unretract
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_feedrate/60, active_extruder);
-            CLEAR_EXTRUDER_RETRACT(active_extruder);
-        }
-        else
-        {
-          memcpy(current_position, target, sizeof(current_position));
-          memcpy(destination, current_position, sizeof(destination));
-        }
-        serial_action_P(PSTR("resume"));
-    }
-    break;
+        //final unretract
+        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_feedrate[active_extruder] / 60, active_extruder);
+        CLEAR_EXTRUDER_RETRACT(active_extruder);
+      }
+      else {
+        memcpy(current_position, target, sizeof(current_position));
+        memcpy(destination, current_position, sizeof(destination));
+      }
+      serial_action_P(PSTR("resume"));
+    } break;
 
     case 605: // M605 store current set values
     {
@@ -3129,128 +3128,105 @@ static void ClearToSend()
   SERIAL_PROTOCOLLNPGM(MSG_OK);
 }
 
-static void get_coordinates(const char *cmd)
-{
+static void get_coordinates(const char *cmd) {
 #ifdef FWRETRACT
-    uint8_t seen=0;
+  uint8_t seen = 0;
 #endif
-    if (printing_state < PRINT_STATE_TOOLCHANGE)
-    {
-        memcpy(destination, current_position, sizeof(destination));
-    }
-    for(uint8_t i=0; i < NUM_AXIS; ++i)
-    {
-        if(code_seen(cmd, axis_codes[i]))
-        {
-            destination[i] = (float)code_value();
-            if ((axis_relative_state & (1 << i)) || (axis_relative_state & RELATIVE_MODE))
-            {
-                destination[i] += current_position[i];
-            }
+  if (printing_state < PRINT_STATE_TOOLCHANGE) {
+    memcpy(destination, current_position, sizeof(destination));
+  }
+  for (uint8_t i = 0; i < NUM_AXIS; ++i) {
+    if (code_seen(cmd, axis_codes[i])) {
+      destination[i] = (float)code_value();
+      if ((axis_relative_state & (1 << i)) || (axis_relative_state & RELATIVE_MODE)) {
+        destination[i] += current_position[i];
+      }
 #ifdef FWRETRACT
-            seen |= (1 << i);
+      seen |= (1 << i);
 #endif
-        }
     }
+  }
 
-    if(code_seen(cmd, 'F'))
-    {
-        next_feedrate = code_value();
-        if(next_feedrate > 0.0f) feedrate = next_feedrate;
-    }
+  if (code_seen(cmd, 'F')) {
+    next_feedrate = code_value();
+    if (next_feedrate > 0.0f)
+      feedrate = next_feedrate;
+  }
 
 #ifdef FWRETRACT
-    float echange=destination[E_AXIS]-current_position[E_AXIS];
+  float echange = destination[E_AXIS] - current_position[E_AXIS];
 
-    if(seen == (1 << E_AXIS))
-    {
-        // e axis only
-        if (echange<-MIN_RETRACT)
-        {
-            if (AUTORETRACT_ENABLED && !EXTRUDER_RETRACTED(active_extruder))
-            {
-                retract_recover_length[active_extruder] = -echange;
-                SET_EXTRUDER_RETRACT(active_extruder);
+  if (seen == (1 << E_AXIS)) {
+    // e axis only
+    if (echange < -MIN_RETRACT) {
+      if (AUTORETRACT_ENABLED && !EXTRUDER_RETRACTED(active_extruder)) {
+        retract_recover_length[active_extruder] = -echange;
+        SET_EXTRUDER_RETRACT(active_extruder);
 
-                //to generate the additional steps, not the destination is changed, but inversely the current position
-                current_position[Z_AXIS]-=retract_zlift;
-                //if slicer retracted by echange=-1mm and you want to retract 3mm, corrrectede=-2mm additionally
-                float correctede=-echange-retract_length;
-                retract_recover_length[active_extruder] -= correctede;
-                feedrate=retract_feedrate;
-                current_position[E_AXIS]-=correctede;
+        //to generate the additional steps, not the destination is changed, but inversely the current position
+        current_position[Z_AXIS] -= retract_zlift[active_extruder];
+        //if slicer retracted by echange=-1mm and you want to retract 3mm, corrrectede=-2mm additionally
+        float correctede = -echange - retract_length[active_extruder];
+        retract_recover_length[active_extruder] -= correctede;
+        feedrate = retract_feedrate[active_extruder];
+        current_position[E_AXIS] -= correctede;
 
-                plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, false);
-            }
-            else
-            {
-                if(TOOLCHANGE_RETRACTED(active_extruder) || (printing_state >= PRINT_STATE_TOOLCHANGE))
-                {
-                    // ignore additional retracts
-                    current_position[E_AXIS] = destination[E_AXIS];
-                    plan_set_e_position(current_position[E_AXIS], active_extruder, false);
-                }
-                else if (EXTRUDER_RETRACTED(active_extruder))
-                {
-                    // keep last retraction in mind
-                    retract_recover_length[active_extruder] -= echange;
-                }
-                else
-                {
-                    retract_recover_length[active_extruder] = -echange;
-                }
-            }
-            SET_EXTRUDER_RETRACT(active_extruder);
+        plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, false);
+      }
+      else {
+        if (TOOLCHANGE_RETRACTED(active_extruder) || (printing_state >= PRINT_STATE_TOOLCHANGE)) {
+          // ignore additional retracts
+          current_position[E_AXIS] = destination[E_AXIS];
+          plan_set_e_position(current_position[E_AXIS], active_extruder, false);
         }
-        else if (echange>MIN_RETRACT) //retract_recover
-        {
-		#if EXTRUDERS > 1
-            // recover tool change retraction
-            recover_toolchange_retract(active_extruder, false);
-		#endif
-            if (EXTRUDER_RETRACTED(active_extruder))
-            {
-                if (AUTORETRACT_ENABLED)
-                {
-                    current_position[Z_AXIS]+=retract_zlift;
-                    //if slicer retracted_recovered by echange=+1mm and you want to retract_recover 3mm, corrrectede=2mm additionally
-                    float correctede=-echange+1*retract_length+retract_recover_length[active_extruder]; //total unretract=retract_length+retract_recover_length[surplus]
-                    current_position[E_AXIS]+=correctede; //to generate the additional steps, not the destination is changed, but inversely the current position
-                    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, false);
-                    feedrate=retract_recover_feedrate[active_extruder];
-                }
-//                else
-//                {
-//                    float correctede=echange-retract_recover_length[active_extruder]; //total unretract=retract_length+retract_recover_length[surplus]
-//                    current_position[E_AXIS]+=correctede; //to generate the additional steps, not the destination is changed, but inversely the current position
-//                    plan_set_e_position(current_position[E_AXIS], active_extruder, false);
-//                }
-            }
-            CLEAR_EXTRUDER_RETRACT(active_extruder);
-            retract_recover_length[active_extruder] = 0.0f;
+        else if (EXTRUDER_RETRACTED(active_extruder)) {
+          // keep last retraction in mind
+          retract_recover_length[active_extruder] -= echange;
         }
+        else {
+          retract_recover_length[active_extruder] = -echange;
+        }
+      }
+      SET_EXTRUDER_RETRACT(active_extruder);
     }
-    else if ((seen & (1 << E_AXIS)) && (EXTRUDER_RETRACTED(active_extruder) || TOOLCHANGE_RETRACTED(active_extruder)) && (echange>0.0f))
+    else if (echange > MIN_RETRACT)  //retract_recover
     {
-		#if EXTRUDERS > 1
-            // first e-move after toolchange -> recover retraction
-            recover_toolchange_retract(active_extruder, false);
-		#endif
-        if (EXTRUDER_RETRACTED(active_extruder))
-        {
-            plan_set_e_position(current_position[E_AXIS]-retract_recover_length[active_extruder], active_extruder, false);
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_recover_feedrate[active_extruder]/60, active_extruder);
-            CLEAR_EXTRUDER_RETRACT(active_extruder);
-		    retract_recover_length[active_extruder] = 0.0f;
+#if EXTRUDERS > 1
+      // recover tool change retraction
+      recover_toolchange_retract(active_extruder, false);
+#endif
+      if (EXTRUDER_RETRACTED(active_extruder)) {
+        if (AUTORETRACT_ENABLED) {
+          current_position[Z_AXIS] += retract_zlift[active_extruder];
+          //if slicer retracted_recovered by echange=+1mm and you want to retract_recover 3mm, corrrectede=2mm additionally
+          float correctede = -echange + 1 * retract_length[active_extruder] + retract_recover_length[active_extruder];  //total unretract=retract_length+retract_recover_length[surplus]
+          current_position[E_AXIS] += correctede;                                                      //to generate the additional steps, not the destination is changed, but inversely the current position
+          plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, false);
+          feedrate = retract_recover_feedrate[active_extruder];
         }
+      }
+      CLEAR_EXTRUDER_RETRACT(active_extruder);
+      retract_recover_length[active_extruder] = 0.0f;
     }
-#endif //FWRETRACT
+  }
+  else if ((seen & (1 << E_AXIS)) && (EXTRUDER_RETRACTED(active_extruder) || TOOLCHANGE_RETRACTED(active_extruder)) && (echange > 0.0f)) {
+#if EXTRUDERS > 1
+    // first e-move after toolchange -> recover retraction
+    recover_toolchange_retract(active_extruder, false);
+#endif
+    if (EXTRUDER_RETRACTED(active_extruder)) {
+      plan_set_e_position(current_position[E_AXIS] - retract_recover_length[active_extruder], active_extruder, false);
+      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], retract_recover_feedrate[active_extruder] / 60, active_extruder);
+      CLEAR_EXTRUDER_RETRACT(active_extruder);
+      retract_recover_length[active_extruder] = 0.0f;
+    }
+  }
+#endif  //FWRETRACT
 
-    // Mark2-Dual: tool change moves are complete: back to normal
-    if (printing_state == PRINT_STATE_TOOLREADY)
-    {
-        printing_state = PRINT_STATE_NORMAL;
-    }
+  // Mark2-Dual: tool change moves are complete: back to normal
+  if (printing_state == PRINT_STATE_TOOLREADY) {
+    printing_state = PRINT_STATE_NORMAL;
+  }
 }
 
 static void get_arc_coordinates(const char *cmd)
