@@ -1203,20 +1203,12 @@ void lcd_menu_axisdirection()
     lcd_lib_update_screen();
 }
 
-static void __lcd_preset_retract_speed() {
+static void lcd_preset_retract_speed() {
   lcd_tune_speed(retract_feedrate[menu_extruder], 0, max_feedrate[E_AXIS]*60);
 }
 
-static void lcd_preset_retract_speed() {
-  lcd_select_nozzle(__lcd_preset_retract_speed, NULL);
-}
-
-static void __lcd_preset_retract_length() {
-  lcd_tune_value(retract_length[menu_extruder], 0, 50, 0.01);
-}
-
 static void lcd_preset_retract_length() {
-  lcd_select_nozzle(__lcd_preset_retract_length, NULL);
+  lcd_tune_value(retract_length[menu_extruder], 0, 50, 0.01);
 }
 
 static void lcd_preset_endofprint_length()
@@ -1370,7 +1362,7 @@ static void drawRetractSubmenu(uint8_t nr, uint8_t &flags)
     }
 }
 
-static void __lcd_menu_retraction() {
+static void lcd_menu_retraction_settings() {
   lcd_basic_screen();
   lcd_lib_draw_hline(3, 124, 13);
 
@@ -1394,8 +1386,12 @@ static void __lcd_menu_retraction() {
   lcd_lib_update_screen();
 }
 
+static void lcd_menu_retraction_dual() {
+  menu.replace_menu(lcd_menu_retraction_settings);
+}
+
 void lcd_menu_retraction() {
-  lcd_select_nozzle(__lcd_menu_retraction, NULL);
+  lcd_select_nozzle(lcd_menu_retraction_dual, NULL);
 }
 
 static void lcd_store_motorcurrent() {

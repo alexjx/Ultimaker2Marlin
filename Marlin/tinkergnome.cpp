@@ -543,20 +543,12 @@ static void lcd_print_flow_nozzle1()
 }
 #endif
 
-static void __lcd_tune_retract_length() {
-    lcd_tune_value(retract_length[menu_extruder], 0, 50, 0.01);
-}
-
 static void lcd_tune_retract_length() {
-  lcd_select_nozzle(__lcd_tune_retract_length, NULL);
-}
-
-static void __lcd_tune_retract_speed() {
-    lcd_tune_speed(retract_feedrate[menu_extruder], 0, max_feedrate[E_AXIS]*60);
+    lcd_tune_value(retract_length[active_extruder], 0, 50, 0.01);
 }
 
 static void lcd_tune_retract_speed() {
-  lcd_select_nozzle(__lcd_tune_retract_speed, NULL);
+    lcd_tune_speed(retract_feedrate[active_extruder], 0, max_feedrate[E_AXIS]*60);
 }
 
 static void lcd_print_tune_accel()
