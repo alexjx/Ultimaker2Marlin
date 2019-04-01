@@ -2978,6 +2978,9 @@ static void lcd_extrude_quit_move()
 
 static void lcd_fastmove_init()
 {
+    // try fixing the unexpected move problem.
+    st_synchronize();
+
     plan_set_e_position(st_get_position(E_AXIS) / e_steps_per_unit(menu_extruder) / volume_to_filament_length[menu_extruder], menu_extruder, true);
     TARGET_POS(E_AXIS) = st_get_position(E_AXIS) / e_steps_per_unit(menu_extruder);
     //Set E motor power lower so the motor will skip instead of grind.
