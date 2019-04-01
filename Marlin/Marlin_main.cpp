@@ -2372,9 +2372,12 @@ void process_command(const char *strCmd, bool sendAck)
     break;
     case 221: // M221 S<factor in percent>- set extrude factor override percentage
     {
+      if (setTargetedHotend(strCmd, 221)) {
+        break;
+      }
       if(code_seen(strCmd, 'S'))
       {
-        extrudemultiply[active_extruder] = code_value() ;
+        extrudemultiply[tmp_extruder] = code_value() ;
       }
     }
     break;
