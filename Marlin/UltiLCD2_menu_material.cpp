@@ -201,18 +201,18 @@ void lcd_menu_change_material_preheat()
 
       // Do a forward push before pulling back the material, reducing blobs at
       // the end of the filament.
-      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 20.0 / volume_to_filament_length[menu_extruder], retract_feedrate[menu_extruder] / 60.0, menu_extruder);
+      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 20.0 / volume_to_filament_length[menu_extruder], 25.0, menu_extruder);
 
       float old_max_feedrate_e = max_feedrate[E_AXIS];
       float old_retract_acceleration = retract_acceleration;
       float old_max_e_jerk = max_e_jerk;
 
-      max_feedrate[E_AXIS] = float(FILAMENT_FAST_STEPS) / e_steps_per_unit(menu_extruder);
-      retract_acceleration = float(FILAMENT_LONG_ACCELERATION_STEPS) / e_steps_per_unit(menu_extruder);
+      max_feedrate[E_AXIS] = FILAMENT_FAST_REVERSE_SPEED;
+      retract_acceleration = FILAMENT_LONG_ACCELERATION;
       max_e_jerk = FILAMENT_LONG_MOVE_JERK;
 
       current_position[E_AXIS] -= 1.0 / volume_to_filament_length[menu_extruder];
-      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], 25.0, menu_extruder);
+      plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
       current_position[E_AXIS] -= FILAMENT_REVERSAL_LENGTH / volume_to_filament_length[menu_extruder];
       plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], max_feedrate[E_AXIS], menu_extruder);
 
