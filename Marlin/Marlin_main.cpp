@@ -1280,7 +1280,7 @@ void process_command(const char *strCmd, bool sendAck)
       if (printing_state == PRINT_STATE_RECOVER)
         break;
 
-      serial_action_P(PSTR("pause"));
+      // serial_action_P(PSTR("pause"));
       LCD_MESSAGEPGM(MSG_DWELL);
       codenum = 0;
       if(code_seen(strCmd, 'P')) codenum = code_value(); // milliseconds to wait
@@ -1290,7 +1290,7 @@ void process_command(const char *strCmd, bool sendAck)
       previous_millis_cmd = millis();
       printing_state = PRINT_STATE_DWELL;
       CommandBuffer::dwell(codenum);
-      serial_action_P(PSTR("resume"));
+      // serial_action_P(PSTR("resume"));
 
       break;
       #ifdef FWRETRACT
