@@ -742,8 +742,8 @@ void manage_heater() {
     iTerm_bed = bedKi * temp_iState_bed;
 
 //K1 defined in Configuration.h in the PID settings
-#define K2 (1.0 - K1)
-    dTerm_bed = (bedKd * (pid_input - temp_dState_bed)) * K2 + (K1 * dTerm_bed);
+#define K2_bed (1.0 - K1_bed)
+    dTerm_bed = (bedKd * (pid_input - temp_dState_bed)) * K2_bed + (K1_bed * dTerm_bed);
     temp_dState_bed = pid_input;
 
     pid_output = constrain(pTerm_bed + iTerm_bed - dTerm_bed, 0, MAX_BED_POWER);
