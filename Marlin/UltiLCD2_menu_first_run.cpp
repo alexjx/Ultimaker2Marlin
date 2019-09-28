@@ -17,46 +17,72 @@
 #include "UltiLCD2_menu_print.h"
 #include "UltiLCD2_menu_utils.h"
 
-#define BED_LEFT_OUTTER_X_SINGLE 20
-#define BED_LEFT_OUTTER_Y_SINGLE 20
-#define BED_LEFT_INNER_X_SINGLE 20
-#define BED_LEFT_INNER_Y_SINGLE (int(max_pos[Y_AXIS])-20)
+// profile dual
+#define BED_LEFT_X      int(max(min_pos[X_AXIS], 0) + 20)
+#define BED_RIGHT_X     int(max(max_pos[X_AXIS], 0) - 20)
 
-#define BED_RIGHT_OUTTER_X_SINGLE (int(max_pos[X_AXIS])-10)
-#define BED_RIGHT_OUTTER_Y_SINGLE 20
-#define BED_RIGHT_INNER_X_SINGLE (int(max_pos[X_AXIS])-10)
-#define BED_RIGHT_INNER_Y_SINGLE (int(max_pos[X_AXIS])-20)
+#define BED_FRONT_Y     int(max(min_pos[Y_AXIS], 0) + 30)
+#define BED_BACK_Y      int(max(max_pos[Y_AXIS], 0) - 20)
+
+#define BED_OUTTER_LEFT_X   BED_LEFT_X
+#define BED_OUTTER_LEFT_Y   BED_FRONT_Y
+#define BED_INNER_LEFT_X    BED_LEFT_X
+#define BED_INNER_LEFT_Y    BED_BACK_Y
+#define BED_OUTTER_RIGHT_X  BED_RIGHT_X
+#define BED_OUTTER_RIGHT_Y  BED_FRONT_Y
+#define BED_INNER_RIGHT_X   BED_RIGHT_X
+#define BED_INNER_RIGHT_Y   BED_BACK_Y
+
+// profile 2
+#define BED_OUTTER_LEFT_X_2   BED_LEFT_X
+#define BED_OUTTER_LEFT_Y_2   BED_FRONT_Y
+#define BED_INNER_LEFT_X_2    BED_LEFT_X
+#define BED_INNER_LEFT_Y_2    BED_BACK_Y
+#define BED_OUTTER_RIGHT_X_2  BED_RIGHT_X
+#define BED_OUTTER_RIGHT_Y_2  BED_FRONT_Y
+#define BED_INNER_RIGHT_X_2   BED_RIGHT_X
+#define BED_INNER_RIGHT_Y_2   BED_BACK_Y
+
 
 static void lcd_menu_first_run_init_2();
 static void lcd_menu_first_run_init_3();
 
-static void lcd_menu_first_run_bed_level_center_adjust();
-static void lcd_menu_first_run_bed_level_left_adjust();
-static void lcd_menu_first_run_bed_level_right_adjust();
+static void lcd_menu_first_run_bed_level_outter_left_adjust();
+static void lcd_menu_first_run_bed_level_outter_right_adjust();
+static void lcd_menu_first_run_bed_level_inner_right_adjust();
+static void lcd_menu_first_run_bed_level_inner_left_adjust();
 static void lcd_menu_first_run_bed_level_paper();
-static void lcd_menu_first_run_bed_level_paper_center();
-static void lcd_menu_first_run_bed_level_paper_left();
-static void lcd_menu_first_run_bed_level_paper_right();
+static void lcd_menu_first_run_bed_level_paper_outter_left();
+static void lcd_menu_first_run_bed_level_paper_outter_right();
+static void lcd_menu_first_run_bed_level_paper_inner_right();
+static void lcd_menu_first_run_bed_level_paper_inner_left();
 
-static void lcd_menu_first_run_bed_level_center_adjust_single_nozzle();
-static void lcd_menu_first_run_bed_level_left_adjust_single_nozzle();
-static void lcd_menu_first_run_bed_level_right_adjust_single_nozzle();
-static void lcd_menu_first_run_bed_level_paper_single_nozzle();
-static void lcd_menu_first_run_bed_level_paper_center_single_nozzle();
-static void lcd_menu_first_run_bed_level_paper_left_single_nozzle();
-static void lcd_menu_first_run_bed_level_paper_right_single_nozzle();
+// static void lcd_menu_first_run_bed_level_outter_left_adjust_2();
+// static void lcd_menu_first_run_bed_level_outter_right_adjust_2();
+// static void lcd_menu_first_run_bed_level_inner_right_adjust_2();
+// static void lcd_menu_first_run_bed_level_inner_left_adjust_2();
+// static void lcd_menu_first_run_bed_level_paper_2();
+// static void lcd_menu_first_run_bed_level_paper_outter_left_2();
+// static void lcd_menu_first_run_bed_level_paper_outter_right_2();
+// static void lcd_menu_first_run_bed_level_paper_inner_right_2();
+// static void lcd_menu_first_run_bed_level_paper_inner_left_2();
 
-static void homeAndParkHeadForCenterAdjustment2();
-static void parkHeadForCenterAdjustment_single_nozzle();
-static void parkHeadForLeftAdjustment_single_nozzle();
-static void parkHeadForRightAdjustment_single_nozzle();
-static void homeAndParkHeadForCenterAdjustment2_single_nozzle();
+static void homeAndParkHeadForOutterLeftAdjustment();
+static void parkHeadForOutterLeftAdjustment();
+static void parkHeadForOutterRightAdjustment();
+static void parkHeadForInnerRightAdjustment();
+static void parkHeadForInnerLeftAdjustment();
+
+// static void homeAndParkHeadForOutterLeftAdjustment_2();
+// static void parkHeadForOutterLeftAdjustment_2();
+// static void parkHeadForOutterRightAdjustment_2();
+// static void parkHeadForInnerRightAdjustment_2();
+// static void parkHeadForInnerLeftAdjustment_2();
 
 static void lcd_menu_first_run_bed_level_store();
 static void lcd_menu_first_run_bed_level_done();
 
 static void lcd_menu_first_run_bed_level_choose_mode();
-
 
 static void lcd_menu_first_run_material_load();
 static void lcd_menu_first_run_material_select_1();
@@ -71,9 +97,134 @@ static void lcd_menu_first_run_material_load_wait();
 static void lcd_menu_first_run_print_1();
 static void lcd_menu_first_run_print_card_detect();
 
-#define DRAW_PROGRESS_NR_IF_NOT_DONE(nr) do { if (!IS_FIRST_RUN_DONE()) { lcd_lib_draw_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/21")); } } while(0)
-#define DRAW_PROGRESS_NR(nr) do { lcd_lib_draw_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/21")); } while(0)
-#define CLEAR_PROGRESS_NR(nr) do { lcd_lib_clear_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/21")); } while(0)
+#define DRAW_PROGRESS_NR_IF_NOT_DONE(nr) do { if (!IS_FIRST_RUN_DONE()) { lcd_lib_draw_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/22")); } } while(0)
+#define DRAW_PROGRESS_NR(nr) do { lcd_lib_draw_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/22")); } while(0)
+#define CLEAR_PROGRESS_NR(nr) do { lcd_lib_clear_stringP((nr < 10) ? 100 : 94, 0, PSTR( #nr "/22")); } while(0)
+
+
+///////////////////////////////////////
+// Common Helpers
+///////////////////////////////////////
+
+static void parkHeadForOutterRightAdjustment()
+{
+    add_homing[Z_AXIS] -= current_position[Z_AXIS];
+    current_position[Z_AXIS] = 0;
+    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
+
+    char buffer[32] = {0};
+    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+#if (EXTRUDERS > 1)
+    if IS_DUAL_ENABLED
+    {
+        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X, BED_OUTTER_RIGHT_Y);
+    }
+    else
+    {
+        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X_2, BED_OUTTER_RIGHT_Y_2);
+    }
+    enquecommand(buffer);
+#else
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X_2, BED_OUTTER_RIGHT_Y_2);
+    enquecommand(buffer);
+#endif
+    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+}
+
+static void parkHeadForInnerRightAdjustment()
+{
+    char buffer[32] = {0};
+    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_INNER_RIGHT_X, BED_INNER_RIGHT_Y);
+    enquecommand(buffer);
+    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+}
+
+static void parkHeadForInnerLeftAdjustment()
+{
+    char buffer[32] = {0};
+    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_INNER_LEFT_X, BED_INNER_LEFT_Y);
+    enquecommand(buffer);
+    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+}
+
+static void parkHeadForOutterLeftAdjustment()
+{
+    char buffer[32] = {0};
+    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+#if (EXTRUDERS > 1)
+    if IS_DUAL_ENABLED
+    {
+        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X, BED_OUTTER_LEFT_Y);
+    }
+    else
+    {
+        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X_2, BED_OUTTER_LEFT_Y_2);
+    }
+    enquecommand(buffer);
+#else
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X_2, BED_OUTTER_LEFT_Y_2);
+    enquecommand(buffer);
+#endif
+
+
+    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
+    enquecommand(buffer);
+}
+
+////////////////////////////////////////////
+// Re-leveling
+////////////////////////////////////////////
+
+// this function reset the add_homing for used as entry
+static void homeAndParkHeadForOutterLeftAdjustment2()
+{
+    add_homing[Z_AXIS] = 0;
+    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
+    char buffer[32] = {0};
+    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, BED_OUTTER_LEFT_X, BED_OUTTER_LEFT_Y);
+    enquecommand(buffer);
+    menu.return_to_previous(false);
+}
+
+//Started bed leveling from the calibration menu
+void lcd_menu_first_run_start_bed_leveling()
+{
+    lcd_question_screen(lcd_menu_first_run_bed_level_outter_left_adjust, homeAndParkHeadForOutterLeftAdjustment2, PSTR("CONTINUE"), NULL, lcd_change_to_previous_menu, PSTR("CANCEL"));
+    lcd_lib_draw_string_centerP(10, PSTR("I will guide you"));
+    lcd_lib_draw_string_centerP(20, PSTR("through the process"));
+    lcd_lib_draw_string_centerP(30, PSTR("of adjusting your"));
+    lcd_lib_draw_string_centerP(40, PSTR("buildplate."));
+    lcd_lib_update_screen();
+}
+
+// static void lcd_menu_first_run_bed_level_choose_mode()
+// {
+//     lcd_question_screen(lcd_menu_first_run_bed_level_outter_left_adjust_2,
+//                         homeAndParkHeadForOutterLeftAdjustment_2,
+//                         PSTR("SINGLE"),
+//                         lcd_menu_first_run_bed_level_outter_left_adjust,
+//                         homeAndParkHeadForOutterLeftAdjustment,
+//                         PSTR("DUAL"));
+//     lcd_lib_draw_string_centerP(10, PSTR("Please choose mode:"));
+//     lcd_lib_draw_string_centerP(20, PSTR("single nozzle?"));
+//     lcd_lib_draw_string_centerP(30, PSTR("or"));
+//     lcd_lib_draw_string_centerP(40, PSTR("dual nozzle?"));
+//     lcd_lib_update_screen();
+// }
+
+
+/////////////////////////////////////////
+// first run
+/////////////////////////////////////////
 
 //Run the first time you start-up the machine or after a factory reset.
 void lcd_menu_first_run_init()
@@ -87,251 +238,6 @@ void lcd_menu_first_run_init()
     lcd_lib_draw_string_centerP(40, PSTR("button to continue"));
     lcd_lib_update_screen();
 }
-
-static void homeAndParkHeadForCenterAdjustment2()
-{
-    add_homing[Z_AXIS] = 0;
-    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
-    enquecommand(buffer);
-    menu.return_to_previous(false);
-}
-//Started bed leveling from the calibration menu
-void lcd_menu_first_run_start_bed_leveling()
-{
-    lcd_question_screen(lcd_menu_first_run_bed_level_choose_mode, NULL, PSTR("CONTINUE"), NULL, lcd_change_to_previous_menu, PSTR("CANCEL"));
-    lcd_lib_draw_string_centerP(10, PSTR("I will guide you"));
-    lcd_lib_draw_string_centerP(20, PSTR("through the process"));
-    lcd_lib_draw_string_centerP(30, PSTR("of adjusting your"));
-    lcd_lib_draw_string_centerP(40, PSTR("buildplate."));
-    lcd_lib_update_screen();
-}
-
-static void lcd_menu_first_run_bed_level_choose_mode()
-{
-    lcd_question_screen(lcd_menu_first_run_bed_level_center_adjust_single_nozzle,
-                        homeAndParkHeadForCenterAdjustment2_single_nozzle,
-                        PSTR("SINGLE"),
-                        lcd_menu_first_run_bed_level_center_adjust,
-                        homeAndParkHeadForCenterAdjustment2,
-                        PSTR("DUAL"));
-    lcd_lib_draw_string_centerP(10, PSTR("Please choose mode:"));
-    lcd_lib_draw_string_centerP(20, PSTR("single nozzle?"));
-    lcd_lib_draw_string_centerP(30, PSTR("or"));
-    lcd_lib_draw_string_centerP(40, PSTR("dual nozzle?"));
-    lcd_lib_update_screen();
-}
-
-static void lcd_menu_first_run_bed_level_center_adjust_single_nozzle()
-{
-    LED_GLOW
-
-    if (lcd_lib_encoder_pos == ENCODER_NO_SELECTION)
-        lcd_lib_encoder_pos = 0;
-
-    if (printing_state == PRINT_STATE_NORMAL && lcd_lib_encoder_pos != 0 && movesplanned() < 4)
-    {
-        current_position[Z_AXIS] -= float(lcd_lib_encoder_pos) * 0.05;
-        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], 60, 0);
-    }
-    lcd_lib_encoder_pos = 0;
-
-    if (blocks_queued())
-        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
-    else
-        lcd_info_screen(lcd_menu_first_run_bed_level_left_adjust_single_nozzle, parkHeadForLeftAdjustment_single_nozzle, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(4);
-    lcd_lib_draw_string_centerP(10, PSTR("Rotate the button"));
-    lcd_lib_draw_string_centerP(20, PSTR("until the nozzle is"));
-    lcd_lib_draw_string_centerP(30, PSTR("a millimeter away"));
-    lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
-    lcd_lib_update_screen();
-}
-
-static void homeAndParkHeadForCenterAdjustment2_single_nozzle()
-{
-    add_homing[Z_AXIS] = 0;
-    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, BED_CENTER_ADJUST_X_SINGLE_NOZZLE, BED_CENTER_ADJUST_Y_SINGLE_NOZZLE);//int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
-    enquecommand(buffer);
-    menu.return_to_previous(false);
-}
-
-static void homeAndParkHeadForLeftInnerAdjustment2_single_nozzle()
-{
-    add_homing[Z_AXIS] = 0;
-    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, BED_CENTER_ADJUST_X_SINGLE_NOZZLE, BED_CENTER_ADJUST_Y_SINGLE_NOZZLE);//int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
-    enquecommand(buffer);
-    menu.return_to_previous(false);
-}
-
-
-
-static void lcd_menu_first_run_bed_level_left_adjust_single_nozzle()
-{
-   LED_GLOW
-    SELECT_MAIN_MENU_ITEM(0);
-
-    lcd_info_screen(lcd_menu_first_run_bed_level_right_adjust_single_nozzle, parkHeadForRightAdjustment_single_nozzle, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(5);
-    lcd_lib_draw_string_centerP(10, PSTR("Turn left buildplate"));
-    lcd_lib_draw_string_centerP(20, PSTR("screw till the nozzle"));
-    lcd_lib_draw_string_centerP(30, PSTR("is a millimeter away"));
-    lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
-
-    lcd_lib_update_screen();
-}
-
-static void lcd_menu_first_run_bed_level_right_adjust_single_nozzle()
-{
-    LED_GLOW
-    SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper_single_nozzle, NULL, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(6);
-    lcd_lib_draw_string_centerP(10, PSTR("Turn right buildplate"));
-    lcd_lib_draw_string_centerP(20, PSTR("screw till the nozzle"));
-    lcd_lib_draw_string_centerP(30, PSTR("is a millimeter away"));
-    lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
-
-    lcd_lib_update_screen();
-}
-
-static void parkHeadForRightAdjustment_single_nozzle()
-{
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-#if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_RIGHT_ADJUST_X_SINGLE_NOZZLE, BED_RIGHT_ADJUST_Y_SINGLE_NOZZLE);// int(max_pos[X_AXIS]), max(int(min_pos[Y_AXIS]), 0));
-    }
-    else
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_RIGHT_ADJUST_X_SINGLE_NOZZLE, BED_RIGHT_ADJUST_Y_SINGLE_NOZZLE); //int(max_pos[X_AXIS]), max(int(min_pos[Y_AXIS]), 0));
-    }
-    enquecommand(buffer);
-#else
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_RIGHT_ADJUST_X_SINGLE_NOZZLE, BED_RIGHT_ADJUST_Y_SINGLE_NOZZLE); //int(max_pos[X_AXIS])-10, max(int(min_pos[Y_AXIS]), 0)+15);
-    enquecommand(buffer);
-#endif
-
-
-    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-}
-
-static void parkHeadForLeftAdjustment_single_nozzle()
-{
-    add_homing[Z_AXIS] -= current_position[Z_AXIS];
-    current_position[Z_AXIS] = 0;
-    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
-
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-#if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_LEFT_ADJUST_X_SINGLE_NOZZLE, BED_LEFT_ADJUST_Y_SINGLE_NOZZLE,0); // max(int(min_pos[X_AXIS]), 0), max(int(min_pos[Y_AXIS]), 0));
-    }
-    else
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_LEFT_ADJUST_X_SINGLE_NOZZLE, BED_LEFT_ADJUST_Y_SINGLE_NOZZLE,0); //max(int(min_pos[X_AXIS]), 0), max(int(min_pos[Y_AXIS]), 0));
-    }
-    enquecommand(buffer);
-#else
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_LEFT_ADJUST_X_SINGLE_NOZZLE, BED_LEFT_ADJUST_Y_SINGLE_NOZZLE); //max(int(min_pos[X_AXIS]), 0), max(int(min_pos[Y_AXIS]), 0));
-    enquecommand(buffer);
-#endif
-    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-}
-
-static void lcd_menu_first_run_bed_level_paper_single_nozzle()
-{
-    SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper_center_single_nozzle, parkHeadForCenterAdjustment_single_nozzle, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(7);
-    lcd_lib_draw_string_centerP(10, PSTR("Repeat this step, but"));
-    lcd_lib_draw_string_centerP(20, PSTR("now use a sheet of"));
-    lcd_lib_draw_string_centerP(30, PSTR("paper to fine-tune"));
-    lcd_lib_draw_string_centerP(40, PSTR("the buildplate level."));
-    lcd_lib_update_screen();
-}
-
-static void lcd_menu_first_run_bed_level_paper_center_single_nozzle()
-{
-    LED_GLOW
-
-    if (lcd_lib_encoder_pos == ENCODER_NO_SELECTION)
-        lcd_lib_encoder_pos = 0;
-
-    if (printing_state == PRINT_STATE_NORMAL && lcd_lib_encoder_pos != 0 && movesplanned() < 4)
-    {
-        current_position[Z_AXIS] -= float(lcd_lib_encoder_pos) * 0.05;
-        lcd_lib_encoder_pos = 0;
-        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], 60, 0);
-    }
-
-    if (blocks_queued())
-        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
-    else
-        lcd_info_screen(lcd_menu_first_run_bed_level_paper_left_single_nozzle, parkHeadForLeftAdjustment_single_nozzle, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(8);
-    lcd_lib_draw_string_centerP(10, PSTR("Slide a paper between"));
-    lcd_lib_draw_string_centerP(20, PSTR("buildplate and nozzle"));
-    lcd_lib_draw_string_centerP(30, PSTR("until you feel a"));
-    lcd_lib_draw_string_centerP(40, PSTR("bit resistance."));
-    lcd_lib_update_screen();
-}
-
-static void parkHeadForCenterAdjustment_single_nozzle()
-{
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_CENTER_ADJUST_X_SINGLE_NOZZLE, BED_CENTER_ADJUST_Y_SINGLE_NOZZLE);
-    enquecommand(buffer);
-    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-}
-
-static void lcd_menu_first_run_bed_level_paper_left_single_nozzle()
-{
-   LED_GLOW
-
-    SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper_right_single_nozzle, parkHeadForRightAdjustment_single_nozzle, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(9);
-    lcd_lib_draw_string_centerP(20, PSTR("Repeat this for"));
-    lcd_lib_draw_string_centerP(30, PSTR("the left corner..."));
-    lcd_lib_update_screen();
-}
-
-static void lcd_menu_first_run_bed_level_paper_right_single_nozzle()
-{
-   LED_GLOW
-
-    SELECT_MAIN_MENU_ITEM(0);
-    if (IS_FIRST_RUN_DONE())
-    {
-        lcd_info_screen(NULL, lcd_menu_first_run_bed_level_store, PSTR("DONE"));
-    }
-    else
-    {
-        lcd_info_screen(lcd_menu_first_run_material_load, lcd_menu_first_run_bed_level_done, PSTR("CONTINUE"));
-    }
-    DRAW_PROGRESS_NR_IF_NOT_DONE(10);
-    lcd_lib_draw_string_centerP(20, PSTR("Repeat this for"));
-    lcd_lib_draw_string_centerP(30, PSTR("the right corner..."));
-    lcd_lib_update_screen();
-}
-
 
 static void homeAndRaiseBed()
 {
@@ -353,19 +259,20 @@ static void lcd_menu_first_run_init_2()
     lcd_lib_update_screen();
 }
 
-static void homeAndParkHeadForCenterAdjustment()
+// this callback is used part of first run
+static void homeAndParkHeadForOutterLeftAdjustment()
 {
     cmd_synchronize();
     CommandBuffer::homeHead();
     char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
+    sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, BED_OUTTER_LEFT_X, BED_OUTTER_LEFT_Y);
     enquecommand(buffer);
 }
 
 static void lcd_menu_first_run_init_3()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_center_adjust, homeAndParkHeadForCenterAdjustment, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_bed_level_outter_left_adjust, homeAndParkHeadForOutterLeftAdjustment, PSTR("CONTINUE"));
     DRAW_PROGRESS_NR_IF_NOT_DONE(3);
     lcd_lib_draw_string_centerP(10, PSTR("After transportation"));
     lcd_lib_draw_string_centerP(20, PSTR("we need to do some"));
@@ -374,34 +281,7 @@ static void lcd_menu_first_run_init_3()
     lcd_lib_update_screen();
 }
 
-static void parkHeadForLeftAdjustment()
-{
-    add_homing[Z_AXIS] -= current_position[Z_AXIS];
-    current_position[Z_AXIS] = 0;
-    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], active_extruder, true);
-
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-#if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), max(int(min_pos[X_AXIS]), 0)+10, max(int(min_pos[Y_AXIS]), 0)+int(DUAL_Y_MIN_POS));
-    }
-    else
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), max(int(min_pos[X_AXIS]), 0)+10, max(int(min_pos[Y_AXIS]), 0)+15);
-    }
-    enquecommand(buffer);
-#else
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), max(int(min_pos[X_AXIS]), 0)+10, max(int(min_pos[Y_AXIS]), 0)+15);
-    enquecommand(buffer);
-#endif
-    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-}
-
-static void lcd_menu_first_run_bed_level_center_adjust()
+static void lcd_menu_first_run_bed_level_outter_left_adjust()
 {
     LED_GLOW
 
@@ -418,7 +298,7 @@ static void lcd_menu_first_run_bed_level_center_adjust()
     if (blocks_queued())
         lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
     else
-        lcd_info_screen(lcd_menu_first_run_bed_level_left_adjust, parkHeadForLeftAdjustment, PSTR("CONTINUE"));
+        lcd_info_screen(lcd_menu_first_run_bed_level_outter_right_adjust, parkHeadForOutterRightAdjustment, PSTR("CONTINUE"));
     DRAW_PROGRESS_NR_IF_NOT_DONE(4);
     lcd_lib_draw_string_centerP(10, PSTR("Rotate the button"));
     lcd_lib_draw_string_centerP(20, PSTR("until the nozzle is"));
@@ -427,39 +307,14 @@ static void lcd_menu_first_run_bed_level_center_adjust()
     lcd_lib_update_screen();
 }
 
-static void parkHeadForRightAdjustment()
-{
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-#if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(max_pos[X_AXIS])-10, max(int(min_pos[Y_AXIS]), 0)+int(DUAL_Y_MIN_POS));
-    }
-    else
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(max_pos[X_AXIS])-10, max(int(min_pos[Y_AXIS]), 0)+15);
-    }
-    enquecommand(buffer);
-#else
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(max_pos[X_AXIS])-10, max(int(min_pos[Y_AXIS]), 0)+15);
-    enquecommand(buffer);
-#endif
-
-
-    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-}
-
-static void lcd_menu_first_run_bed_level_left_adjust()
+static void lcd_menu_first_run_bed_level_outter_right_adjust()
 {
     LED_GLOW
     SELECT_MAIN_MENU_ITEM(0);
 
-    lcd_info_screen(lcd_menu_first_run_bed_level_right_adjust, parkHeadForRightAdjustment, PSTR("CONTINUE"));
+    lcd_info_screen(lcd_menu_first_run_bed_level_inner_right_adjust, parkHeadForInnerRightAdjustment, PSTR("CONTINUE"));
     DRAW_PROGRESS_NR_IF_NOT_DONE(5);
-    lcd_lib_draw_string_centerP(10, PSTR("Turn left buildplate"));
+    lcd_lib_draw_string_centerP(10, PSTR("Turn outter right"));
     lcd_lib_draw_string_centerP(20, PSTR("screw till the nozzle"));
     lcd_lib_draw_string_centerP(30, PSTR("is a millimeter away"));
     lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
@@ -467,13 +322,28 @@ static void lcd_menu_first_run_bed_level_left_adjust()
     lcd_lib_update_screen();
 }
 
-static void lcd_menu_first_run_bed_level_right_adjust()
+static void lcd_menu_first_run_bed_level_inner_right_adjust()
+{
+    LED_GLOW
+    SELECT_MAIN_MENU_ITEM(0);
+
+    lcd_info_screen(lcd_menu_first_run_bed_level_inner_left_adjust, parkHeadForInnerLeftAdjustment, PSTR("CONTINUE"));
+    DRAW_PROGRESS_NR_IF_NOT_DONE(6);
+    lcd_lib_draw_string_centerP(10, PSTR("Turn inner right"));
+    lcd_lib_draw_string_centerP(20, PSTR("screw till the nozzle"));
+    lcd_lib_draw_string_centerP(30, PSTR("is a millimeter away"));
+    lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
+
+    lcd_lib_update_screen();
+}
+
+static void lcd_menu_first_run_bed_level_inner_left_adjust()
 {
     LED_GLOW
     SELECT_MAIN_MENU_ITEM(0);
     lcd_info_screen(lcd_menu_first_run_bed_level_paper, NULL, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(6);
-    lcd_lib_draw_string_centerP(10, PSTR("Turn right buildplate"));
+    DRAW_PROGRESS_NR_IF_NOT_DONE(7);
+    lcd_lib_draw_string_centerP(10, PSTR("Turn inner left"));
     lcd_lib_draw_string_centerP(20, PSTR("screw till the nozzle"));
     lcd_lib_draw_string_centerP(30, PSTR("is a millimeter away"));
     lcd_lib_draw_string_centerP(40, PSTR("from the buildplate."));
@@ -481,22 +351,13 @@ static void lcd_menu_first_run_bed_level_right_adjust()
     lcd_lib_update_screen();
 }
 
-static void parkHeadForCenterAdjustment()
-{
-    char buffer[32] = {0};
-    sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), int(AXIS_CENTER_POS(X_AXIS)), int(max_pos[Y_AXIS])-10);
-    enquecommand(buffer);
-    sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
-    enquecommand(buffer);
-}
+// paper phase
 
 static void lcd_menu_first_run_bed_level_paper()
 {
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper_center, parkHeadForCenterAdjustment, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(7);
+    lcd_info_screen(lcd_menu_first_run_bed_level_paper_outter_left, parkHeadForOutterLeftAdjustment, PSTR("CONTINUE"));
+    DRAW_PROGRESS_NR_IF_NOT_DONE(8);
     lcd_lib_draw_string_centerP(10, PSTR("Repeat this step, but"));
     lcd_lib_draw_string_centerP(20, PSTR("now use a sheet of"));
     lcd_lib_draw_string_centerP(30, PSTR("paper to fine-tune"));
@@ -504,7 +365,7 @@ static void lcd_menu_first_run_bed_level_paper()
     lcd_lib_update_screen();
 }
 
-static void lcd_menu_first_run_bed_level_paper_center()
+static void lcd_menu_first_run_bed_level_paper_outter_left()
 {
     LED_GLOW
 
@@ -521,8 +382,8 @@ static void lcd_menu_first_run_bed_level_paper_center()
     if (blocks_queued())
         lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
     else
-        lcd_info_screen(lcd_menu_first_run_bed_level_paper_left, parkHeadForLeftAdjustment, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(8);
+        lcd_info_screen(lcd_menu_first_run_bed_level_paper_outter_right, parkHeadForOutterRightAdjustment, PSTR("CONTINUE"));
+    DRAW_PROGRESS_NR_IF_NOT_DONE(9);
     lcd_lib_draw_string_centerP(10, PSTR("Slide a paper between"));
     lcd_lib_draw_string_centerP(20, PSTR("buildplate and nozzle"));
     lcd_lib_draw_string_centerP(30, PSTR("until you feel a"));
@@ -530,15 +391,74 @@ static void lcd_menu_first_run_bed_level_paper_center()
     lcd_lib_update_screen();
 }
 
-static void lcd_menu_first_run_bed_level_paper_left()
+static void lcd_menu_first_run_bed_level_paper_outter_right()
+{
+    LED_GLOW
+
+    if (lcd_lib_encoder_pos == ENCODER_NO_SELECTION)
+        lcd_lib_encoder_pos = 0;
+
+    if (printing_state == PRINT_STATE_NORMAL && lcd_lib_encoder_pos != 0 && movesplanned() < 4)
+    {
+        current_position[Z_AXIS] -= float(lcd_lib_encoder_pos) * 0.05;
+        lcd_lib_encoder_pos = 0;
+        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], 60, 0);
+    }
+
+    if (blocks_queued())
+        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
+    else
+        lcd_info_screen(lcd_menu_first_run_bed_level_paper_inner_right, parkHeadForInnerRightAdjustment, PSTR("CONTINUE"));
+    DRAW_PROGRESS_NR_IF_NOT_DONE(10);
+    lcd_lib_draw_string_centerP(10, PSTR("Repeat this for"));
+    lcd_lib_draw_string_centerP(20, PSTR("the outter right"));
+    lcd_lib_draw_string_centerP(30, PSTR("corner..."));
+    lcd_lib_update_screen();
+}
+
+
+static void lcd_menu_first_run_bed_level_paper_inner_right()
+{
+    LED_GLOW
+
+    if (lcd_lib_encoder_pos == ENCODER_NO_SELECTION)
+        lcd_lib_encoder_pos = 0;
+
+    if (printing_state == PRINT_STATE_NORMAL && lcd_lib_encoder_pos != 0 && movesplanned() < 4)
+    {
+        current_position[Z_AXIS] -= float(lcd_lib_encoder_pos) * 0.05;
+        lcd_lib_encoder_pos = 0;
+        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], 60, 0);
+    }
+
+    if (blocks_queued())
+        lcd_info_screen(NULL, NULL, PSTR("CONTINUE"));
+    else
+        lcd_info_screen(lcd_menu_first_run_bed_level_paper_inner_left, parkHeadForInnerLeftAdjustment, PSTR("CONTINUE"));
+    DRAW_PROGRESS_NR_IF_NOT_DONE(11);
+    lcd_lib_draw_string_centerP(10, PSTR("Repeat this for"));
+    lcd_lib_draw_string_centerP(20, PSTR("the inner right"));
+    lcd_lib_draw_string_centerP(30, PSTR("corner..."));
+    lcd_lib_update_screen();
+}
+
+static void lcd_menu_first_run_bed_level_paper_inner_left()
 {
     LED_GLOW
 
     SELECT_MAIN_MENU_ITEM(0);
-    lcd_info_screen(lcd_menu_first_run_bed_level_paper_right, parkHeadForRightAdjustment, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR_IF_NOT_DONE(9);
-    lcd_lib_draw_string_centerP(20, PSTR("Repeat this for"));
-    lcd_lib_draw_string_centerP(30, PSTR("the left corner..."));
+    if (IS_FIRST_RUN_DONE())
+    {
+        lcd_info_screen(NULL, lcd_menu_first_run_bed_level_store, PSTR("DONE"));
+    }
+    else
+    {
+        lcd_info_screen(lcd_menu_first_run_material_load, lcd_menu_first_run_bed_level_done, PSTR("CONTINUE"));
+    }
+    DRAW_PROGRESS_NR_IF_NOT_DONE(12);
+    lcd_lib_draw_string_centerP(10, PSTR("Repeat this for"));
+    lcd_lib_draw_string_centerP(20, PSTR("the inner left"));
+    lcd_lib_draw_string_centerP(30, PSTR("corner..."));
     lcd_lib_update_screen();
 }
 
@@ -561,36 +481,18 @@ static void storeBedLeveling()
 
 static void lcd_menu_first_run_bed_level_store()
 {
+    // menu.return_to_previous();
     storeBedLeveling();
-    menu.return_to_previous();
     menu.return_to_previous(true);
 }
 
 static void lcd_menu_first_run_bed_level_done()
 {
-    menu.return_to_previous();
+    // menu.return_to_previous();
     storeBedLeveling();
     lcd_material_reset_defaults();
 }
 
-static void lcd_menu_first_run_bed_level_paper_right()
-{
-    LED_GLOW
-
-    SELECT_MAIN_MENU_ITEM(0);
-    if (IS_FIRST_RUN_DONE())
-    {
-        lcd_info_screen(NULL, lcd_menu_first_run_bed_level_store, PSTR("DONE"));
-    }
-    else
-    {
-        lcd_info_screen(lcd_menu_first_run_material_load, lcd_menu_first_run_bed_level_done, PSTR("CONTINUE"));
-    }
-    DRAW_PROGRESS_NR_IF_NOT_DONE(10);
-    lcd_lib_draw_string_centerP(20, PSTR("Repeat this for"));
-    lcd_lib_draw_string_centerP(30, PSTR("the right corner..."));
-    lcd_lib_update_screen();
-}
 
 static void parkHeadForHeating()
 {
@@ -604,7 +506,7 @@ static void lcd_menu_first_run_material_load()
 {
     SELECT_MAIN_MENU_ITEM(0);
     lcd_info_screen(lcd_menu_first_run_material_select_1, parkHeadForHeating, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR(11);
+    DRAW_PROGRESS_NR(13);
     lcd_lib_draw_string_centerP(10, PSTR("Now that we leveled"));
     lcd_lib_draw_string_centerP(20, PSTR("the buildplate"));
     lcd_lib_draw_string_centerP(30, PSTR("the next step is"));
@@ -628,7 +530,7 @@ static void lcd_menu_first_run_material_select_1()
     }
     SELECT_MAIN_MENU_ITEM(0);
     lcd_info_screen(lcd_menu_first_run_material_select_material, doCooldown, PSTR("READY"));
-    DRAW_PROGRESS_NR(12);
+    DRAW_PROGRESS_NR(14);
     lcd_lib_draw_string_centerP(10, PSTR("Next, select the"));
     lcd_lib_draw_string_centerP(20, PSTR("material you will"));
     lcd_lib_draw_string_centerP(30, PSTR("insert in this"));
@@ -656,7 +558,7 @@ static void lcd_menu_first_run_material_select_material()
     uint8_t count = eeprom_read_byte(EEPROM_MATERIAL_COUNT_OFFSET());
 
     lcd_scroll_menu(PSTR("MATERIAL"), count, lcd_material_select_callback, lcd_material_select_details_callback);
-    CLEAR_PROGRESS_NR(13);
+    CLEAR_PROGRESS_NR(15);
     lcd_lib_update_screen();
 
     if (lcd_lib_button_pressed)
@@ -675,7 +577,7 @@ static void lcd_menu_first_run_material_select_confirm_material()
 {
     LED_GLOW
     lcd_question_screen(lcd_menu_first_run_material_select_2, lcd_remove_menu, PSTR("YES"), lcd_menu_first_run_material_select_material, lcd_remove_menu, PSTR("NO"));
-    DRAW_PROGRESS_NR(14);
+    DRAW_PROGRESS_NR(15);
     lcd_lib_draw_string_centerP(20, PSTR("You have chosen"));
     lcd_lib_draw_string_center(30, LCD_CACHE_FILENAME(0));
     lcd_lib_draw_string_centerP(40, PSTR("is this right?"));
@@ -686,7 +588,7 @@ static void lcd_menu_first_run_material_select_2()
 {
     SELECT_MAIN_MENU_ITEM(0);
     lcd_info_screen(lcd_menu_first_run_material_load_heatup, NULL, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR(15);
+    DRAW_PROGRESS_NR(16);
     lcd_lib_draw_string_centerP(10, PSTR("Now your Ultimaker2"));
     lcd_lib_draw_string_centerP(20, PSTR("knows what kind"));
     lcd_lib_draw_string_centerP(30, PSTR("of material"));
@@ -716,7 +618,7 @@ static void lcd_menu_first_run_material_load_heatup()
         minProgress = progress;
 
     lcd_basic_screen();
-    DRAW_PROGRESS_NR(16);
+    DRAW_PROGRESS_NR(17);
     lcd_lib_draw_string_centerP(10, PSTR("Please wait,"));
     lcd_lib_draw_string_centerP(20, PSTR("printhead heating for"));
     lcd_lib_draw_string_centerP(30, PSTR("material loading"));
@@ -759,7 +661,7 @@ static void lcd_menu_first_run_material_load_insert()
     }
 
     lcd_info_screen(lcd_menu_first_run_material_load_forward, runMaterialForward, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR(17);
+    DRAW_PROGRESS_NR(18);
     lcd_lib_draw_string_centerP(10, PSTR("Insert new material"));
     lcd_lib_draw_string_centerP(20, PSTR("from the rear of"));
     lcd_lib_draw_string_centerP(30, PSTR("your Ultimaker2,"));
@@ -770,7 +672,7 @@ static void lcd_menu_first_run_material_load_insert()
 static void lcd_menu_first_run_material_load_forward()
 {
     lcd_basic_screen();
-    DRAW_PROGRESS_NR(18);
+    DRAW_PROGRESS_NR(19);
     lcd_lib_draw_string_centerP(20, PSTR("Loading material..."));
 
     if (!blocks_queued())
@@ -794,7 +696,7 @@ static void lcd_menu_first_run_material_load_wait()
     LED_GLOW
 
     lcd_info_screen(lcd_menu_first_run_print_1, doCooldown, PSTR("CONTINUE"));
-    DRAW_PROGRESS_NR(19);
+    DRAW_PROGRESS_NR(20);
     lcd_lib_draw_string_centerP(10, PSTR("Push button when"));
     lcd_lib_draw_string_centerP(20, PSTR("material exits"));
     lcd_lib_draw_string_centerP(30, PSTR("from nozzle..."));
@@ -812,7 +714,7 @@ static void lcd_menu_first_run_print_1()
 {
     SELECT_MAIN_MENU_ITEM(0);
     lcd_info_screen(lcd_menu_first_run_print_card_detect, NULL, PSTR("ARE YOU READY?"));
-    DRAW_PROGRESS_NR(20);
+    DRAW_PROGRESS_NR(21);
     lcd_lib_draw_string_centerP(20, PSTR("I'm ready let's"));
     lcd_lib_draw_string_centerP(30, PSTR("make a 3D Print!"));
     lcd_lib_update_screen();
@@ -823,7 +725,7 @@ static void lcd_menu_first_run_print_card_detect()
     if (!card.sdInserted())
     {
         lcd_info_screen(NULL, lcd_return_to_main_menu);
-        DRAW_PROGRESS_NR(21);
+        DRAW_PROGRESS_NR(22);
         lcd_lib_draw_string_centerP(20, PSTR("Please insert SD-card"));
         lcd_lib_draw_string_centerP(30, PSTR("that came with"));
         lcd_lib_draw_string_centerP(40, PSTR("your Ultimaker2..."));
@@ -835,7 +737,7 @@ static void lcd_menu_first_run_print_card_detect()
     if (!card.isOk())
     {
         lcd_info_screen(NULL, lcd_return_to_main_menu);
-        DRAW_PROGRESS_NR(21);
+        DRAW_PROGRESS_NR(22);
         lcd_lib_draw_string_centerP(30, PSTR("Reading card..."));
         lcd_lib_update_screen();
         card.initsd();
@@ -844,7 +746,7 @@ static void lcd_menu_first_run_print_card_detect()
 
     SELECT_MAIN_MENU_ITEM(0);
     lcd_info_screen(lcd_menu_print_select, NULL, PSTR("LET'S PRINT"));
-    DRAW_PROGRESS_NR(21);
+    DRAW_PROGRESS_NR(22);
     lcd_lib_draw_string_centerP(10, PSTR("Select a print file"));
     lcd_lib_draw_string_centerP(20, PSTR("on the SD-card"));
     lcd_lib_draw_string_centerP(30, PSTR("and press the button"));
