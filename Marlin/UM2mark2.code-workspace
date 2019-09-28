@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "Ultimaker2Marlin",
+			"path": "/Users/lxj/Dropbox/Design and Make/2019/SW-Ultimaker-Mark2/Ultimaker2Marlin"
+		}
+	],
+	"settings": {
+		"terminal.integrated.env.osx": {
+			"PATH": "/Users/lxj/.platformio/penv/bin:/Users/lxj/.platformio/penv:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/VMware Fusion.app/Contents/Public:/Library/TeX/texbin:/opt/X11/bin",
+			"PLATFORMIO_CALLER": "vscode"
+		}
+	}
+}
