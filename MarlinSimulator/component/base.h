@@ -1,6 +1,9 @@
 #ifndef SIM_BASE_H
 #define SIM_BASE_H
 
+#undef max
+#undef min
+
 #include <stdint.h>
 #include <vector>
 
@@ -12,7 +15,7 @@ class simBaseComponent
 public:
     simBaseComponent() : drawPosX(-1), drawPosY(-1) {simComponentList.push_back(this);}
     virtual ~simBaseComponent() {}
-    
+
     virtual void tick() {}//Called about every ms
     void doDraw() { if (drawPosX > -1) draw(drawPosX, drawPosY); }
     virtual void draw(int x, int y) {}//Called every screen draw (~25ms)
