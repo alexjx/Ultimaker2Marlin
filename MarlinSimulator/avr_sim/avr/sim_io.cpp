@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <SDL/SDL.h>
 
-#include "../../Marlin/configuration.h"
+#include "../../Marlin/Configuration.h"
 #include "../../Marlin/pins.h"
 #include "../../Marlin/fastio.h"
 

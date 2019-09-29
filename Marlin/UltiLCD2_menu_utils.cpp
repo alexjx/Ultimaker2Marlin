@@ -220,7 +220,7 @@ void LCDMenu::drawMenuString(uint8_t left, uint8_t top, uint8_t width, uint8_t h
 
     if (split)
     {
-        strlcpy(buffer, str, split - str);
+        strlcpy(buffer, str, split - str + 1);
         ++split;
 
         // calculate text position

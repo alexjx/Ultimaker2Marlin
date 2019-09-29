@@ -95,7 +95,8 @@ struct CommandBuffer::t_cmdline* CommandBuffer::readScript(const char *filename)
                     cmd->next = createScript();
                     cmd = cmd->next;
                 }
-                cmd->str = new char[len+1];
+                ++len;
+                cmd->str = new char[len];
                 strlcpy(cmd->str, buffer, len);
             }
         }
