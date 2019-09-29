@@ -301,7 +301,7 @@ const int8_t dropsegments = 5; //everything with less than this number of steps 
   #define PS_ON_ASLEEP LOW
 #endif
 
-#define CUSTOM_USER_MENUS
+// #define CUSTOM_USER_MENUS
 #if defined CUSTOM_USER_MENUS
 
 #define USER_DESC_1 "Preheat chamber"

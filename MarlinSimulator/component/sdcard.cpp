@@ -109,8 +109,10 @@ void sdcardSimulation::read_sd_block(int nr)
                     break;
                 idx++;
             }
-            if (entry == NULL)
+            if (entry == NULL) {
+              closedir(dh);
                 return;
+            }
 
             const char* namePtr = entry->d_name;
 

@@ -12,7 +12,7 @@
 // build by the user have been successfully uploaded into firmware.
 #define STRING_VERSION_CONFIG_H __DATE__ " " __TIME__ // build date and time
 #ifndef STRING_CONFIG_H_AUTHOR
-#define STRING_CONFIG_H_AUTHOR "Tinker_18.11-JIA-DEV" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "Tinker_19.03-DEV" // Who made the changes.
 #endif
 
 // we are extended
@@ -399,7 +399,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
   #ifdef UM2GO
     #define Y_MAX_POS 124
   #else
-    #define Y_MAX_POS 222
+    #define Y_MAX_POS 224
   #endif // UM2GO
 #endif // Y_MAX_POS
 
@@ -439,7 +439,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 
 // default settings
 #ifdef UM2PLUS
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {80.0,80.0,200,369}  // default steps per unit for ultimaker2.1 JarJar
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {128.0,128.0,200,369}  // default steps per unit for ultimaker2.1 JarJar
 #else
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {80.0,80.0,200,282}  // default steps per unit for ultimaker2
 #endif

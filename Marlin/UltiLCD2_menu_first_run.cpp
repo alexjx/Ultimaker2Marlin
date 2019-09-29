@@ -113,20 +113,8 @@ static void parkHeadForOutterRightAdjustment()
     char buffer[32] = {0};
     sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
-#if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X, BED_OUTTER_RIGHT_Y);
-    }
-    else
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X_2, BED_OUTTER_RIGHT_Y_2);
-    }
-    enquecommand(buffer);
-#else
     sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X_2, BED_OUTTER_RIGHT_Y_2);
     enquecommand(buffer);
-#endif
     sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
 }
@@ -158,21 +146,8 @@ static void parkHeadForOutterLeftAdjustment()
     char buffer[32] = {0};
     sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
-#if (EXTRUDERS > 1)
-    if IS_DUAL_ENABLED
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X, BED_OUTTER_LEFT_Y);
-    }
-    else
-    {
-        sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X_2, BED_OUTTER_LEFT_Y_2);
-    }
-    enquecommand(buffer);
-#else
     sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X_2, BED_OUTTER_LEFT_Y_2);
     enquecommand(buffer);
-#endif
-
 
     sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
@@ -262,7 +237,7 @@ static void lcd_menu_first_run_init_2()
 static void homeAndParkHeadForOutterLeftAdjustment()
 {
     cmd_synchronize();
-    enquecommand_P(PSTR("G28 Z0 X0 Y0"));
+    enquecommand_P(PSTR("G28 X0 Y0"));
     char buffer[32] = {0};
     sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, BED_OUTTER_LEFT_X, BED_OUTTER_LEFT_Y);
     enquecommand(buffer);
