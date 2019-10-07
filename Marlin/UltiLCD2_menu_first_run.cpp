@@ -21,7 +21,7 @@
 #define BED_LEFT_X      int(max(min_pos[X_AXIS], 0) + 20)
 #define BED_RIGHT_X     int(max(max_pos[X_AXIS], 0) - 20)
 
-#define BED_FRONT_Y     int(max(min_pos[Y_AXIS], 0) + 30)
+#define BED_FRONT_Y     int(max(min_pos[Y_AXIS], 0) + 55)
 #define BED_BACK_Y      int(max(max_pos[Y_AXIS], 0) - 20)
 
 #define BED_OUTTER_LEFT_X   BED_LEFT_X
@@ -35,11 +35,11 @@
 
 // profile 2
 #define BED_OUTTER_LEFT_X_2   BED_LEFT_X
-#define BED_OUTTER_LEFT_Y_2   BED_FRONT_Y - 15
+#define BED_OUTTER_LEFT_Y_2   BED_FRONT_Y - 40
 #define BED_INNER_LEFT_X_2    BED_LEFT_X
 #define BED_INNER_LEFT_Y_2    BED_BACK_Y
 #define BED_OUTTER_RIGHT_X_2  BED_RIGHT_X
-#define BED_OUTTER_RIGHT_Y_2  BED_FRONT_Y - 15
+#define BED_OUTTER_RIGHT_Y_2  BED_FRONT_Y - 40
 #define BED_INNER_RIGHT_X_2   BED_RIGHT_X
 #define BED_INNER_RIGHT_Y_2   BED_BACK_Y
 
