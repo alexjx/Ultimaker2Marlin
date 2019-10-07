@@ -31,17 +31,6 @@
 #define BED_INNER_RIGHT_X   BED_RIGHT_X
 #define BED_INNER_RIGHT_Y   BED_BACK_Y
 
-// profile 2
-#define BED_OUTTER_LEFT_X_2   BED_LEFT_X
-#define BED_OUTTER_LEFT_Y_2   BED_FRONT_Y
-#define BED_INNER_LEFT_X_2    BED_LEFT_X
-#define BED_INNER_LEFT_Y_2    BED_BACK_Y
-#define BED_OUTTER_RIGHT_X_2  BED_RIGHT_X
-#define BED_OUTTER_RIGHT_Y_2  BED_FRONT_Y
-#define BED_INNER_RIGHT_X_2   BED_RIGHT_X
-#define BED_INNER_RIGHT_Y_2   BED_BACK_Y
-
-
 static void lcd_menu_first_run_init_2();
 static void lcd_menu_first_run_init_3();
 
@@ -55,27 +44,11 @@ static void lcd_menu_first_run_bed_level_paper_outter_right();
 static void lcd_menu_first_run_bed_level_paper_inner_right();
 static void lcd_menu_first_run_bed_level_paper_inner_left();
 
-// static void lcd_menu_first_run_bed_level_outter_left_adjust_2();
-// static void lcd_menu_first_run_bed_level_outter_right_adjust_2();
-// static void lcd_menu_first_run_bed_level_inner_right_adjust_2();
-// static void lcd_menu_first_run_bed_level_inner_left_adjust_2();
-// static void lcd_menu_first_run_bed_level_paper_2();
-// static void lcd_menu_first_run_bed_level_paper_outter_left_2();
-// static void lcd_menu_first_run_bed_level_paper_outter_right_2();
-// static void lcd_menu_first_run_bed_level_paper_inner_right_2();
-// static void lcd_menu_first_run_bed_level_paper_inner_left_2();
-
 static void homeAndParkHeadForOutterLeftAdjustment();
 static void parkHeadForOutterLeftAdjustment();
 static void parkHeadForOutterRightAdjustment();
 static void parkHeadForInnerRightAdjustment();
 static void parkHeadForInnerLeftAdjustment();
-
-// static void homeAndParkHeadForOutterLeftAdjustment_2();
-// static void parkHeadForOutterLeftAdjustment_2();
-// static void parkHeadForOutterRightAdjustment_2();
-// static void parkHeadForInnerRightAdjustment_2();
-// static void parkHeadForInnerLeftAdjustment_2();
 
 static void lcd_menu_first_run_bed_level_store();
 static void lcd_menu_first_run_bed_level_done();
@@ -113,7 +86,7 @@ static void parkHeadForOutterRightAdjustment()
     char buffer[32] = {0};
     sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X_2, BED_OUTTER_RIGHT_Y_2);
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_RIGHT_X, BED_OUTTER_RIGHT_Y);
     enquecommand(buffer);
     sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
@@ -146,7 +119,7 @@ static void parkHeadForOutterLeftAdjustment()
     char buffer[32] = {0};
     sprintf_P(buffer, PSTR("G1 F%i Z5"), int(homing_feedrate[Z_AXIS]));
     enquecommand(buffer);
-    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X_2, BED_OUTTER_LEFT_Y_2);
+    sprintf_P(buffer, PSTR("G1 F%i X%i Y%i"), int(homing_feedrate[X_AXIS]), BED_OUTTER_LEFT_X, BED_OUTTER_LEFT_Y);
     enquecommand(buffer);
 
     sprintf_P(buffer, PSTR("G1 F%i Z0"), int(homing_feedrate[Z_AXIS]));
@@ -165,7 +138,6 @@ static void homeAndParkHeadForOutterLeftAdjustment2()
     char buffer[32] = {0};
     sprintf_P(buffer, PSTR("G1 F%i Z%i X%i Y%i"), int(homing_feedrate[0]), 35, BED_OUTTER_LEFT_X, BED_OUTTER_LEFT_Y);
     enquecommand(buffer);
-    menu.return_to_previous(false);
 }
 
 //Started bed leveling from the calibration menu
@@ -178,22 +150,6 @@ void lcd_menu_first_run_start_bed_leveling()
     lcd_lib_draw_string_centerP(40, PSTR("buildplate."));
     lcd_lib_update_screen();
 }
-
-// static void lcd_menu_first_run_bed_level_choose_mode()
-// {
-//     lcd_question_screen(lcd_menu_first_run_bed_level_outter_left_adjust_2,
-//                         homeAndParkHeadForOutterLeftAdjustment_2,
-//                         PSTR("SINGLE"),
-//                         lcd_menu_first_run_bed_level_outter_left_adjust,
-//                         homeAndParkHeadForOutterLeftAdjustment,
-//                         PSTR("DUAL"));
-//     lcd_lib_draw_string_centerP(10, PSTR("Please choose mode:"));
-//     lcd_lib_draw_string_centerP(20, PSTR("single nozzle?"));
-//     lcd_lib_draw_string_centerP(30, PSTR("or"));
-//     lcd_lib_draw_string_centerP(40, PSTR("dual nozzle?"));
-//     lcd_lib_update_screen();
-// }
-
 
 /////////////////////////////////////////
 // first run
