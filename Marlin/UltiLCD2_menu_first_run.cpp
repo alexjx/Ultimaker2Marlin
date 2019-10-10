@@ -19,7 +19,7 @@
 #define BED_LEFT_X      int(max(min_pos[X_AXIS], 0) + 20)
 #define BED_RIGHT_X     int(max(max_pos[X_AXIS], 0) - 20)
 
-#define BED_FRONT_Y     int(max(min_pos[Y_AXIS], 0) + 30)
+#define BED_FRONT_Y     int(max(min_pos[Y_AXIS], 0) + 20)
 #define BED_BACK_Y      int(max(max_pos[Y_AXIS], 0) - 20)
 
 #define BED_OUTTER_LEFT_X   BED_LEFT_X
